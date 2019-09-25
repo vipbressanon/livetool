@@ -1,0 +1,30 @@
+{
+    "name": "vipbressanon/livetool",
+    "description": "live",
+    "license": "MIT",
+    "authors": [
+        {   
+            "name": "vipbressanon",
+            "email": "48803222@qq.com"
+        }   
+    ],  
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.6.4"
+    },  
+    "autoload": {
+        "psr-4": {
+            "Vipbressanon\\LiveTool\\": "src/"
+        }   
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vipbressanon\\LiveTool\\LiveToolServiceProvider"
+            ],
+            "aliases": {
+                "LiveTool": "Vipbressanon\\LiveTool\\Facades\\LiveTool"
+            }
+        }
+    }
+}
