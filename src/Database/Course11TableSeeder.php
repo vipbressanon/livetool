@@ -1,4 +1,5 @@
 <?php
+namespace Vipbressanon\LiveTool\Database;
 
 use Illuminate\Database\Seeder;
 
