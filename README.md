@@ -47,16 +47,3 @@ DB_PASSWORD=***
 ```shell
 php artisan migrate:refresh
 ```
-
-5. 在 `database/seeds/DatabaseSeeder.php` 文件中，run()修改为：
-```php
-public function run()
-{
-    $this->call(Vipbressanon\LiveTool\Database\Course11TableSeeder::class);
-}
-```
-
-6. 填充直播相关数据。
-```shell
-php artisan db:seed
-```
