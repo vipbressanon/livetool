@@ -35,7 +35,7 @@ class ApiServer
     }
     
     // 获取用户口令
-    public function sig($users_id)
+    public function userssig($users_id)
     {
         $data = '';
         $accesstoken = $this->accesstoken();
@@ -125,6 +125,82 @@ class ApiServer
             $data = true;
         } else {
             Log::error($this->api['url'].'/api/users/end: '.$res->meta->msg);
+        }
+        return $data;
+    }
+    
+    // 录制开始
+    public function recordstart($room_id)
+    {
+        $data = false;
+        $accesstoken = $this->accesstoken();
+        $res = $this->sendRequest(
+            $this->api['url'].'/api/record/start',
+            ['room_id' => $room_id],
+            ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
+            'POST'
+        );
+        if ($res->meta->code == 200) {
+            $data = true;
+        } else {
+            Log::error($this->api['url'].'/api/record/start: '.$res->meta->msg);
+        }
+        return $data;
+    }
+    
+    // 录制暂停
+    public function recordpause($room_id)
+    {
+        $data = false;
+        $accesstoken = $this->accesstoken();
+        $res = $this->sendRequest(
+            $this->api['url'].'/api/record/pause',
+            ['room_id' => $room_id],
+            ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
+            'POST'
+        );
+        if ($res->meta->code == 200) {
+            $data = true;
+        } else {
+            Log::error($this->api['url'].'/api/record/pause: '.$res->meta->msg);
+        }
+        return $data;
+    }
+    
+    // 录制恢复
+    public function recordresume($room_id)
+    {
+        $data = false;
+        $accesstoken = $this->accesstoken();
+        $res = $this->sendRequest(
+            $this->api['url'].'/api/record/resume',
+            ['room_id' => $room_id],
+            ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
+            'POST'
+        );
+        if ($res->meta->code == 200) {
+            $data = true;
+        } else {
+            Log::error($this->api['url'].'/api/record/sresumetart: '.$res->meta->msg);
+        }
+        return $data;
+    }
+    
+    // 录制结束
+    public function recordend($room_id)
+    {
+        $data = false;
+        $accesstoken = $this->accesstoken();
+        $res = $this->sendRequest(
+            $this->api['url'].'/api/record/end',
+            ['room_id' => $room_id],
+            ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
+            'POST'
+        );
+        if ($res->meta->code == 200) {
+            $data = true;
+        } else {
+            Log::error($this->api['url'].'/api/record/end: '.$res->meta->msg);
         }
         return $data;
     }

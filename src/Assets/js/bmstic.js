@@ -3,12 +3,8 @@ var bmstic = function () {
     
     // 创建课堂
     var createroom = function(){
-        this.tic.createClassroom({
-            classId: this.room.hash_id,
-            classScene: 0
-        }, (res) => {
+        this.tic.createClassroom(this.room.hash_id, (res) => {
             if (res.code) {
-                console.log(res);
                 this.bmsim.toast('创建课堂失败');
                 this.bmsajax.errors(4, res.desc);
                 if (res.code == 10021 && this.isteacher) {    //课堂已存在，直接进入课堂

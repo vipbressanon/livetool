@@ -10,6 +10,7 @@ use Auth;
 use Vipbressanon\LiveTool\Servers\CourseServer;
 use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
+use Vipbressanon\LiveTool\Servers\RecordServer;
 
 class LiveController extends Controller
 {
@@ -17,12 +18,13 @@ class LiveController extends Controller
     public function getRoom(Request $request, $hash_id = '')
     {
         $auth = config('livetool.auth');
-        // $users = Auth::guard($auth)->user();
-        // if (!$users) {
+        $users = Auth::guard($auth)->user();
+        if (!$users) {
             Auth::guard($auth)->loginUsingId($request->input('uid'));
             $users = Auth::guard($auth)->user();
-            //abort(404);
-        // }
+            // $url = config('livetool.loginurl');
+            // return redirect($url.'/'.$hash_id);
+        }
         $cs = new CourseServer();
         $course = $cs->detail($hash_id);
         if ($course) {
@@ -31,18 +33,18 @@ class LiveController extends Controller
             $room = $rs->detail($course['id'], $course['teacher_id']);
             $us = new UsersServer();
             $us->init($course['id'], $room['id'], $users->id, $platform);
-            $file = $cs->filelist($course['id']);
             
             $info = $us->sig($users->hash_id, $users->id);
             $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
             $view = $isteacher ? 'livetool::teacher' : 'livetool::student';
             $black = $rs->black($room['id'], $info['id']);
+            $share = $cs->share($course['id']);
             return view($view)
                     ->with('course', $course)
                     ->with('room', $room)
                     ->with('info', $info)
-                    ->with('file', $file)
                     ->with('black', $black)
+                    ->with('share', $share)
                     ->with('isteacher', $isteacher);
         } else {
             abort(404);
@@ -52,10 +54,13 @@ class LiveController extends Controller
     // 记录报错信息
     public function postErrors(Request $request)
     {
-        $auth = config('livetool.auth');
-        $users = Auth::guard($auth)->user();
-        $cs = new CourseServer();
-        $cs->errors($request->all());
+		$status = config('livetool.error_status');
+		if ($status) {
+			$auth = config('livetool.auth');
+			$users = Auth::guard($auth)->user();
+			$cs = new CourseServer();
+			$cs->errors($request->all());
+		}
         return response()->json(['error'=>'']);
     }
     
@@ -173,6 +178,7 @@ class LiveController extends Controller
         return response()->json(['error'=>'', 'add'=>$info[0], 'cut'=>$info[1]]);
     }
     
+    // 设备选择，检测
     public function getCheck(Request $request)
     {
         $type = $request->input('type', '1');
@@ -180,13 +186,13 @@ class LiveController extends Controller
                 ->with('type', $type);
     }
     
-    // 改变课件状态
-    public function postFileStatus(Request $request)
+    // 录制开始
+    public function postRecord(Request $request)
     {
-        $file_id = $request->input('file_id');
-        $status = $request->input('status', 0);
-        $cs = new CourseServer();
-        $cs->filestatus($file_id, $status);
+        $room_id = $request->input('room_id');
+        $status = $request->input('status');
+        $rs = new RecordServer();
+        $res = $rs->hander($room_id, $status);
         return response()->json(['error'=>'']);
     }
 }

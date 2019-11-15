@@ -371,21 +371,27 @@ var bmsajax = function () {
         });
     };
     //录播
-    var record_start = function(){
-        console.log('record_start');
+    var roomrecord = function(status){
         var _this = this;
         $.ajax({
             type: "post",
-            url: "/users/record/start",
+            url: "/livetool/record",
             dataType: 'json',
             data: {
-                room_id:_this.room.roomid,
-                users_id:_this.users.id,
-                live_id:_this.room.liveid,
+                room_id:_this.room.id,
+                status:status,
                 _token:$("#_token").val()
             },
             success: function(json){
-                console.log(json);
+                if(json.error){
+                    _this.bmsim.toast(json.error, 'error');
+                } else {
+                    if (status == 1) {
+                        _this.bmsim.toast('开始录制');
+                    } else if (status == 2) {
+                        _this.bmsim.toast('结束录制');
+                    }
+                }
             }
         });
     }
@@ -415,6 +421,8 @@ var bmsajax = function () {
             kick(users_id);
         },uploadstatus: function(file_id, status){
             uploadstatus(file_id, status);
+        },roomrecord: function(status){
+            roomrecord(status);
         }
     };
 

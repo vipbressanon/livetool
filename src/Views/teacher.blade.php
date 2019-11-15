@@ -35,26 +35,7 @@
                             <div class="course">
                                 <a class="addBtn uploadbtn" href="javascript:;">+添加</a>
                                 <p class="support">支持 .ppt、pdf、doc文件</p>
-                                <div class="list">
-                                    @foreach($file as $v)
-                                    <div class="between">
-                                        <div>
-                                            @if(in_array($v->filesuffix, ['.ppt', '.pptx']))
-                                            <label class="pdf">P</label>
-                                            @elseif(in_array($v->filesuffix, ['.pdf', '.pdfx']))
-                                            <label class="pdf">PDF</label>
-                                            @elseif(in_array($v->filesuffix, ['.doc', '.docx']))
-                                            <label class="word">W</label>
-                                            @elseif(in_array($v->filesuffix, ['.xls', '.xlsx']))
-                                            <label class="excel">X</label>
-                                            @else
-                                            <label class="word">W</label>
-                                            @endif
-                                            <span>{{$v->filename}}</span>
-                                        </div>
-                                        <a class="Btn cancel filebtn files{{$v->id}}" data-id="{{$v->id}}" data-status="{{$v->status}}" data-url="{{$v->domain}}{{$v->fileurl}}" href="javascript:;">打开</a>
-                                    </div>
-                                    @endforeach
+                                <div class="list uploadlist">
                                 </div>
                             </div>
                         </div>
@@ -78,10 +59,17 @@
                         </div>
                     </li>
                     <li>
-                        <div class="blackCircle">
+                        @if($room['roomrecord']==1)
+                        <div class="blackCircle recordbtn recording" data-record="1">
+                            <label class="sidePic sideIcon6"></label>
+                            <span class="sideName">录制中</span>
+                        </div>
+                        @else
+                        <div class="blackCircle recordbtn" data-record="{{$room['roomrecord']}}">
                             <label class="sidePic sideIcon5"></label>
                             <span class="sideName">课程录制</span>
                         </div>
+                        @endif
                     </li>
                 </ul>
                 <div class="recordBtn">
@@ -121,7 +109,7 @@
                 <!-- 课件按钮 -->
                 <div class="boardTab clearfix"></div>
                 
-                <div id="edu-toolbar-box" class="edu-toolbar-box">
+                <div id="edu-toolbar-box" class="edu-toolbar-box" style="display: none;">
                     <ul class="edu-toolbar-menu">
                         <li class="tool-bgcolor" title="色板">
                             <div class="choose-state showoption"><span class="bg-red"></span></div>
@@ -237,9 +225,68 @@
                 </div>
             </div>
             <!-- 讨论区 end -->
+
+            <!-- 课程分享 start -->
+            <div class="shareBg">
+                <div class="shareBox">
+                    <div class="shareTitle row between">
+                        <h3>课程分享</h3>
+                        <i class="iconfont icon-close" onclick="shareClose()"></i>
+                    </div>
+                    <div class="shareContent">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">上课链接：</label>
+                            <div class="layui-input-block row">
+                                <input type="text" name="title" autocomplete="off" placeholder="上课链接" value="{{config('livetool.domainurl').'/livetool/room/'.$course['hash_id']}}" class="layui-input linkInp">
+                                <a class="copyBtn copy_link" href="javascript:;">复制</a>
+                            </div>
+                            
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">上课二维码：</label>
+                            <div class="layui-input-block row">
+                                <div class="ewm">
+                                    <img id="code_img" src="/vendor/livetool/images/blackClose.png">
+                                    <!-- <button class="load_code">下载二维码</button> -->
+                                    <a id="download_code_img" class="load_code" href="/vendor/livetool/images/blackClose.png" download="code.png">下载二维码</a>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="line"></p>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">上课方式：</label>
+                            <div class="layui-input-block row">
+                                <input type="text" autocomplete="off" placeholder="上课方式" value="@if($share['invite_type']==1)口令邀请@else白名单@endif" class="layui-input" disabled>
+                            </div>
+                        </div>
+                        @if($share['invite_type']==1)
+                        <div class="command">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">学生口令：</label>
+                                <div class="layui-input-block row">
+                                    <input type="text" autocomplete="off" placeholder="学生口令" value="{{$share['content']}}" class="layui-input copy_word">
+                                    <a class="copyBtn copy_student" href="javascript:;">复制</a>
+                                </div>
+                            </div>
+                        </div>
+                        @else
+                        <div class="white">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">指定学生：</label>
+                                <div class="layui-input-block row">
+                                    <input type="text" autocomplete="off" placeholder="指定学生" value="{{$share['content']}}" class="layui-input" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <!-- 课程分享 end -->
         </div>
         <input type="hidden" id="status" value="{{$course['status']}}" />
         <input type="hidden" id="_token" name="_token" value="{{csrf_token()}}" />
+        <div class="show" style="display:none;"></div>
     </body>
 </html>
 <script src="/vendor/livetool/js/jquery.min.js"></script>

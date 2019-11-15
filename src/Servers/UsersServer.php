@@ -28,7 +28,7 @@ class UsersServer
         }
         if ($res->usersig == '' || $res->overtime < $now) {
             $api = new ApiServer();
-            $sig = $api->sig($users_id);
+            $sig = $api->userssig($users_id);
             $res->sdkappid = $sig ? $sig->sdkappid : '';
             $res->hash_id = $sig ? $sig->hash_id : '';
             $res->usersig = $sig ? $sig->usersig : '';

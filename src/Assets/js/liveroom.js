@@ -18,7 +18,6 @@ var liveroom = function () {
         this.isenter = false;   //进入课堂状态
         this.isstart = false;   //推流开始状态
         this.isspeak = false;   //是否在台上
-        this.fileload = false;  //文件正在加载
         this.socket = null;
         // 课程未结束才进行登录
         if (this.course.status < 2) {
@@ -78,7 +77,7 @@ var liveroom = function () {
         });
     };
     
-    // 点击按钮开始上课，结束上课
+    // 点击按钮开始上课，结束上课，录制
     var roombtn = function(){
         var _this = this;
         $(document).on("click", "#startbtn", function(){
@@ -129,6 +128,27 @@ var liveroom = function () {
                     }
                 });
         	}
+        });
+        $(document).on("click", ".recordbtn", function(){
+            if ($(this).attr('data-record') == 0) {
+                $(this).attr('data-record', 1);
+                $(this).addClass('recording');
+                $(this).find('label').removeClass('sideIcon5').addClass('sideIcon6');
+                $(this).find('span').html('录制中');
+                _this.bmsajax.roomrecord(1);
+            } else if ($(this).attr('data-record') == 1) {
+                $(this).attr('data-record', 2);
+                $(this).removeClass('recording');
+                $(this).find('label').removeClass('sideIcon6').addClass('sideIcon5');
+                $(this).find('span').html('课程录制');
+                _this.bmsajax.roomrecord(2);
+            } else if ($(this).attr('data-record') == 2) {
+                $(this).attr('data-record', 1);
+                $(this).addClass('recording');
+                $(this).find('label').removeClass('sideIcon5').addClass('sideIcon6');
+                $(this).find('span').html('录制中');
+                _this.bmsajax.roomrecord(1);
+            }
         });
     };
     

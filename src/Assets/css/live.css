@@ -10,7 +10,29 @@
 	background: url('/vendor/livetool/images/close.png') no-repeat!important;
 	background-position: 0 0!important;
 	background-size: 100%!important;
-
+	right: 7px!important;
+    top: 10px!important;
+    width: 20px!important;
+    height: 20px!important;
+}
+.layui-layer{
+	background: #000!important;
+}
+.layui-layer-content::-webkit-scrollbar {
+	/*滚动条整体样式*/
+	width : 10px;  /*高宽分别对应横竖滚动条的尺寸*/
+	height: 10px;
+}
+.layui-layer-content::-webkit-scrollbar-thumb {
+	/*滚动条里面小方块*/
+	border-radius: 10px;
+	box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+	background: #ededed;
+}
+.layui-layer-content::-webkit-scrollbar-track {
+	/*滚动条里面轨道*/
+	box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+	background: #535353;
 }
 /* ---------------- */
 body{
@@ -123,6 +145,7 @@ body{
 	width: 65%;
     white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
 }
 .gatherBox .studentTag .name span{
 	color: #fff;
@@ -260,14 +283,15 @@ body{
 .sideTab{
 	width: 88px;
 	height: 465px;
-	padding: 40px 0 0 7px;
+	padding: 40px 0 0 0;
 	background: #24272A;
 	display: flex;
 	flex-direction: column;
 }
 .sideTab li{
-	width: 74px;
+	width: 88px;
 	height: 74px;
+	padding-left: 7px;
 	margin-bottom: 9px;
 	text-align: center;
 	cursor: pointer;
@@ -306,24 +330,18 @@ body{
 .sideIcon5{
 	background-position: -152px 0;
 }
+.sideIcon6{
+	background-position: -190px 0;
+}
 .sideTab li .sideName{
 	color: #D2D2D2;
 	font-size: 12px;
 }
-.sideBar .recordBtn{
-	width: 74px;
-	height: 74px;
-	font-size: 12px;
-	color: #F3033B;
-	text-align: center;
-	margin: 26px auto 0;
+.sideBar .recording{
+    background: #191B1D;
 }
-.sideBar .recordBtn label{
-	display: block;
-	width: 38px;
-	height: 38px;
-	background: url('/vendor/livetool/images/leftTools.png') -190px 0 no-repeat;
-	margin: 0 auto 6px;
+.sideBar .recording .sideName{
+	color: #F3033B;
 }
 .sideTab li:hover .blackCircle{
 	background: #191B1D;
@@ -384,8 +402,8 @@ body{
 }
 .course .list .between{
 	width: 100%;
-	height: 78px;
 	text-align: center;
+	margin-bottom: 20px;
 }
 .course .list .between>div{
 	width: 114px;
@@ -454,6 +472,9 @@ body{
 	align-items: center;
 	color: #fff;
 	font-size: 16px;
+	position: absolute;
+    left: 0;
+    top: 0;
 }
 .status .tag{
 	width: 227px;
@@ -1160,12 +1181,113 @@ body{
 }
 
 
-
-
-
-
-
-
-
+/* ============分享课程============ */
+.shareBg{
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,.5);
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 9999;
+	display: none;
+}
+.shareBox{
+	width: 670px;
+	background: #fff;
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	margin: -235px 0 0 -335px;
+	z-index: 999;
+}
+.shareTitle{
+	height: 70px;
+	line-height: 70px;
+	padding:0 25px;
+	border-bottom: 1px solid #DEDEDE;
+}
+.shareTitle h3{
+	font-size: 18px;
+	font-weight: normal;
+}
+.shareTitle i{
+	font-size: 26px;
+	color:#666;
+	cursor: pointer;
+}
+.shareContent{
+	padding: 25px 0 0 0;
+	height: 400px;
+	overflow-y: scroll;
+}
+.shareContent::-webkit-scrollbar {
+	width: 8px;
+}
+.shareContent::-webkit-scrollbar-track {
+	background: #fff;
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
+.shareContent::-webkit-scrollbar-thumb {
+	background:rgb(222,222,222);
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
+.copyBtn,.load_code{
+	display: inline-block;
+	height: 37px;
+	line-height: 37px;
+	background: #00B1F6;
+	color: #fff;
+	text-align: center;
+	font-size: 13px;
+	vertical-align: bottom;
+	border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	margin-left: 13px;
+}
+.copyBtn{
+	width: 70px;
+}
+.copyBtn:hover{
+	color: #fff;
+}
+.linkInp{
+	color: #37A0C9;
+}
+.ewm img{
+	width: 96px;
+	height: 96px;
+	border: 1px solid #e6e6e6;
+}
+.load_code{
+	width: 83px;
+}
+.shareBox .line{
+	width: 100%;
+	height: 1px;
+	background: #DEDEDE;
+	margin-bottom: 15px;
+}
+.shareBox .tishi{
+	padding: 0 0 15px 20px;
+	color: #FF3D3D;
+	font-size: 13px;
+	align-items: center;
+}
+.shareBox .layui-form-item{
+	padding: 0 30px;
+}
+.shareBox .layui-form-item .layui-form-label{
+	width: 93px;
+	padding: 9px 0;
+}
+.shareBox .layui-form-item .layui-input-block input{
+	width: 400px;
+}
 
 

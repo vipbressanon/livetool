@@ -63,31 +63,23 @@ class CourseServer
         return $res ? $res->starttime : '';
     }
     
-    public function filelist($course_id)
+    public function share($course_id)
     {
-        $course = config('livetool.course_file');
-        $res = DB::table($course['table'])
+        $share = config('livetool.share');
+        $res = DB::table($share['table'])
                 ->select(
-                    $course['field']['id'].' as id',
-                    $course['field']['course_id'].' as course_id',
-                    $course['field']['filename'].' as filename',
-                    $course['field']['domain'].' as domain',
-                    $course['field']['fileurl'].' as fileurl',
-                    $course['field']['filesize'].' as filesize',
-                    $course['field']['filesuffix'].' as filesuffix',
-                    $course['field']['status'].' as status'
+                    $share['field']['id'].' as id',
+                    $share['field']['title'].' as title',
+                    $share['field']['invite_type'].' as invite_type',
+                    $share['field']['content'].' as content'
                 )
-                ->where($course['field']['course_id'], $course_id)
-                ->get();
-        return $res;
-    }
-    
-    public function filestatus($file_id, $status)
-    {
-        $course = config('livetool.course_file');
-        $res = DB::table($course['table'])
-                ->where($course['field']['id'], $file_id)
-                ->update([$course['field']['status'] => $status]);
-        return true;
+                ->where($share['field']['id'], $course_id)
+                ->first();
+        return [
+            'id' => $res->id,
+            'title' => $res->title,
+            'invite_type' => $res->invite_type,
+            'content' => $res->content
+        ];
     }
 }

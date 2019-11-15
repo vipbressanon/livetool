@@ -15,7 +15,7 @@ class RoomServer
 
     public function detail($course_id, $teacher_id)
     {
-        $res = Room::select('id', 'hash_id', 'course_id', 'roomtype', 'roomchat', 'roomspeak', 'roomhand')
+        $res = Room::select('id', 'hash_id', 'course_id', 'roomtype', 'roomchat', 'roomspeak', 'roomhand', 'roomrecord')
                 ->where('course_id', $course_id)
                 ->first();
         if (!$res) {
@@ -27,6 +27,7 @@ class RoomServer
             $res->roomchat = 1;
             $res->roomspeak = 0;
             $res->roomhand = 1;
+            $res->roomrecord = 0;
             $res->save();
         }
         if ($res->hash_id == '') {
@@ -42,7 +43,8 @@ class RoomServer
             'roomtype' => $res->roomtype,
             'roomchat' => $res->roomchat,
             'roomspeak' => $res->roomspeak,
-            'roomhand' => $res->roomhand
+            'roomhand' => $res->roomhand,
+            'roomrecord' => $res->roomrecord
         ];
     }
     
@@ -83,6 +85,7 @@ class RoomServer
                 ]);
             $api = new ApiServer();
             $api->roomend($room_id, $now);
+            $api->recordend($room_id);
         }
         return true;
     }

@@ -20,6 +20,7 @@ var bmsboard = function () {
             console.log('======================:  ', 'TEB_SYNCDATA');
         });
         this.teduBoard.on(TEduBoard.EVENT.TEB_INIT, () => {
+            $("#edu-toolbar-box").show();
             this.bmsim.speakstatus('', this.room.roomspeak);
             console.log('======================:  ', 'TEB_INIT');
         });
@@ -263,21 +264,8 @@ var bmsboard = function () {
         });
         
         $(document).on("click",".filebtn",function(){
-            var id = $(this).attr('data-id');
-            var status = $(this).attr('data-status');
-            var url = $(this).attr('data-url');
-            if (_this.fileload == true) {
-                _this.bmsim.toast('文件正在加载，请稍后');
-            } else {
-               if (status == 0 || status == 2) {
-                   _this.fileload = true;
-                   $('#fileSelector').attr('data-id', id);
-                   $('#fileSelector').val(url);
-                   $('#fileSelector').change();
-               } else if (status == 1) {
-                   
-               }
-            }
+            var id = $(this).attr("data-id");
+            $("#file"+id).show();
         });
         
         $(document).on("click",".uploadbtn",function(){
@@ -348,18 +336,52 @@ var bmsboard = function () {
     }
     
     var boardtab = function () {
-        var str = "";
-        var title = "";
+        var str1 = "";
+        var str2 = "";
         var _this = this;
         $.each(this.boardFileGroup, function(i, v){
+            var title = "";
+            var display = "";
             title = v.title == '#DEFAULT' ? '默认页' : v.title+'<i class="layui-icon">&#x1007;</i>';
-            str += "<li data-id='"+v.fid+"' ";
+            str1 += '<li id="file'+i+'" data-id="'+v.fid+'"';
             if (_this.currentFile == v.fid) {
-                str += "class='active'";
+                str1 += 'class="active"';
             }
-            str += ">"+title+"</li>";
+            if ($("#file"+i).length) {
+                display = $("#file"+i).css("display");
+            } else {
+                display = "block";
+            }
+            str1 += ' style="display:'+display+'">'+title+'</li>';
         });
-        $(".boardTab").html(str);
+        $(".boardTab").html(str1);
+        $.each(this.boardFileGroup, function(i, v){
+            if (v.title != '#DEFAULT') {
+                var point = v.title.lastIndexOf(".");  
+                var type = v.title.substr(point);
+                type = type.toLowerCase();
+                var title = "";
+                str2 += '<div class="between">';
+                str2 += '<div>';
+                if (type == 'ppt' || type == 'pptx') {
+                    str2 += '<label class="pdf">W</label>';
+                } else if (type == 'pdf' || type == 'pdfx') {
+                    str2 += '<label class="pdf">W</label>';
+                } else if (type == 'doc' || type == 'docx') {
+                    str2 += '<label class="word">W</label>';
+                } else if (type == 'xls' || type == 'xlsx') {
+                    str2 += '<label class="excel">W</label>';
+                } else {
+                    str2 += '<label class="word">W</label>';
+                }
+                str2 += '<span>'+v.title+'</span>';
+                str2 += '</div>';
+                str2 += '<a class="Btn cancel filebtn" data-id="'+i+'" href="javascript:;">打开</a>';
+                str2 += '</div>';
+            }
+        });
+        $(".uploadlist").html(str2);
+        
     };
     
     return {

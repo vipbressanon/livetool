@@ -1,7 +1,10 @@
 <?php
 return [
     'auth' => 'users',
+    'domainurl' => 'https://zjclass.xueyoubangedu.com',
     'socketurl' => 'http://localhost:2120',
+    'loginurl' => '/live/login',
+    'error_status' => true,
     'course' => [
         'table' => 'course',
         'field' => [
@@ -48,22 +51,6 @@ return [
             'updated_at' => 'updated_at'
         ]
     ],
-    'course_file' => [
-        'table' => 'course_file',
-        'field' => [
-            'id' => 'id',
-            'course_id' => 'course_id',
-            'top_usersid' => 'top_usersid',
-            'filename' => 'filename',
-            'domain' => 'domain',
-            'fileurl' => 'fileurl',
-            'filesize' => 'filesize',
-            'filesuffix' => 'filesuffix',
-            'status' => 'status',
-            'created_at' => 'created_at',
-            'updated_at' => 'updated_at'
-        ]
-    ],
     'course_errors' => [
         'table' => 'course_errors',
         'field' => [
@@ -85,6 +72,15 @@ return [
             'hash_id' => 'hash_id',
             'nickname' => 'nickname',
             'imgurl' => 'imgurl'
+        ]
+    ],
+    'share' => [
+        'table' => 'view_course_share',
+        'field' => [
+            'id' => 'id',
+            'title' => 'title',
+            'invite_type' => 'invite_type',
+            'content' => 'content'
         ]
     ],
     'api' => [

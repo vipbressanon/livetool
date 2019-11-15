@@ -18,10 +18,21 @@
                     <span>{{$course['title']}}</span>
                     <span>学员数量（<b class="online">0</b>人）</span>
                     <span>开课时间：<b class="roomtime">00:00</b></span>
-                    <a class="shareBtn" href="javascript:;">分享课程</a>
                 </div>
             </div>
             <div class="gatherBox row">
+            </div>
+            
+            <!-- 侧边栏 -->
+            <div class="sideBar">
+                <ul class="sideTab">
+                    <li>
+                        <div class="blackCircle switchbtn">
+                            <label class="sidePic sideIcon4"></label>
+                            <span class="sideName">设备选择</span>
+                        </div>
+                    </li>
+                </ul>
             </div>
 
             <!-- 中间部分 -->
@@ -162,6 +173,7 @@
                 </div>
             </div>
             <!-- 讨论区 end -->
+            
         </div>
         <input type="hidden" id="_token" name="_token" value="{{csrf_token()}}" />
     </body>

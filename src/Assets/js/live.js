@@ -8,6 +8,7 @@ $(function(){
     }
     //计算高度
     $('.fullScreen').css('height',document.documentElement.clientHeight);
+    $('.gatherBox').css('height',$('.gatherBox').width()*0.0729*0.957)
     $('.headTx').css('height',$('.headTx').width()*0.957);
     $('.middle').css('height',$('.middle').width()*0.5625);
     $('#paint_box').css('height',$('.middle').width()*0.5625);
@@ -36,14 +37,21 @@ layui.use(['laypage', 'layer'], function(){
     var $ = layui.jquery, 
     layer = layui.layer,
     laypage = layui.laypage;
-    $('.icon-zuidahua').on('click', function() {
-        //获取父级索引
+    $(document).on('click', '.icon-zuidahua', function() {
+        //获取到当前点击的摄像头
+        var $this = $(this);
+        var oDiv = $(this).parents('.headTx').find('.txImg')
+        $('.show').append(oDiv)
+        var headImg = oDiv.find('video').attr('poster')
+        $(this).parents('.headTx').css("background-image","url("+headImg+")");
+
+        //获取父级索引    
         var Index = $(this).parents('.headTx').index()
         var active = 'active_' + Index
         var length = arr.length
         //设置最大化弹框的尺寸
         var areaWidth = $('.middle').width()/3
-        var areaHeight = areaWidth*0.75
+        var areaHeight = areaWidth*1.5
         //设置弹框的坐标
         var middleTop = $('.middle').offset().top;
         var middleLeft = $('.middle').offset().left;
@@ -67,16 +75,18 @@ layui.use(['laypage', 'layer'], function(){
             layer.msg('摄像头已经最大化了哦');
         }else{
             arr.push(active)
-            var video = document.getElementById('teachervideo').srcObject;
+            // var video = document.getElementById('teachervideo').srcObject;
             layer.open({
                 type: 1,
-                area: [areaWidth+'px', areaHeight+'px'],
-                shade: 0,   
+                area: [areaWidth+'px', ''],
+                shade: 0,
                 offset: [offsetTop,offsetLeft],
-                content: '<video style="width:100%;" muted src="'+video+'" autoplay></video>',
+                content: $('.show'),
                 cancel: function(){
                     layer.close()
                     arr.splice($.inArray(active,arr),1);
+                    $('.show').empty();
+                    $this.parents('.headTx').prepend(oDiv);
                 }
             });
         }
@@ -101,17 +111,19 @@ layui.use('form', function(){
     $ = layui.jquery,
     form = layui.form;
     form.render();
-    layer.open({
-        type: 2,
-        title: false,
-        closeBtn: 1, //不显示关闭按钮
-        shade: [0],
-        area: ['560px', '540px'],
-        offset: '50px',
-        //time: 2000, //2秒后自动关闭
-        anim: 2,
-        content: ['/livetool/check?type=1', 'no'], //iframe的url，no代表不显示滚动条
-    });
+    if ($("#status").val() == 0) {
+        layer.open({
+            type: 2,
+            title: false,
+            closeBtn: 1, //不显示关闭按钮
+            shade: [0],
+            area: ['560px', '540px'],
+            offset: '50px',
+            //time: 2000, //2秒后自动关闭
+            anim: 2,
+            content: ['/livetool/check?type=1', 'no'], //iframe的url，no代表不显示滚动条
+        });
+    }
     
     $(document).on("click", ".switchbtn", function(){
         layer.open({
@@ -128,5 +140,22 @@ layui.use('form', function(){
     }); 
     
     $(document).on("click", ".shareBtn", function(){
+        $('.shareBg').show();
     }); 
+    $(document).on("click", ".shareBox .icon-close", function(){
+        $('.shareBg').hide();
+    }); 
+    $(document).on("click", ".copy_link", function(){
+        var copyText = $('.copy_link').siblings('input');
+        copyText.select();//选择
+        document.execCommand("Copy");//执行复制
+        layer.msg("复制成功！");
+    }); 
+    $(document).on("click", ".copy_student", function(){
+        var copyText = $('.copy_student').siblings('input');
+        copyText.select();//选择
+        document.execCommand("Copy");//执行复制
+        layer.msg("复制成功！");
+    }); 
+    
 });
