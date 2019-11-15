@@ -20,10 +20,8 @@ class LiveController extends Controller
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
         if (!$users) {
-            Auth::guard($auth)->loginUsingId($request->input('uid'));
-            $users = Auth::guard($auth)->user();
-            // $url = config('livetool.loginurl');
-            // return redirect($url.'/'.$hash_id);
+            $url = config('livetool.loginurl');
+            return redirect($url.'/'.$hash_id);
         }
         $cs = new CourseServer();
         $course = $cs->detail($hash_id);
