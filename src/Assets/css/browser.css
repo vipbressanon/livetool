@@ -1,0 +1,180 @@
+/* ==============浏览器下载=============== */
+.browserBg{
+	background-color: #0CB7FA;
+}
+.browserBox{
+	width: 100%;
+	background-image: url('/vendor/livetool/images/browserImg.png');
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 100%;
+}
+.chrome{
+	width: 1000px;
+	height: 548px;
+	background: #fff;
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	margin: -274px 0 0 -500px;
+}
+.chrome .logo{
+	width: 158px;
+	height: 56px;
+	position: absolute;
+	left: 44px;
+	top: 39px;
+	z-index: 1;
+}
+.chrome .logo img{
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.chrome .content{
+	padding: 60px 0 0 0;
+	text-align: center;
+}
+.chrome .content .browserPic{
+	display: block;
+	width: 360px;
+	height: auto;
+	margin: 0 auto;
+}
+.chrome .content .desc{
+	font-size: 15px;
+	color: #333;
+	text-align: center;
+	margin-top: 20px;
+}
+.chrome .content .download{
+	display: block;
+	justify-content: center;
+	width: 160px;
+	height: 36px;
+	line-height: 36px;
+	text-align: center;
+	background: #00B1F6;
+	color: #fff;
+	margin: 45px auto 0;
+}
+.chrome .content .download img,.chrome .content .download span{
+	display: inline-block;
+	vertical-align: middle;
+}
+.chrome .content .download img{
+	margin-right: 8px;
+}
+
+
+/* ==============pc登录=============== */
+.loginBox{
+	width: 1000px;
+	height: 530px;
+	background: #fff;
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	margin: -265px 0 0 -500px;
+}
+.loginDesc{
+	float: left;
+	width: 500px;
+	height: 530px;
+	background: #F7FDFF;
+	padding: 125px 62px 0 56px;
+	position: relative;
+}
+.loginDesc .logo{
+	width: 158px;
+	height: 56px;
+	position: absolute;
+	left: 30px;
+	top: 37px;
+	z-index: 1;
+}
+.loginDesc .logo img{
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.loginDesc dl dt img{
+	display: block;
+	width: 382px;
+	height: 170px;
+}
+.loginDesc dl dt h3{
+	font-size: 16px;
+	font-weight: bold;
+	padding: 35px 0 15px;
+	border-bottom: 1px solid #DADFE0;
+}
+.loginDesc dl dd{
+	padding-top: 10px;
+	line-height: 36px;
+}
+.loginCenter{
+	float: left;
+	width: 370px;
+	padding: 110px 0 0 69px;
+}
+.loginCenter h3{
+	font-size: 25px;
+	color: #333;
+	margin-bottom: 20px;
+}
+.loginCenter .layui-form-item{
+	width: 370px;
+	padding-top: 20px;
+	height: 70px;
+	border-bottom: 1px solid #EEEEEE;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	margin-bottom: 0;
+}
+.loginCenter .layui-form-item .iconfont{
+	float: left;
+	color: #A1A1A1;
+	font-size: 26px;
+}
+.loginCenter .layui-form-item .layui-input{
+	float: left;
+	border: none;
+	width: 246px;
+	height: 50px;
+	line-height: 50px;
+}
+.gainBtn{
+	float: right;
+	width: 96px;
+	height: 32px;
+	line-height: 32px;
+	text-align: center;
+	border: 1px solid #00B1F6;
+	color: #00B1F6;
+	border-radius:3px;
+	background: none;
+	cursor: pointer;
+}
+.layui-btn-item{
+	padding-top: 36px!important;
+	height: 86px!important;
+}
+.layui-btn{
+	width: 370px!important;
+	height: 50px;
+	line-height: 50px;
+	font-size: 16px;
+}
+
+
+
+
+
+
+
+
+
+
+

@@ -2,6 +2,7 @@
 namespace Vipbressanon\LiveTool\Servers;
 
 use DB;
+use Log;
 
 class CourseServer
 {
@@ -22,7 +23,9 @@ class CourseServer
                     $course['field']['status'].' as status',
                     $course['field']['expectstart'].' as expectstart',
                     $course['field']['starttime'].' as starttime',
-                    $course['field']['endtime'].' as endtime'
+                    $course['field']['endtime'].' as endtime',
+                    $course['field']['invite_type'].' as invite_type',
+                    $course['field']['top_usersid'].' as top_usersid',
                 )
                 ->where($course['field']['hash_id'], $hash_id)
                 ->first();
@@ -34,7 +37,9 @@ class CourseServer
             'status' => $res->status,
             'expectstart' => $res->expectstart,
             'starttime' => $res->starttime,
-            'endtime' => $res->endtime
+            'endtime' => $res->endtime,
+            'invite_type' => $res->invite_type,
+            'top_usersid' => $res->top_usersid
         ];
     }
     
@@ -81,5 +86,40 @@ class CourseServer
             'invite_type' => $res->invite_type,
             'content' => $res->content
         ];
+    }
+    
+    public function iswhite($course_id, $users_id)
+    {
+        $white = config('livetool.white');
+        $res = DB::table($white['table'])
+                ->where($white['field']['course_id'], $course_id)
+                ->where($white['field']['users_id'], $users_id)
+                ->first();
+        return $res ? 1 : 0;
+    }
+    
+    public function word($course_id, $users_id, $isteacher, $word)
+    {
+        $type = $isteacher ? 2 : 3;
+        $cw = config('livetool.course_word');
+        $res = DB::table($cw['table'])
+                ->where($cw['field']['course_id'], $course_id)
+                ->where($cw['field']['word'], $word)
+                ->where($cw['field']['type'], $type)
+                ->first();
+        if ($res) {
+            $now = date('Y-m-d H:i:s');
+            $cww = config('livetool.course_word_white');
+            $res = DB::table($cww['table'])->insert([
+                $cww['field']['course_id'] => $course_id,
+                $cww['field']['users_id'] => $users_id,
+                $cww['field']['created_at'] => $now,
+                $cww['field']['updated_at'] => $now
+            ]);
+            return true;
+        } else {
+            return false;
+        }     
+        return $res ? 1 : 0;
     }
 }

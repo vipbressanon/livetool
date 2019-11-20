@@ -306,26 +306,6 @@ var bmsajax = function () {
         });
     };
     
-    //记录文件上传状态，
-    var uploadstatus = function(file_id, status){
-        var _this = this;
-        $.ajax({
-            type: "post",
-            url: "/livetool/file/status",
-            dataType: 'json',
-            data: {
-                file_id: id,
-                status: status,
-                _token: $("#_token").val()
-            },
-            success: function(json){
-                if(json.error){
-                    _this.bmsim.toast(json.error, 'error');
-                }
-            }
-        });
-    };
-    
     //实时直播时间
     var livetime = function(){
         var str = "";
@@ -370,6 +350,7 @@ var bmsajax = function () {
             }
         });
     };
+    
     //录播
     var roomrecord = function(status){
         var _this = this;
@@ -395,6 +376,49 @@ var bmsajax = function () {
             }
         });
     }
+    
+    //课件上传至七牛
+    var addfile = function(file){
+        var _this = this;
+        var formData = new FormData();
+        formData.append("file", file);
+        formData.append("hash_id", _this.course.hash_id);
+        formData.append("top_usersid", _this.course.top_usersid);
+        formData.append("_token", $("#_token").val());
+        $.ajax({
+            type: "post",
+            url: _this.fileurl,
+            dataType: 'json',
+            processData : false,
+            contentType : false,
+            data: formData,
+            success: function(json){
+                if(json.error){
+                    //_this.bmsim.toast(json.error, 'error');
+                }
+            }
+        });
+    };
+    
+    //课件从七牛删除
+    var delfile = function(name){
+        var _this = this;
+        $.ajax({
+            type: "post",
+            url: _this.fileurl,
+            dataType: 'json',
+            data: {
+                filename: name,
+                hash_id: _this.course.hash_id,
+                _token: $("#_token").val()
+            },
+            success: function(json){
+                if(json.error){
+                    //_this.bmsim.toast(json.error, 'error');
+                }
+            }
+        });
+    };
     
     return {
         roomstart: function () {
@@ -423,6 +447,10 @@ var bmsajax = function () {
             uploadstatus(file_id, status);
         },roomrecord: function(status){
             roomrecord(status);
+        },addfile: function(file){
+            addfile(file);
+        },delfile: function(name){
+            delfile(name);
         }
     };
 

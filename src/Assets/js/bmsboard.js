@@ -46,6 +46,7 @@ var bmsboard = function () {
             proBoardData();
         });
         this.teduBoard.on(TEduBoard.EVENT.TEB_ADDFILE, () => {
+            this.fileload = false;
             console.log('======================:  ', 'TEB_ADDFILE');
             proBoardData();
         });
@@ -268,6 +269,13 @@ var bmsboard = function () {
             $("#file"+id).show();
         });
         
+        $(document).on("click",".deletebtn",function(){
+            var fid = $(this).attr("data-fid");
+            var name = $(this).attr("data-name");
+            deleteFile(fid);
+            _this.bmsajax.delfile(name);
+        });
+        
         $(document).on("click",".uploadbtn",function(){
             if (_this.fileload == true) {
                 _this.bmsim.toast('文件正在加载，请稍后');
@@ -279,24 +287,16 @@ var bmsboard = function () {
         $(document).on("change","#fileSelector",function(){
             var id = $(this).attr('data-id');
             if ($(this).val() != '') {
+                _this.fileload = true;
                 var file = document.getElementById('fileSelector').files[0];
                 _this.bmsim.toast('文件正在加载，请稍后');
                 _this.teduBoard.addFile({
                     data: file,
                 }, (total, data) => {
-                    console.log(total);
-                    console.log(data);
-                    // $(this).attr('data-id', '');
-                    // $('.files'+id).attr('data-status', 1);
-                    // _this.fileload = false;
-                    // _this.bmsajax.uploadstatus(id, 1);
                 }, (err) => {
                     _this.bmsim.toast('文件加载失败，请重试');
-                    $(this).attr('data-id', '');
-                    $('.files'+id).attr('data-status', 2);
-                    _this.fileload = false;
-                    _this.bmsajax.uploadstatus(id, 2);
                 });
+                _this.bmsajax.addfile(file);
             }
         });
         
@@ -377,6 +377,7 @@ var bmsboard = function () {
                 str2 += '<span>'+v.title+'</span>';
                 str2 += '</div>';
                 str2 += '<a class="Btn cancel filebtn" data-id="'+i+'" href="javascript:;">打开</a>';
+                str2 += '<a class="Btn delete deletebtn" data-fid="'+v.fid+'" data-name="'+v.title+'" href="javascript:;">删除</a>';
                 str2 += '</div>';
             }
         });

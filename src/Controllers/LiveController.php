@@ -18,31 +18,42 @@ class LiveController extends Controller
     public function getRoom(Request $request, $hash_id = '')
     {
         $auth = config('livetool.auth');
-        $users = Auth::guard($auth)->user();
-        if (!$users) {
-            $url = config('livetool.loginurl');
-            return redirect($url.'/'.$hash_id);
-        }
+        // $users = Auth::guard($auth)->user();
+        // if (!$users) {
+            Auth::guard($auth)->loginUsingId($request->input('uid'));
+            $users = Auth::guard($auth)->user();
+            // $url = config('livetool.loginurl');
+            // return redirect($url.'/'.$hash_id);
+        // }
         $cs = new CourseServer();
         $course = $cs->detail($hash_id);
         if ($course) {
             $platform = 0;
             $rs = new RoomServer();
+            // 获取房间信息
             $room = $rs->detail($course['id'], $course['teacher_id']);
             $us = new UsersServer();
-            $us->init($course['id'], $room['id'], $users->id, $platform);
-            
+            // 获取房间用户信息
+            $us->detail($course['id'], $room['id'], $users->id, $platform);
+            // 获取用户令牌
             $info = $us->sig($users->hash_id, $users->id);
+            // 判断用户是否为讲师
             $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
+            // 根据用户身份进入不同页面
             $view = $isteacher ? 'livetool::teacher' : 'livetool::student';
+            // 用户黑名单,被讲师踢出的将不能再次进入
             $black = $rs->black($room['id'], $info['id']);
+            // 获取课程分享信息
             $share = $cs->share($course['id']);
+            // 判断用户是否在白名单内
+            $iswhite = $cs->iswhite($course['id'], $users->id);
             return view($view)
                     ->with('course', $course)
                     ->with('room', $room)
                     ->with('info', $info)
                     ->with('black', $black)
                     ->with('share', $share)
+                    ->with('iswhite', $iswhite)
                     ->with('isteacher', $isteacher);
         } else {
             abort(404);
@@ -192,5 +203,26 @@ class LiveController extends Controller
         $rs = new RecordServer();
         $res = $rs->hander($room_id, $status);
         return response()->json(['error'=>'']);
+    }
+    
+    // 课堂口令
+    public function postRoomWord(Request $request)
+    {
+        $course_id = $request->input('course_id');
+        $users_id = $request->input('users_id');
+        $isteacher = $request->input('isteacher');
+        $word = $request->input('word');
+        $cs = new CourseServer();
+        $res = $cs->word($course_id, $users_id, $isteacher, $word);
+        if ($res) {
+            return response()->json(['error'=>'']);
+        } else {
+            return response()->json(['error'=>'口令不正确，请重新输入']);
+        }
+    }
+    
+    public function getBrowser(Request $request)
+    {
+        return view('livetool::browser');
     }
 }

@@ -1,11 +1,4 @@
 $(function(){
-    var isChrome;
-    if(isChrome == window.google && window.chrome){
-        console.log('谷歌');
-    }
-    else{
-        console.log('非谷歌');
-    }
     //计算高度
     $('.fullScreen').css('height',document.documentElement.clientHeight);
     $('.gatherBox').css('height',$('.gatherBox').width()*0.0729*0.957)
@@ -13,7 +6,6 @@ $(function(){
     $('.middle').css('height',$('.middle').width()*0.5625);
     $('#paint_box').css('height',$('.middle').width()*0.5625);
     $('.dialog').css('height',$('.dialog').width()*1.519);
-    $('.maxWindow').css('height',$('.maxWindow').width()*0.9589);
 })
 //按钮关闭与开启
 $('.teacherHead .handle>div').click(function(){
@@ -111,7 +103,7 @@ layui.use('form', function(){
     $ = layui.jquery,
     form = layui.form;
     form.render();
-    if ($("#status").val() == 0) {
+    if ($("#status").val() == 0 && $("#iswhite").val() == 1) {
         layer.open({
             type: 2,
             title: false,

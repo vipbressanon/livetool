@@ -81,22 +81,15 @@ var liveroom = function () {
     var roombtn = function(){
         var _this = this;
         $(document).on("click", "#startbtn", function(){
-            swal({   
+            swal.fire({   
                 title: "提示",   
                 text: "确定开始上课吗？\n开始上课前，请保证您使用的摄像头、麦克风等设备已插好",   
                 icon: "warning",   
-                buttons : {
-                    button1 : {
-                        text : "取消",
-                        value : false,
-                    },
-                    button2 : {
-                        text : "我已经准备好了",
-                        value : true,
-                    }
-                }
-            }).then(function(value){
-                if (value) {
+                confirmButtonText: "我已经准备好了",
+                cancelButtonText: "取消",
+                showCancelButton: true
+            }).then((result) => {
+                if (result.value) {
                     $(".status").css('display', 'none');
                     $("#endbtn").removeClass("hide");
                     _this.bmsajax.roomstart();
@@ -105,25 +98,21 @@ var liveroom = function () {
         });
         $(document).on("click", "#endbtn", function(){
         	if(_this.isenter){
-                swal({   
+                swal.fire({   
                     title: "提示",   
                     text: "确定要下课吗？一旦结束无法再开启，请谨慎操作！",   
-                    icon: "warning",   
-                    buttons : {
-                        button1 : {
-                            text : "取消",
-                            value : false,
-                        },
-                        button2 : {
-                            text : "我要下课",
-                            value : true,
-                        }
-                    }
-                }).then(function(value){
-                    if (value) {
+                    icon: "warning",  
+                    confirmButtonText: "我要下课",
+                    cancelButtonText: "取消",
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.value) {
                         _this.islogin = false;
                         _this.isenter = false;
                         _this.isstart = false;
+                        $("#paint_box").hide();
+                        $(".sideBar").hide();
+                        $("#edu-toolbar-box").hide();
                         _this.bmsajax.roomend();
                     }
                 });
@@ -161,8 +150,62 @@ var liveroom = function () {
         this.bmsboard = bmsboard;
         this.bmsrtc = bmsrtc;
         this.tic = null;
-
-        initData();
+        
+        var isChrome;
+        if(isChrome == window.google && window.chrome){
+            console.log('谷歌');
+        } else{
+            location = '/livetool/browser';
+        }
+        if (this.iswhite) {
+           initData();
+        } else if (this.course.invite_type == 0) {
+            swal.fire({   
+                title: "您无法进入本课堂",   
+                icon: "error",
+                confirmButtonText : "确定"
+            });
+        }
+        
+        var _this = this;
+        $(document).on("click", "#courseword", function(){
+            swal.fire({   
+                title: "请输入口令",   
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                confirmButtonText: "确定",
+                showLoaderOnConfirm: true
+            }).then((result) => {
+                if (result.value == '') {
+                    _this.bmsim.toast("请输入口令", 'error');
+                } else {
+                    $.ajax({
+                        type: "post",
+                        url: "/livetool/room/word",
+                        dataType: 'json',
+                        data: {
+                            course_id: _this.course.id,
+                            users_id: _this.users.id,
+                            isteacher: _this.isteacher,
+                            word: result.value,
+                            _token: $("#_token").val()
+                        },
+                        success: function(json){
+                            if(json.error){
+                                _this.bmsim.toast(json.error, 'error');
+                            } else {
+                                _this.bmsim.toast('口令输入正确');
+                                location.reload();
+                            }
+                        }
+                    });
+                }
+            });
+        });
     };
     
     return {

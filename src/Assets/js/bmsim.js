@@ -259,22 +259,15 @@ var bmsim = function () {
         
         $(document).on("click", ".banbtn", function(){
             if (_this.room.roomchat) {
-                swal({   
+                swal.fire({   
                     title: "提示",   
                     text: "确定要禁止全员讨论吗？",   
                     icon: "warning",   
-                    buttons : {
-                        button1 : {
-                            text : "取消",
-                            value : false,
-                        },
-                        button2 : {
-                            text : "确定",
-                            value : true,
-                        }
-                    }
-                }).then(function(value){
-                    if (value) {
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.value) {
                         _this.room.roomchat = 0;
                         _this.bmsajax.roomchat();
                         sendcustommsg('', '{"nickname":"","type":"CHAT","text":"0"}');
@@ -282,22 +275,15 @@ var bmsim = function () {
                     }
                 });
             } else {
-                swal({   
+                swal.fire({   
                     title: "提示",   
                     text: "确定要解除禁止讨论吗？",   
-                    icon: "warning",   
-                    buttons : {
-                        button1 : {
-                            text : "取消",
-                            value : false,
-                        },
-                        button2 : {
-                            text : "确定",
-                            value : true,
-                        }
-                    }
-                }).then(function(value){
-                    if (value) {
+                    icon: "warning",  
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.value) {
                         _this.room.roomchat = 1;
                         _this.bmsajax.roomchat();
                         sendcustommsg('', '{"nickname":"","type":"CHAT","text":"1"}');
@@ -319,16 +305,22 @@ var bmsim = function () {
         }
     };
     
-    var showToast = function(text, icon = 'success', position = 'top-right', loaderBg = '#1e88e5'){
-        $.toast({
-            heading: '提示',
-            text: text,
-            position: position,
-            loaderBg: loaderBg,
-            icon: icon,
-            hideAfter: 3000, 
-            stack: 6
+    var showToast = function(text, icon = 'success', position = 'top-right'){
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            onOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
         });
+        Toast.fire({
+            icon: icon,
+            title: text
+        })
     };
     
     return {

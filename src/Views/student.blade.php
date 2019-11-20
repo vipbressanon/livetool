@@ -9,7 +9,7 @@
         <link href="/vendor/livetool/css/common.css" rel="stylesheet" type="text/css">
         <link href="/vendor/livetool/css/live.css" rel="stylesheet" type="text/css">
         <link href="/vendor/livetool/font/iconfont.css" rel="stylesheet">
-        <link href="/vendor/livetool/toast/jquery.toast.css" rel="stylesheet">
+        <link href="https://cdn.bootcss.com/jquery-toast-plugin/1.3.2/jquery.toast.css" rel="stylesheet">
     </head>
     <body>
         <div class="fullScreen">
@@ -40,33 +40,25 @@
                 <!-- 直播视频地址 -->
                 <div id="paint_box"></div>
                 <!-- 暂未开课、已下课 -->
-                @if($black)
-                <div class="status"><a class="tag end" href="javascript:;">被踢出</a><p>无法再进入直播间~</p></div>
-                @else
-                <div class="status" @if($course['status'] == 1) style="display:none;" @endif>
-                    @if($course['status'] == 0)
-                    <a class="tag start" href="javascript:;">请等待讲师开课</a>
-                    <p>暂未开课~</p>
-                    @elseif($course['status'] == 2)
-                    <a class="tag end" href="javascript:;">已下课</a>
-                    <p>已经下课~</p>
+                @if($iswhite)
+                    @if($black)
+                    <div class="status"><a class="tag end" href="javascript:;">被踢出</a><p>无法再进入直播间~</p></div>
+                    @else
+                    <div class="status" @if($course['status'] == 1) style="display:none;" @endif>
+                        @if($course['status'] == 0)
+                        <a class="tag start" href="javascript:;">请等待讲师开课</a>
+                        <p>暂未开课~</p>
+                        @elseif($course['status'] == 2)
+                        <a class="tag end" href="javascript:;">已下课</a>
+                        <p>已经下课~</p>
+                        @endif
+                    </div>
                     @endif
+                @elseif($course['invite_type'] == 1)
+                <div class="status">
+                    <a id="courseword" class="tag start" href="javascript:;">请输入口令</a>
                 </div>
                 @endif
-                
-                <!-- 摄像头最大化 -->
-                <div class="maxWindow">
-                    <span class="iconfont icon-close" title="关闭" onclick="maxHide()"></span>
-                    <!-- 摄像头未正常开启 -->
-                    <div class="without">
-                        <span class="iconfont icon-shexiangtou"></span>
-                        <span class="iconfont icon-xiantiao"></span>
-                    </div>
-                    <!-- 摄像头正常开启 -->
-                    <div class="with">
-                        
-                    </div>
-                </div>
                 
                 <div id="edu-toolbar-box" class="edu-toolbar-box" style="display: none;">
                     <ul class="edu-toolbar-menu">
@@ -198,17 +190,15 @@
 <script src="https://tic-res-1259648581.file.myqcloud.com/tic/2.2.2/TIC.min.js"></script>
 <!-- socket.io -->
 <script src="https://cdn.bootcss.com/socket.io/2.0.3/socket.io.js"></script>
-<script src="/vendor/livetool/sweetalert/sweetalert2.min.js"></script>
-<script src="/vendor/livetool/toast/jquery.toast.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+<script src="https://cdn.bootcss.com/jquery-toast-plugin/1.3.2/jquery.toast.min.js"></script>
 <script>
     this.users = JSON.parse('{!!json_encode($info)!!}');
     this.room = JSON.parse('{!!json_encode($room)!!}');
     this.course = JSON.parse('{!!json_encode($course)!!}');
-    this.isteacher = {{$isteacher}};
     this.socketurl = '{{config("livetool.socketurl")}}';
+    this.isteacher = {{$isteacher}};
+    this.iswhite = {{$iswhite}};
 </script>
 <script src="/vendor/livetool/js/loadroom.js"></script>
 @endif
-<!-- <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
-<script src="/vendor/livetool/js/check.js"></script> -->
-<!-- <script>check.init()</script> -->

@@ -115,22 +115,15 @@ var bmsrtc = function () {
         $(document).on("click", ".studentHead .icon04", function(){
             var users_id = $(this).attr("data-id");
             var nickname = $("#users"+users_id+" .nickname").html();
-            swal({   
+            swal.fire({   
                 title: "提示",   
                 text: "确定要将 "+nickname+" 踢出课堂吗？",   
-                icon: "warning",   
-                buttons : {
-                    button1 : {
-                        text : "取消",
-                        value : false,
-                    },
-                    button2 : {
-                        text : "确定",
-                        value : true,
-                    }
-                }
-            }).then(function(value){
-                if (value) {
+                icon: "warning", 
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                showCancelButton: true
+            }).then((result) => {
+                if (result.value) {
                     _this.bmsajax.kick(users_id);
                     _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"KICK","text":""}');
                 }
@@ -141,22 +134,15 @@ var bmsrtc = function () {
             var users_id = $(this).attr("data-id");
             var nickname = $("#users"+users_id+" .nickname").html();
             var that = $(this);
-            swal({   
+            swal.fire({   
                 title: "提示",   
                 text: "是否允许 "+nickname+" 上台吗？",   
-                icon: "warning",   
-                buttons : {
-                    button1 : {
-                        text : "拒绝",
-                        value : false,
-                    },
-                    button2 : {
-                        text : "允许",
-                        value : true,
-                    }
-                }
-            }).then(function(value){
-                if (value) {
+                icon: "warning",
+                confirmButtonText: "允许",
+                cancelButtonText: "拒绝",
+                showCancelButton: true
+            }).then((result) => {
+                if (result.value) {
                     _this.bmsajax.operatetype(users_id, 'speak');
                     _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"SPEAK","text":"2"}');
                 }

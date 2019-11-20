@@ -52,7 +52,7 @@ class UsersServer
         ];
     }
     
-    public function init($course_id, $room_id, $users_id, $platform)
+    public function detail($course_id, $room_id, $users_id, $platform)
     {
         $course_users = config('livetool.course_users');
         $res = DB::table($course_users['table'])
