@@ -19,13 +19,11 @@ var liveroom = function () {
         this.isstart = false;   //推流开始状态
         this.isspeak = false;   //是否在台上
         this.socket = null;
-        // 课程未结束才进行登录
-        if (this.course.status < 2) {
-            this.tic = new TIC({});
-            this.tic.init(this.users.sdkappid, res => {
-                login();
-            });
-        }
+        
+        this.tic = new TIC({});
+        this.tic.init(this.users.sdkappid, res => {
+            login();
+        });
     };
     
     var login = function(){
@@ -53,6 +51,7 @@ var liveroom = function () {
         // 连接并触发登录事件
         this.socket.on('connect', function () {
             _this.socket.emit('login', {
+                course_id:_this.course.id,
                 room_id:_this.room.id,
                 users_id:_this.users.id
             });
@@ -60,6 +59,10 @@ var liveroom = function () {
             if (_this.course.status == 1) {
                 _this.bmstic.join();
             }
+        });
+        // 讲师创建房间后邀请所有人进入
+        this.socket.on('create', function () {
+            _this.bmstic.join();
         });
         // 在线人数统计
         this.socket.on('online', function (arr) {console.log(arr);
@@ -90,7 +93,7 @@ var liveroom = function () {
                 showCancelButton: true
             }).then((result) => {
                 if (result.value) {
-                    $(".status").css('display', 'none');
+                    $(".status").hide();
                     $("#endbtn").removeClass("hide");
                     _this.bmsajax.roomstart();
                 }
@@ -157,14 +160,9 @@ var liveroom = function () {
         } else{
             location = '/livetool/browser';
         }
-        if (this.iswhite) {
-           initData();
-        } else if (this.course.invite_type == 0) {
-            swal.fire({   
-                title: "您无法进入本课堂",   
-                icon: "error",
-                confirmButtonText : "确定"
-            });
+        
+        if (this.role[0] == 200 || this.role[0] == 202 || this.role[0] == 204) {
+            initData();
         }
         
         var _this = this;

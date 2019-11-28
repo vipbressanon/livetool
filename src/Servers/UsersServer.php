@@ -85,6 +85,7 @@ class UsersServer
             $users_log['field']['course_id'] => $course_id,
             $users_log['field']['users_id'] => $users_id,
             $users_log['field']['starttime'] => $now,
+            $users_log['field']['balancetime'] => null,
             $users_log['field']['endtime'] => null,
             $users_log['field']['total'] => 0,
             $users_log['field']['status'] => 0,

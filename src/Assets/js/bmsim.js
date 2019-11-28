@@ -57,9 +57,9 @@ var bmsim = function () {
                     }
                 } else if (json.type == 'TEXT') {
                     if (_this.course.teacher_id == json.users_id) {
-                        $('.discussList').append("<li class='yellow'>" + json.nickname + "：" + json.text + "</li>");
+                        $('.discussList').append("<li class='yellow'><p><i>" + json.nickname + "</i>" + json.text + "</p></li>");
                     } else {
-                       $('.discussList').append("<li>" + json.nickname + "：" + json.text + "</li>"); 
+                       $('.discussList').append("<li><p><i>" + json.nickname + "</i>" + json.text + "</p></li>"); 
                     }
                     if (_this.ischat) {
                         $(".discussBtn .redDot").hide();
@@ -305,12 +305,12 @@ var bmsim = function () {
         }
     };
     
-    var showToast = function(text, icon = 'success', position = 'top-right'){
+    var showToast = function(text, icon = 'success', timer = 3000, position = 'top-right'){
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
-            timer: 3000,
+            timer: timer,
             timerProgressBar: true,
             onOpen: (toast) => {
                 toast.addEventListener('mouseenter', Swal.stopTimer)

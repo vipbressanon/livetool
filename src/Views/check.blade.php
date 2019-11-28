@@ -73,16 +73,10 @@
             color: #fff;
             border-radius: 3px;
         }
-
     </style>
-
 </head>
 <body>
     <div class="testBox">
-        <div class="title between">
-            <h4>媒体设置</h4>
-            <i class="iconfont icon-close"></i>
-        </div>
         <div class="testContent layui-form">
             @if($type==1)
             <div class="videoBox">

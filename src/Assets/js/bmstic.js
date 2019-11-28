@@ -8,13 +8,13 @@ var bmstic = function () {
                 this.bmsim.toast('创建课堂失败');
                 this.bmsajax.errors(4, res.desc);
                 if (res.code == 10021 && this.isteacher) {    //课堂已存在，直接进入课堂
-                    joinroom();
+                    this.socket.emit('create');
                 }
             } else {
                 this.bmsim.toast('创建课堂成功');
                 // 如果是老师
                 if (this.isteacher) {
-                    joinroom();
+                    this.socket.emit('create');
                 }
             }
         });
@@ -46,9 +46,10 @@ var bmstic = function () {
                 //开始推流
                 this.bmsrtc.start();
                 this.socket.emit('enter', {
-                    course_id:this.course.id,
-                    room_id:this.room.id,
-                    users_id:this.users.id
+                    course_id: this.course.id,
+                    room_id: this.room.id,
+                    users_id: this.users.id,
+                    isteacher: this.isteacher
                 });
             }
         });
@@ -68,7 +69,7 @@ var bmstic = function () {
                 });
                 clearTimeout(this.timeadd);
                 $(".online").html("0");
-                $(".status").html('<a class="tag end" href="javascript:;">已下课</a><p>已经下课~</p>').css('display', 'flex');
+                $(".status").html('<a class="tag end" href="javascript:;">已下课</a>').show();
             }
         });
     };
@@ -87,7 +88,7 @@ var bmstic = function () {
                 });
                 clearTimeout(this.timeadd);
                 $(".online").html("0");
-                $(".status").html('<a class="tag end" href="javascript:;">被踢出</a><p>无法再进入直播间~</p>').css('display', 'flex');
+                $(".status").html('<a class="tag end" href="javascript:;">被讲师踢出</a>').show();
             }
         });
     };

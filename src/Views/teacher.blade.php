@@ -16,17 +16,17 @@
             <div class="mount">
                 <div class="wrapper align_item">
                     <span>{{$course['title']}}</span>
-                    <span>学员数量（<b class="online">0</b>人）</span>
+                    <span>学员数量（<b class="stucount">0</b>人）</span>
                     <span>开课时间：<b class="roomtime">00:00</b></span>
                     <a class="shareBtn" href="javascript:;">分享课程</a>
                     <a id="endbtn" class="overBtn @if($course['status']!=1) hide @endif" href="javascript:;">下课</a>
                 </div>
             </div>
-            <div class="gatherBox row">
+            <div class="gatherBox">
             </div>
 
             <!-- 侧边栏 -->
-            <div class="sideBar">
+            <div class="sideBar" @if($course['status']==2) style="display: none;" @endif>
                 <ul class="sideTab">
                     <li>
                         <div class="blackCircle">
@@ -83,19 +83,21 @@
                 <!-- 直播视频地址 -->
                 <div id="paint_box"></div>
                 <!-- 暂未开课、已下课 -->
-                @if($iswhite)
-                <div class="status" @if($course['status'] == 1) style="display:none;" @endif>
-                    @if($course['status'] == 0)
-                    <a id="startbtn" class="tag start" href="javascript:;">开始上课</a>
-                    <p>暂未开课~</p>
-                    @elseif($course['status'] == 2)
-                    <a class="tag end" href="javascript:;">已下课</a>
-                    <p>已经下课~</p>
-                    @endif
-                </div>
-                @elseif($course['invite_type'] == 1)
+                @if($role[0] == 201)
                 <div class="status">
-                    <a id="courseword" class="tag start" href="javascript:;">请输入口令</a>
+                    <a class="tag end" href="javascript:;">{{$role[1]}}</a>
+                </div>
+                @elseif($role[0] == 202)
+                <div class="status">
+                    <a id="startbtn" class="tag start" href="javascript:;">开始上课</a>
+                </div>
+                @elseif($role[0] == 203)
+                <div class="status">
+                    <a id="courseword" class="tag start" href="javascript:;">{{$role[1]}}</a>
+                </div>
+                @elseif($role[0] == 204)
+                <div class="status">
+                    <a class="tag end" href="javascript:;">{{$role[1]}}</a>
                 </div>
                 @endif
                 <!-- 课件按钮 -->
@@ -238,9 +240,9 @@
                             <label class="layui-form-label">上课二维码：</label>
                             <div class="layui-input-block row">
                                 <div class="ewm">
-                                    <img id="code_img" src="/vendor/livetool/images/blackClose.png">
+                                    <img id="code_img" src="{{$course['code_url']}}">
                                     <!-- <button class="load_code">下载二维码</button> -->
-                                    <a id="download_code_img" class="load_code" href="/vendor/livetool/images/blackClose.png" download="code.png">下载二维码</a>
+                                    <a id="download_code_img" class="load_code" href="{{$course['code_url']}}" target="_blank">下载二维码</a>
                                 </div>
                             </div>
                         </div>
@@ -277,9 +279,8 @@
             <!-- 课程分享 end -->
         </div>
         <input type="hidden" id="status" value="{{$course['status']}}" />
-        <input type="hidden" id="iswhite" value="{{$iswhite}}" />
+        <input type="hidden" id="role" value="{{$role[0]}}" />
         <input type="hidden" id="_token" name="_token" value="{{csrf_token()}}" />
-        <div class="show" style="display:none;"></div>
     </body>
 </html>
 <script src="/vendor/livetool/js/jquery.min.js"></script>
@@ -309,6 +310,7 @@
     this.course = JSON.parse('{!!json_encode($course)!!}');
     this.socketurl = '{{config("livetool.socketurl")}}';
     this.isteacher = {{$isteacher}};
-    this.iswhite = {{$iswhite}};
+    this.role = JSON.parse('{!!json_encode($role)!!}');
+    this.fileurl = '{{config("livetool.fileurl")}}';
 </script>
 <script src="/vendor/livetool/js/loadroom.js"></script> 

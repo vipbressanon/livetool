@@ -269,7 +269,7 @@ var bmsboard = function () {
             $("#file"+id).show();
         });
         
-        $(document).on("click",".deletebtn",function(){
+        $(document).on("click",".delbtn",function(){
             var fid = $(this).attr("data-fid");
             var name = $(this).attr("data-name");
             deleteFile(fid);
@@ -376,8 +376,8 @@ var bmsboard = function () {
                 }
                 str2 += '<span>'+v.title+'</span>';
                 str2 += '</div>';
-                str2 += '<a class="Btn cancel filebtn" data-id="'+i+'" href="javascript:;">打开</a>';
-                str2 += '<a class="Btn delete deletebtn" data-fid="'+v.fid+'" data-name="'+v.title+'" href="javascript:;">删除</a>';
+                str2 += '<p class="column"><a class="Btn cancel filebtn" data-id="'+i+'" href="javascript:;">打开</a>';
+                str2 += '<a class="delbtn" data-fid="'+v.fid+'" data-name="'+v.title+'" href="javascript:;">删除</a></p>';
                 str2 += '</div>';
             }
         });

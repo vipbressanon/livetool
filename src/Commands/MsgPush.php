@@ -10,6 +10,7 @@ use Vipbressanon\LiveTool\Servers\ApiServer;
 use Vipbressanon\LiveTool\Servers\CourseServer;
 use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
+use Vipbressanon\LiveTool\Servers\BalanceServer;
 use Log;
 use DB;
 
@@ -26,6 +27,7 @@ class MsgPush extends Command
     //PHPSocketIO服务
     private static $senderIo = null;
     
+    private $timer_id;
 
     public function __construct()
     {
@@ -63,12 +65,19 @@ class MsgPush extends Command
                 // 已经登录过了
                 if (isset($socket->users_id)) return;
                 // 初始化用户房间数据
+                $course_id = $request['course_id'];
                 $room_id = $request['room_id'];
                 $users_id = $request['users_id'];
                 $socket->join($room_id);
+                $socket->course_id = $course_id;
                 $socket->room_id = $room_id;
                 $socket->users_id = $users_id;
                 self::onlinenum($room_id, $users_id, 'add');
+            });
+            
+            // 讲师创建房间后邀请所有人进入
+            $socket->on('create', function () use ($socket) {
+                self::$senderIo->to($socket->room_id)->emit('create');
             });
             
             // 加入房间
@@ -77,16 +86,28 @@ class MsgPush extends Command
                 $course_id = $request['course_id'];
                 $room_id = $request['room_id'];
                 $users_id = $request['users_id'];
+                $isteacher = $request['isteacher'];
                 $us = new UsersServer();
                 $us->start($course_id, $room_id, $users_id);
                 $cs = new CourseServer();
                 $starttime = $cs->starttime($course_id);
                 $socket->emit('starttime', $starttime);
+                
+                if ($isteacher) {
+                    $interval = config('livetool.intervaltime');
+                    $balance = new BalanceServer();
+                    // 每隔一段时间执行一次结算
+                    $this->timer_id = Timer::add($interval, [$balance, 'handle'], [$course_id], true);
+                    // $this->timer_id = Timer::add(3, function(){var_dump(1);});
+                }
             });
             
             // 下课
             $socket->on('over', function () use ($socket) {
                 var_dump('over');
+                $balance = new BalanceServer();
+                // 10秒以后执行一次结算,定时器只执行一次
+                Timer::add(10, [$balance, 'handle'], [$socket->course_id], false);
                 self::$senderIo->to($socket->room_id)->emit('over');
             });
             
@@ -99,12 +120,13 @@ class MsgPush extends Command
                 $us = new UsersServer();
                 $us->end($socket->room_id, $socket->users_id);
                 self::onlinenum($socket->room_id, $socket->users_id, 'cut');
+                Timer::del($this->timer_id);
             });
             
         });
         
         // 当self::$senderIo启动后监听一个http端口，通过这个端口可以给任意uid或者所有uid推送数据
-        self::$senderIo->on('workerStart', function () {
+        self::$senderIo->on('workerStart', function ($socket) {
             // 监听一个http端口
             $innerHttpWorker = new Worker('http://0.0.0.0:2121');
             // 当http客户端发来数据时触发

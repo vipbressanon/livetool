@@ -18,13 +18,13 @@ class LiveController extends Controller
     public function getRoom(Request $request, $hash_id = '')
     {
         $auth = config('livetool.auth');
-        // $users = Auth::guard($auth)->user();
-        // if (!$users) {
-            Auth::guard($auth)->loginUsingId($request->input('uid'));
-            $users = Auth::guard($auth)->user();
-            // $url = config('livetool.loginurl');
-            // return redirect($url.'/'.$hash_id);
-        // }
+        $users = Auth::guard($auth)->user();
+        if (!$users) {
+            //Auth::guard($auth)->loginUsingId($request->input('uid'));
+            //$users = Auth::guard($auth)->user();
+            $url = config('livetool.loginurl');
+            return redirect($url.'/'.$hash_id);
+        }
         $cs = new CourseServer();
         $course = $cs->detail($hash_id);
         if ($course) {
@@ -47,14 +47,17 @@ class LiveController extends Controller
             $share = $cs->share($course['id']);
             // 判断用户是否在白名单内
             $iswhite = $cs->iswhite($course['id'], $users->id);
+            // 判断课程所属团队余额是否大于等于0
+            $balance = $cs->balance($course['team_id']);
+            // 判断是否有权限进入
+            $role = $this->role($course, $black, $iswhite, $balance);
             return view($view)
                     ->with('course', $course)
                     ->with('room', $room)
                     ->with('info', $info)
-                    ->with('black', $black)
                     ->with('share', $share)
-                    ->with('iswhite', $iswhite)
-                    ->with('isteacher', $isteacher);
+                    ->with('isteacher', $isteacher)
+                    ->with('role', $role);
         } else {
             abort(404);
         }
@@ -205,7 +208,7 @@ class LiveController extends Controller
         return response()->json(['error'=>'']);
     }
     
-    // 课堂口令
+    // 验证课堂口令
     public function postRoomWord(Request $request)
     {
         $course_id = $request->input('course_id');
@@ -213,6 +216,10 @@ class LiveController extends Controller
         $isteacher = $request->input('isteacher');
         $word = $request->input('word');
         $cs = new CourseServer();
+        $wordnum = $cs->whitenum($course_id);
+        if (!$wordnum) {
+            return response()->json(['error'=>'房间人数已达上限，无法进入']);
+        }
         $res = $cs->word($course_id, $users_id, $isteacher, $word);
         if ($res) {
             return response()->json(['error'=>'']);
@@ -224,5 +231,31 @@ class LiveController extends Controller
     public function getBrowser(Request $request)
     {
         return view('livetool::browser');
+    }
+    
+    
+    private function role($course, $black, $iswhite, $balance)
+    {
+        $data = [201, '无法进入直播间'];
+        if ($course['status'] == 0) {
+            if ($balance) {
+                $data = [202, '请等待讲师开课'];
+            } else {
+                $data = [204, '讲师账户余额不足'];
+            }
+        } elseif ($course['status'] == 1) {
+            if (!$balance) {
+                $data = [204, '讲师账户余额不足'];
+            } elseif ($black) {
+                $data = [201, '被讲师踢出'];
+            } elseif ($iswhite) {
+                $data = [200, '允许进入'];
+            } elseif ($course['invite_type'] == 1) {
+                $data = [203, '请输入口令'];
+            }
+        } elseif ($course['status'] == 2) {
+            $data = [201, '已下课'];
+        }
+        return $data;
     }
 }

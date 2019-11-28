@@ -26,21 +26,29 @@ class CourseServer
                     $course['field']['endtime'].' as endtime',
                     $course['field']['invite_type'].' as invite_type',
                     $course['field']['top_usersid'].' as top_usersid',
+                    $course['field']['team_id'].' as team_id',
+                    $course['field']['code_url'].' as code_url'
                 )
                 ->where($course['field']['hash_id'], $hash_id)
                 ->first();
-        return [
-            'id' => $res->id,
-            'hash_id' => $res->hash_id,
-            'title' => $res->title,
-            'teacher_id' => $res->teacher_id,
-            'status' => $res->status,
-            'expectstart' => $res->expectstart,
-            'starttime' => $res->starttime,
-            'endtime' => $res->endtime,
-            'invite_type' => $res->invite_type,
-            'top_usersid' => $res->top_usersid
-        ];
+        if ($res) {
+            return [
+                'id' => $res->id,
+                'hash_id' => $res->hash_id,
+                'title' => $res->title,
+                'teacher_id' => $res->teacher_id,
+                'status' => $res->status,
+                'expectstart' => $res->expectstart,
+                'starttime' => $res->starttime,
+                'endtime' => $res->endtime,
+                'invite_type' => $res->invite_type,
+                'top_usersid' => $res->top_usersid,
+                'team_id' => $res->team_id,
+                'code_url' => $res->code_url
+            ];
+        } else {
+            return null;
+        }
     }
     
     public function errors($input)
@@ -98,6 +106,16 @@ class CourseServer
         return $res ? 1 : 0;
     }
     
+    public function whitenum($course_id)
+    {
+        $cww = config('livetool.course_word_white');
+        $whitenum = config('livetool.whitenum');
+        $count = DB::table($cww['table'])
+                ->where($cww['field']['course_id'], $course_id)
+                ->count();
+        return $count < $whitenum ? true : false;
+    }
+    
     public function word($course_id, $users_id, $isteacher, $word)
     {
         $type = $isteacher ? 2 : 3;
@@ -121,5 +139,15 @@ class CourseServer
             return false;
         }     
         return $res ? 1 : 0;
+    }
+    
+    public function balance($team_id)
+    {
+        $team = config('livetool.team');
+        $res = DB::table($team['table'])
+                ->where($team['field']['id'], $team_id)
+                ->select($team['field']['amount_money'].' as amount_money')
+                ->first();
+        return $res->amount_money >= 0 ? 1 : 0;
     }
 }

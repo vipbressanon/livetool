@@ -1,17 +1,145 @@
+* {
+    margin: 0;
+    padding: 0;
+    outline: none;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+body {
+    min-width: 1366px;
+    font-size: 14px;
+    color: #333;
+    font-family: "Poppins", sans-serif;
+}
+li {
+    list-style: none;
+}
+a {  
+    text-decoration: none;
+    cursor: pointer;
+    color: #333;
+    outline: none;
+}
+a:hover {
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+    text-decoration: none;
+}
+a img, a:hover img {
+    border: 0 none;
+}
+h1, h2, h3, h4, h5 {
+    font-weight: normal;
+}
+b{
+    font-weight: normal;
+}
+i{
+    font-style: normal;
+}
+input, button, select, textarea {
+    outline: none;
+    border: 0 none;
+    font-family: "微软雅黑";
+}
+.wrapper {
+    width: 82.29%;
+    margin: 0 auto;
+}
+.fl {
+    float: left;
+}
+.fr {
+    float: right;
+}
+.clearfix:after {
+    display: block;
+    clear: both;
+    content: "";
+    visibility: hidden;
+    height: 0;
+}
+.clearfix {
+    zoom: 1
+}
+.clear {
+    clear: both;
+}
+.grey_bg {
+    background: #f5f8fe;
+}
+table {
+    border-collapse: collapse;
+    /*border-spacing: 1;*/
+    border-spacing: 0;
+}
+label{
+    font-weight: normal;
+}
+.over {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.href_aaa {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 10;
+}
+.row{
+    display: -ms-flex; /* 兼容IE */
+    display: flex;
+    flex-direction: row;
+}
+.column{
+    display: -ms-flex; /* 兼容IE */
+    display: flex;
+    flex-direction: column;
+}
+.align_item{
+    display: -ms-flex; /* 兼容IE */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.between{
+    display: -ms-flex; /* 兼容IE */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.around{
+    display: -ms-flex; /* 兼容IE */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+.redXing{
+    display: inline-block;
+    position: relative;
+    top: 2px;
+    margin-right: 2px;
+    color: #FF1919;
+    font-weight: bold;
+}
 /* layui样式 */
 .layui-layer-page .layui-layer-content,.layui-layer-title{
 	background: #000!important;
 }
 .layui-layer-title{
-	color: #000!important;
+	color: #fff!important;
 }
 
 .layui-layer-ico{
 	background: url('/vendor/livetool/images/close.png') no-repeat!important;
 	background-position: 0 0!important;
 	background-size: 100%!important;
-	right: 7px!important;
-    top: 10px!important;
+    top: -4px!important;
     width: 20px!important;
     height: 20px!important;
 }
@@ -82,39 +210,45 @@ body{
 	width: 100%;
 	border-bottom: 1px solid #4C4E53;
 	justify-content: center;
+	display: flex;
+    flex-direction: row;
 }
-.gatherBox .headTx{
+.gatherBox .swiper-wrapper{
+	width: 100%;
+}
+.gatherBox .swiper-slide{
 	width: 7.29%;
 	position: relative;
 	z-index: 8;
 	margin-right: 0.4166%;
 	background: #000;
+	color: #fff;
 }
 .gatherBox .headTx:last-child{
 	margin-right: 0;
 }
-.gatherBox .headTx .txImg{
+.txImg{
 	display: block;
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
 }
-.gatherBox .headTx .txImg video{
+.txImg video{
 	display: block;
 	width: 100%;
 	height: 100%;
 }
-.gatherBox .headTx .unusnal{
+.unusnal{
 	width: 100%;
 	height: 100%;
 	color: #686868;
 	justify-content: center;
 	position: relative;
 }
-.gatherBox .headTx .unusnal span{
+.unusnal span{
 	font-size: 60px;
 }
-.gatherBox .headTx .unusnal .icon-xiantiao{
+.unusnal .icon-xiantiao{
 	position: absolute;
 	left: 50%;
 	top: 50%;
@@ -147,10 +281,7 @@ body{
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.gatherBox .studentTag .name span{
-	color: #fff;
-}
-.gatherBox .teacherTag .name{
+.gatherBox .teacherTag .nikename{
 	color: #fff;
 }
 .headTx:hover .handle{
@@ -438,7 +569,7 @@ body{
 	color: #D2D2D2;
 	margin-top: 10px;
 }
-.course .list .between .Btn{
+.course .list .between .Btn,.course .list .between .delbtn{
 	width: 43px;
 	height: 18px;
 	line-height: 18px;
@@ -452,8 +583,14 @@ body{
 	background: #3C9CFE;
 }
 .course .list .between .cancel{
-	background: #F5685E;
+	background: #3C9CFE;
 }
+.delbtn{
+	font-size: 12px;
+	margin-bottom: 5px;
+    background: #F5685E;
+    margin-top: 5px;
+}		
 
 /* 中间部分 */
 .middle{
@@ -941,6 +1078,7 @@ body{
 
 .dialog{
 	width: 17.86%;
+	height: 25rem;
 	background: #3E414A;
 	position: fixed;
 	right: 18%;
@@ -1007,6 +1145,9 @@ body{
 .discussList li{
 	margin-bottom: 15px;
 }
+.discussList li p i:after{
+	content: '：';
+}
 .discussList .yellow{
 	color: #FF9900;
 }
@@ -1034,16 +1175,31 @@ body{
 } 
 .relayBox textarea{
 	display: block;
-	width: 100%;
-	height: 58%;
+	width: 80%;
+	height: 85%;
 	margin-top: 3.8%;
 	resize: none;
 	background: none;
 	color: #fff;
 }
+.relayBox textarea::-webkit-scrollbar {
+	width: 5px;
+}
+.relayBox textarea::-webkit-scrollbar-track {
+	background: #3E414A;
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
+.relayBox textarea::-webkit-scrollbar-thumb {
+	background: #383941;
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
 .send{
 	width: 16.9%;
-	height: 18.86%;
+	height: 1.8rem;
 	background: #3C9CFE;
 	align-items: center;
 	justify-content: center;
@@ -1051,7 +1207,7 @@ body{
 	border-radius: 4px;
 	color: #fff;
 	position: absolute;
-	bottom: 18px;
+	top: 10px;
 	right: 14px;
 }
 .askBox{
@@ -1289,5 +1445,12 @@ body{
 .shareBox .layui-form-item .layui-input-block input{
 	width: 400px;
 }
+.TelCourse,#qqq,.PortDiscussTitle{
+	display: none;
+}
 
 
+/*pc端竖屏样式隐藏*/
+.PortCourse .desc{
+	display: none;
+}

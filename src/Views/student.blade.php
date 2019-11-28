@@ -5,24 +5,27 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>直击课堂</title>
-        <link href="/vendor/livetool/layui/css/layui.css" rel="stylesheet" type="text/css">
+		<link href="" id="css1" rel="stylesheet" type="text/css">
         <link href="/vendor/livetool/css/common.css" rel="stylesheet" type="text/css">
-        <link href="/vendor/livetool/css/live.css" rel="stylesheet" type="text/css">
+        <link href="" id="css2" rel="stylesheet" type="text/css">
         <link href="/vendor/livetool/font/iconfont.css" rel="stylesheet">
-        <link href="https://cdn.bootcss.com/jquery-toast-plugin/1.3.2/jquery.toast.css" rel="stylesheet">
+        <link href="/vendor/livetool/css/swiper.min.css" rel="stylesheet" type="text/css">
+        <link href="https://cdn.bootcss.com/jquery-toast-plugin/1.3.2/jquery.toast.css" rel="stylesheet">   
     </head>
-    <body>
+    <body style="visibility:hidden">
         <div class="fullScreen">
             <div class="mount">
                 <div class="wrapper align_item">
                     <span>{{$course['title']}}</span>
-                    <span>学员数量（<b class="online">0</b>人）</span>
+                    <span>学员数量（<b class="stucount">0</b>人）</span>
                     <span>开课时间：<b class="roomtime">00:00</b></span>
                 </div>
             </div>
-            <div class="gatherBox row">
+            <div class="gatherContent swiper-container">
+                <div class="gatherBox swiper-wrapper">
+
+                </div>
             </div>
-            
             <!-- 侧边栏 -->
             <div class="sideBar">
                 <ul class="sideTab">
@@ -40,26 +43,37 @@
                 <!-- 直播视频地址 -->
                 <div id="paint_box"></div>
                 <!-- 暂未开课、已下课 -->
-                @if($iswhite)
-                    @if($black)
-                    <div class="status"><a class="tag end" href="javascript:;">被踢出</a><p>无法再进入直播间~</p></div>
-                    @else
-                    <div class="status" @if($course['status'] == 1) style="display:none;" @endif>
-                        @if($course['status'] == 0)
-                        <a class="tag start" href="javascript:;">请等待讲师开课</a>
-                        <p>暂未开课~</p>
-                        @elseif($course['status'] == 2)
-                        <a class="tag end" href="javascript:;">已下课</a>
-                        <p>已经下课~</p>
-                        @endif
-                    </div>
-                    @endif
-                @elseif($course['invite_type'] == 1)
+                @if($role[0] == 201)
                 <div class="status">
-                    <a id="courseword" class="tag start" href="javascript:;">请输入口令</a>
+                    <a class="tag end" href="javascript:;">{{$role[1]}}</a>
+                </div>
+                @elseif($role[0] == 202)
+                <div class="status">
+                    <a class="tag start" href="javascript:;">请等待讲师开课</a>
+                </div>
+                @elseif($role[0] == 203)
+                <div class="status">
+                    <a id="courseword" class="tag start" href="javascript:;">{{$role[1]}}</a>
+                </div>
+                @elseif($role[0] == 204)
+                <div class="status">
+                    <a class="tag end" href="javascript:;">{{$role[1]}}</a>
                 </div>
                 @endif
                 
+				<!-- 摄像头最大化 -->
+                <div class="maxWindow">
+                    <span class="iconfont icon-close" title="关闭" onclick="maxHide()"></span>
+                    <!-- 摄像头未正常开启 -->
+                    <div class="without">
+                        <span class="iconfont icon-shexiangtou"></span>
+                        <span class="iconfont icon-xiantiao"></span>
+                    </div>
+                    <!-- 摄像头正常开启 -->
+                    <div class="with">
+                        
+                    </div>
+                </div>					  
                 <div id="edu-toolbar-box" class="edu-toolbar-box" style="display: none;">
                     <ul class="edu-toolbar-menu">
                         <li class="tool-bgcolor" title="色板">
@@ -136,23 +150,45 @@
                     <input id="fileSelector" class="hide" type="file" accept="image/*,application/pdf, application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" />
                 </div>
             </div>
-            
-            
+            <!-- 手机端竖屏 课程标题详情 -->
+            <div class="PortCourse">
+                <!-- 学生举手 -->
+                <div class="handBtn align_item">
+                    <span class="iconfont icon-jushou"></span>
+                </div>
+                <div class="desc">
+                    <div class="row1">@if($course['status']==0)<span>未上课</span>@elseif($course['status']==1)<span>上课中</span>@elseif($course['status']==2)<span>已下课</span>@endif{{$course['title']}}</div>
+                    <div class="row2 row">
+                        <p><i class="iconfont icon-laoshirenshu"></i><span class="teacount">0</span>人</p>
+                        <p><i class="iconfont icon-xueshengrenshu"></i><span class="stucount">0</span>人</p>
+                    </div>
+                    <span class="iconfont icon-zuidahua" id="enlarge"></span>
+                </div>
+            </div>
+            <!-- 手机端竖屏 讨论区title -->
+            <div class="PortDiscussTitle align_item">
+                <i class="line"></i>
+                <span>讨论</span>
+            </div>
+            <p id="qqq" style="width:100%;height:1px;background:#fff;"></p>								 
             <!-- 讨论区 start -->
             <div class="discussBtn align_item">
                 <span class="iconfont icon-liaotian"></span>
                 <i class="redDot" style="display:none;"></i>
             </div>
-            <div class="handBtn align_item">
-                <span class="iconfont icon-jushou"></span>
+			<!-- 手机端 摄像头按钮 -->
+            <div class="cameraBtn align_item">
+                <span class="iconfont icon-shexiangtou"></span>
             </div>
+            <!-- 手机端 摄像头关闭按钮 -->
+            <div class="cameraClose iconfont icon-close"></div>
+
             <div class="dialog">
                 <div class="title between">
                     <ul class="Tab row">
                         <li class="active">讨论</li>
                     </ul>
                     <div class="btns row">
-                        <span class="iconfont icon-liaotian banbtn" title="@if($room['roomchat']==1)禁止全员讨论@else允许全员讨论@endif"></span>
                         <span class="iconfont icon-close closebtn" title="关闭"></span>
                     </div>
                 </div>
@@ -165,7 +201,6 @@
                 </div>
             </div>
             <!-- 讨论区 end -->
-            
         </div>
         <input type="hidden" id="_token" name="_token" value="{{csrf_token()}}" />
     </body>
@@ -173,8 +208,9 @@
 <script src="/vendor/livetool/js/jquery.min.js"></script>
 <script src="/vendor/livetool/font/iconfont.js"></script>
 <script src="/vendor/livetool/layui/layui.js"></script>
-<script src="/vendor/livetool/js/live.js"></script> 
-@if(!$black)
+<script src="/vendor/livetool/js/swiper.min.js"></script>
+<script id="js"></script>
+<script src="/vendor/livetool/js/fit.js"></script>
 <!-- axios SDK -->
 <script src="https://tic-res-1259648581.file.myqcloud.com/thirdpart/axios/axios.min.js"></script>
 <!-- WebRTC SDK -->				  
@@ -192,13 +228,13 @@
 <script src="https://cdn.bootcss.com/socket.io/2.0.3/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
 <script src="https://cdn.bootcss.com/jquery-toast-plugin/1.3.2/jquery.toast.min.js"></script>
+
 <script>
     this.users = JSON.parse('{!!json_encode($info)!!}');
     this.room = JSON.parse('{!!json_encode($room)!!}');
     this.course = JSON.parse('{!!json_encode($course)!!}');
     this.socketurl = '{{config("livetool.socketurl")}}';
     this.isteacher = {{$isteacher}};
-    this.iswhite = {{$iswhite}};
+    this.role = JSON.parse('{!!json_encode($role)!!}');
 </script>
 <script src="/vendor/livetool/js/loadroom.js"></script>
-@endif

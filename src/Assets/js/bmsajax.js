@@ -61,14 +61,22 @@ var bmsajax = function () {
                 if (json.error) {
                     _this.bmsim.toast(json.error, 'error');
                 } else {
+                    var teacount = 0;
+                    var stucount = 0;
                     $.each(json.add, function(i, v){
                         onlinehtml(v);
+                        if (_this.course.teacher_id == v.id) {
+                            teacount++;
+                        } else {
+                            stucount++; 
+                        }
                     });
                     $.each(json.cut, function(i, v){
                         $("#users"+v).remove();
                     });
                     _this.roster = arr;
-                    $(".online").html(_this.roster.length);
+                    $(".teacount").html(teacount);
+                    $(".stucount").html(stucount);
                 }
             }
         });
@@ -85,13 +93,13 @@ var bmsajax = function () {
             local = 'id="'+users.hash_id+'video"';
         }
         if (this.course.teacher_id == users.id) {
-            str += '<div id="users'+users.id+'" class="headTx teacherHead">';
+            str += '<div id="users'+users.id+'" class="headTx swiper-slide teacherHead">';
             str += '<div class="txImg">';
             str += '<video poster="'+users.imgurl+'" '+local+' data-teacher="1" autoplay></video>';
             str += '</div>';
             str += '<img class="teacherSign" src="/vendor/livetool/images/sanjiao.png">';
             str += '<div class="teacherTag align_item">';
-            str += '<span class="name">讲师</span>';
+            str += '<span class="nickname">讲师</span>';
             str += '</div>';
             str += '<div class="handle">';
             if (this.isteacher) {
@@ -139,7 +147,7 @@ var bmsajax = function () {
             str += '</div>';
             $(".gatherBox").prepend(str);
         } else {
-            str += '<div id="users'+users.id+'" class="headTx studentHead" '+local+'>';
+            str += '<div id="users'+users.id+'" class="headTx swiper-slide studentHead" '+local+'>';
             str += '<div class="txImg">';
             str += '<video src="" poster="'+users.imgurl+'" '+local+' data-teacher="0" autoplay></video>';
             str += '</div>';

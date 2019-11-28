@@ -1,3 +1,7 @@
+//延迟1s显示
+setTimeout(function(){
+    $("body").css('visibility','visible')
+},1000)
 $(function(){
     //计算高度
     $('.fullScreen').css('height',document.documentElement.clientHeight);
@@ -33,10 +37,12 @@ layui.use(['laypage', 'layer'], function(){
         //获取到当前点击的摄像头
         var $this = $(this);
         var oDiv = $(this).parents('.headTx').find('.txImg')
-        $('.show').append(oDiv)
+        // 背景头像
         var headImg = oDiv.find('video').attr('poster')
         $(this).parents('.headTx').css("background-image","url("+headImg+")");
-
+        // 获取点击的nickname
+        var oTitle = $(this).parents('.headTx').find('.nickname').text();
+        console.log(oTitle)
         //获取父级索引    
         var Index = $(this).parents('.headTx').index()
         var active = 'active_' + Index
@@ -70,15 +76,16 @@ layui.use(['laypage', 'layer'], function(){
             // var video = document.getElementById('teachervideo').srcObject;
             layer.open({
                 type: 1,
+                title: oTitle,
                 area: [areaWidth+'px', ''],
                 shade: 0,
                 offset: [offsetTop,offsetLeft],
-                content: $('.show'),
+                content: oDiv,
                 cancel: function(){
                     layer.close()
                     arr.splice($.inArray(active,arr),1);
-                    $('.show').empty();
                     $this.parents('.headTx').prepend(oDiv);
+                    $this.parents('.headTx').css("background","#000");
                 }
             });
         }
@@ -103,7 +110,7 @@ layui.use('form', function(){
     $ = layui.jquery,
     form = layui.form;
     form.render();
-    if ($("#status").val() == 0 && $("#iswhite").val() == 1) {
+    if ($("#status").val() == 0) {
         layer.open({
             type: 2,
             title: false,
@@ -120,11 +127,10 @@ layui.use('form', function(){
     $(document).on("click", ".switchbtn", function(){
         layer.open({
             type: 2,
-            title: false,
+            title: '媒体设置',
             closeBtn: 1, //不显示关闭按钮
-            shade: [0],
-            area: ['560px', '345px'],
-            offset: '50px',
+            area: ['560px', '330px'],
+            offset: '150px',
             //time: 2000, //2秒后自动关闭
             anim: 2,
             content: ['/livetool/check?type=2', 'no'], //iframe的url，no代表不显示滚动条
