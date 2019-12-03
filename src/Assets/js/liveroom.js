@@ -36,7 +36,7 @@ var liveroom = function () {
                 this.islogin = false;
             } else {
                 this.islogin = true;
-                this.bmsim.toast('登录成功');
+                // this.bmsim.toast('登录成功');
                 // 加载socket
                 websocket();
                 roombtn();
@@ -55,10 +55,6 @@ var liveroom = function () {
                 room_id:_this.room.id,
                 users_id:_this.users.id
             });
-            // 课程已经开始，直接进入课堂
-            if (_this.course.status == 1) {
-                _this.bmstic.join();
-            }
         });
         // 讲师创建房间后邀请所有人进入
         this.socket.on('create', function () {
@@ -154,12 +150,12 @@ var liveroom = function () {
         this.bmsrtc = bmsrtc;
         this.tic = null;
         
-        var isChrome;
-        if(isChrome == window.google && window.chrome){
-            console.log('谷歌');
-        } else{
-            location = '/livetool/browser';
-        }
+        // var isChrome;
+        // if(isChrome == window.google && window.chrome){
+        //     console.log('谷歌');
+        // } else{
+        //     location = '/livetool/browser';
+        // }
         
         if (this.role[0] == 200 || this.role[0] == 202 || this.role[0] == 204) {
             initData();

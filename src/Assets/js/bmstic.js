@@ -34,6 +34,7 @@ var bmstic = function () {
                 this.bmsajax.errors(3, res.desc);
             } else {
                 this.bmsim.toast('加入课堂成功');
+                $(".status").hide();
                 // 更改课堂状态
                 this.isenter = true;
                 // 白板初始化

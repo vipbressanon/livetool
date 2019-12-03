@@ -77,6 +77,10 @@ var bmsajax = function () {
                     _this.roster = arr;
                     $(".teacount").html(teacount);
                     $(".stucount").html(stucount);
+                    // 课程已经开始，直接进入课堂
+                    if (_this.course.status == 1) {
+                        _this.bmstic.join();
+                    }
                 }
             }
         });
@@ -89,8 +93,10 @@ var bmsajax = function () {
         var display = '';
         if (this.users.id == users.id) {
             local = 'id="localvideo" muted="true"';
+            display = '';
         } else {
             local = 'id="'+users.hash_id+'video"';
+            display = 'style="display:none"';
         }
         if (this.course.teacher_id == users.id) {
             str += '<div id="users'+users.id+'" class="headTx swiper-slide teacherHead">';
@@ -147,7 +153,7 @@ var bmsajax = function () {
             str += '</div>';
             $(".gatherBox").prepend(str);
         } else {
-            str += '<div id="users'+users.id+'" class="headTx swiper-slide studentHead" '+local+'>';
+            str += '<div id="users'+users.id+'" class="headTx swiper-slide studentHead" '+display+'>';
             str += '<div class="txImg">';
             str += '<video src="" poster="'+users.imgurl+'" '+local+' data-teacher="0" autoplay></video>';
             str += '</div>';
@@ -222,6 +228,7 @@ var bmsajax = function () {
             url: "/livetool/room/kick",
             dataType: 'json',
             data: {
+                course_id: _this.course.id,
                 room_id: _this.room.id,
                 users_id: users_id,
                 _token: $("#_token").val()
@@ -235,7 +242,7 @@ var bmsajax = function () {
     };
     
     //共享模式，白板模式
-    var roomtype = function(){
+    var roomtype = function(type){
         var _this = this;
         $.ajax({
             type: "post",
@@ -243,7 +250,7 @@ var bmsajax = function () {
             dataType: 'json',
             data: {
                 room_id: _this.room.id,
-                roomtype: _this.room.roomtype,
+                roomtype: type,
                 _token: $("#_token").val()
             },
             success: function(json){
@@ -255,7 +262,7 @@ var bmsajax = function () {
     };
     
     //全员禁止聊天，解除禁止聊天
-    var roomchat = function(){
+    var roomchat = function(type){
         var _this = this;
         $.ajax({
             type: "post",
@@ -263,7 +270,7 @@ var bmsajax = function () {
             dataType: 'json',
             data: {
                 room_id: _this.room.id,
-                roomchat: _this.room.roomchat,
+                roomchat: type,
                 _token: $("#_token").val()
             },
             success: function(json){
@@ -437,10 +444,10 @@ var bmsajax = function () {
             errors(type, contents);
         },livetime: function() {
             livetime();
-        },roomtype: function(){
-            roomtype();
-        },roomchat: function(){
-            roomchat();
+        },roomtype: function(type){
+            roomtype(type);
+        },roomchat: function(type){
+            roomchat(type);
         },roomspeak: function(){
             roomspeak();
         },roomhand: function(){

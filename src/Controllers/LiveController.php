@@ -161,10 +161,11 @@ class LiveController extends Controller
     // 踢出课堂
     public function postRoomKick(Request $request)
     {
+        $course_id = $request->input('course_id');
         $room_id = $request->input('room_id');
         $users_id = $request->input('users_id');
         $rs = new RoomServer();
-        $rs->kick($room_id, $users_id);
+        $rs->kick($course_id, $room_id, $users_id);
         return response()->json(['error'=>'']);
     }
     
@@ -220,6 +221,10 @@ class LiveController extends Controller
         if (!$wordnum) {
             return response()->json(['error'=>'房间人数已达上限，无法进入']);
         }
+        $teachernum = $cs->teachernum($course_id);
+        if (!$teachernum) {
+            return response()->json(['error'=>'已经有老师进入课堂，请核对信息']);
+        }
         $res = $cs->word($course_id, $users_id, $isteacher, $word);
         if ($res) {
             return response()->json(['error'=>'']);
@@ -237,6 +242,12 @@ class LiveController extends Controller
     private function role($course, $black, $iswhite, $balance)
     {
         $data = [201, '无法进入直播间'];
+    	if (!$iswhite && $course['invite_type'] == 0) {
+    		return [201, '无法进入直播间'];dd(111);
+    	}
+    	if (!$iswhite && $course['invite_type'] == 1) {
+    		return [203, '请输入口令'];
+    	}		
         if ($course['status'] == 0) {
             if ($balance) {
                 $data = [202, '请等待讲师开课'];
@@ -248,10 +259,10 @@ class LiveController extends Controller
                 $data = [204, '讲师账户余额不足'];
             } elseif ($black) {
                 $data = [201, '被讲师踢出'];
-            } elseif ($iswhite) {
-                $data = [200, '允许进入'];
-            } elseif ($course['invite_type'] == 1) {
-                $data = [203, '请输入口令'];
+            } elseif (!$iswhite && $course['invite_type'] == 0) {
+                return [201, '无法进入直播间'];
+            } else {
+                $data = [200, '正常进入'];
             }
         } elseif ($course['status'] == 2) {
             $data = [201, '已下课'];

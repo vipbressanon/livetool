@@ -113,7 +113,7 @@ layui.use('form', function(){
     if ($("#status").val() == 0) {
         layer.open({
             type: 2,
-            title: false,
+            title: '设备检测',
             closeBtn: 1, //不显示关闭按钮
             shade: [0],
             area: ['560px', '540px'],

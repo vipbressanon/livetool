@@ -11,7 +11,6 @@ var bmsrtc = function () {
 
         this.TRTC.on('onRemoteStreamUpdate', (data) => {
             document.getElementById(data.openId+'video').srcObject = data.stream;
-            $("#"+data.openId+"video").parents(".studentHead:eq(0)").hide();
             console.log('WebRTC接收到远端流');
         });
 
@@ -33,18 +32,16 @@ var bmsrtc = function () {
         var _this = this;
 
         $(document).on("click", ".roomtype1", function(){
-            if(_this.isstart){
-                _this.room.roomtype = 1;
-                _this.bmsajax.roomtype();
+            if(_this.isenter){
+                _this.bmsajax.roomtype(1);
                 pushScreen();
                 _this.bmsim.sendcustom('', '{"nickname":"","type":"SHARE","text":""}');
             }
         });
         
         $(document).on("click", ".roomtype2", function(){
-            if(_this.isstart){
-                _this.room.roomtype = 2;
-                _this.bmsajax.roomtype();
+            if(_this.isenter){
+                _this.bmsajax.roomtype(2);
                 startRTC();
                 _this.bmsim.sendcustom('', '{"nickname":"","type":"BOARD","text":""}');
             }

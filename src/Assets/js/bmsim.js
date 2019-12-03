@@ -56,24 +56,28 @@ var bmsim = function () {
                         showToast(""+json.nickname+" 举手要求上台");
                     }
                 } else if (json.type == 'TEXT') {
-                    if (_this.course.teacher_id == json.users_id) {
+                    if (this.course.teacher_id == json.users_id) {
                         $('.discussList').append("<li class='yellow'><p><i>" + json.nickname + "</i>" + json.text + "</p></li>");
                     } else {
                        $('.discussList').append("<li><p><i>" + json.nickname + "</i>" + json.text + "</p></li>"); 
                     }
-                    if (_this.ischat) {
+                    if (this.ischat) {
                         $(".discussBtn .redDot").hide();
                     } else {
                         $(".discussBtn .redDot").show();  
                     }
                 } else if (json.type == 'BOARD') {  //白板模式
+                    this.room.roomtype = 2;
                     showToast('讲师切换为白板教学模式');
                 } else if (json.type == 'SHARE') { //屏幕分享模式
+                    this.room.roomtype = 1;
                     showToast('讲师切换为屏幕共享模式');
                 } else if (json.type == 'CHAT') {  //禁止，解除聊天
                     if (json.text == '1') {
+                        this.room.roomchat = 1;
                         $('.discussList').append("<li class='yellow'><b>系统消息：允许全员发送讨论消息</b></li>");
                     } else {
+                        this.room.roomchat = 0;
                         $('.discussList').append("<li class='yellow'><b>系统消息：禁止全员发送讨论消息</b></li>");
                     }
                 } else if (json.type == 'ZAN') {  //点赞
@@ -268,8 +272,7 @@ var bmsim = function () {
                     showCancelButton: true
                 }).then((result) => {
                     if (result.value) {
-                        _this.room.roomchat = 0;
-                        _this.bmsajax.roomchat();
+                        _this.bmsajax.roomchat(0);
                         sendcustommsg('', '{"nickname":"","type":"CHAT","text":"0"}');
                         $(".banbtn").attr("title", "解除全员讨论");
                     }
@@ -284,8 +287,7 @@ var bmsim = function () {
                     showCancelButton: true
                 }).then((result) => {
                     if (result.value) {
-                        _this.room.roomchat = 1;
-                        _this.bmsajax.roomchat();
+                        _this.bmsajax.roomchat(1);
                         sendcustommsg('', '{"nickname":"","type":"CHAT","text":"1"}');
                         $(".banbtn").attr("title", "禁止全员讨论");
                     }

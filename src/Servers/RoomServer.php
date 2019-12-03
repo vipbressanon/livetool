@@ -118,9 +118,10 @@ class RoomServer
         $res->save();
     }
     
-    public function kick($room_id, $users_id)
+    public function kick($course_id, $room_id, $users_id)
     {
         $res = new RoomBlack();
+        $res->course_id = $course_id;
         $res->room_id = $room_id;
         $res->users_id = $users_id;
         $res->save();

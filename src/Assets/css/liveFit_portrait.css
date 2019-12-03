@@ -382,3 +382,6 @@ body{
     -webkit-align-items: center;
     align-items: center;
 }
+.cameraClose{
+	display: none;
+}
