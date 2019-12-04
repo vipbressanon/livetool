@@ -282,7 +282,7 @@ var bmsajax = function () {
     };
     
     //全员上台，下台
-    var roomspeak = function(){
+    var roomspeak = function(type){
         var _this = this;
         $.ajax({
             type: "post",
@@ -290,7 +290,7 @@ var bmsajax = function () {
             dataType: 'json',
             data: {
                 room_id: _this.room.id,
-                roomspeak: _this.room.roomspeak,
+                roomspeak: type,
                 _token: $("#_token").val()
             },
             success: function(json){
@@ -302,7 +302,7 @@ var bmsajax = function () {
     };
     
     //允许，禁止举手
-    var roomhand = function(){
+    var roomhand = function(type){
         var _this = this;
         $.ajax({
             type: "post",
@@ -310,7 +310,7 @@ var bmsajax = function () {
             dataType: 'json',
             data: {
                 room_id: _this.room.id,
-                roomhand: _this.room.roomhand,
+                roomhand: type,
                 _token: $("#_token").val()
             },
             success: function(json){
@@ -448,10 +448,10 @@ var bmsajax = function () {
             roomtype(type);
         },roomchat: function(type){
             roomchat(type);
-        },roomspeak: function(){
-            roomspeak();
-        },roomhand: function(){
-            roomhand();
+        },roomspeak: function(type){
+            roomspeak(type);
+        },roomhand: function(type){
+            roomhand(type);
         },online: function(arr){
             onlineinfo(arr);
         },operatetype: function(users_id, type){

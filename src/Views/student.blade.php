@@ -199,6 +199,7 @@
                     <button id="chatbtn" class="fr row send">发送</button>
                     <input type="hidden" id="tousers" value="" />
                 </div>
+                <div class="closebtn dialogClose iconfont icon-close"></div>
             </div>
             <!-- 讨论区 end -->
         </div>

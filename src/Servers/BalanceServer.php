@@ -59,10 +59,10 @@ class BalanceServer
                 $course_users_log['field']['updated_at'] => $now
             ]);
         DB::update(
-            'update '.$course_users_log['table'].' set '.$course_users_log['field']['balancetime'].
-            '='.$course_users_log['field']['endtime'].','.$course_users_log['field']['updated_at'].
-            '='.$now.' where '.$course_users_log['field']['course_id'].
-            '='.$course_id.' and '.$course_users_log['field']['status'].'=1'
+            "update ".$course_users_log['table']." set ".$course_users_log['field']['balancetime'].
+            "=".$course_users_log['field']['endtime'].",".$course_users_log['field']['updated_at'].
+            "='".$now."' where ".$course_users_log['field']['course_id'].
+            "=".$course_id." and ".$course_users_log['field']['status']."=1"
         );
     }
     
@@ -153,11 +153,11 @@ class BalanceServer
                 ->first();
         if ($res) {
             DB::update(
-                'update '.$orders['table'].' set '.$orders['field']['consume_money'].
-                '='.$orders['field']['consume_money'].'+'.$money['consume_money'].','.
-                $orders['field']['consume_time'].'='.$orders['field']['consume_time'].'+'.$money['consume'].
-                ' where '.$orders['field']['team_id'].
-                '='.$account->team_id.' and '.$orders['field']['course_id'].'='.$account->course_id
+                "update ".$orders['table']." set ".$orders['field']['consume_money'].
+                "=".$orders['field']['consume_money']."+".$money['consume_money'].",".
+                $orders['field']['consume_time']."=".$orders['field']['consume_time']."+".$money['consume'].
+                " where ".$orders['field']['team_id'].
+                "=".$account->team_id." and ".$orders['field']['course_id']."=".$account->course_id
             );
         } else {
             DB::table($orders['table'])->insert([

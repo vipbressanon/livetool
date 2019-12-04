@@ -41,7 +41,7 @@ var bmsim = function () {
             onTICRecvGroupCustomMessage: (fromUserId, data, textLen) => {
                 var json = JSON.parse(data);
                 if (json.type == 'SPEAK') {                  // 老师邀请上台，或允许上台
-                    speakstatus(json.users_id, json.text);
+                    speakstatus(json.users_id, '1');
                     if (json.text == '1') {
                         showToast("讲师邀请 "+json.nickname+" 上台");
                     } else {
@@ -95,14 +95,18 @@ var bmsim = function () {
                 } else if (json.type == 'ALLSPEAK') { //全员上台，下台
                     speakstatus('', json.text);
                     if (json.text == '1') {
+                        this.room.roomspeak = 1;
                         showToast('讲师邀请全员上台');
                     } else {
+                        this.room.roomspeak = 0;
                         showToast('讲师请全员下台了');
                     }
                 } else if (json.type == 'ALLHAND') { //允许，禁止举手
                     if (json.text == '1') {
+                        this.room.roomhand = 1;
                         showToast('讲师允许学员举手');
                     } else {
+                        this.room.roomhand = 0;
                         showToast('讲师禁止学员举手');
                     }
                 }

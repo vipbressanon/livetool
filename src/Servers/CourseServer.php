@@ -116,14 +116,15 @@ class CourseServer
         return $count < $whitenum ? true : false;
     }
     
-    public function teachernum($course_id)
+    public function teachernum($course_id, $users_id)
     {
         $cww = config('livetool.course_word_white');
         $count = DB::table($cww['table'])
                 ->where($cww['field']['course_id'], $course_id)
                 ->where($cww['field']['type'], 2)
+                ->where($cww['field']['users_id'], '<>', $users_id)
                 ->count();
-        return $count > 0 ? true : false;
+        return $count == 0 ? true : false;
     }
     
     public function word($course_id, $users_id, $isteacher, $word)

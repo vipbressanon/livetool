@@ -221,7 +221,7 @@ class LiveController extends Controller
         if (!$wordnum) {
             return response()->json(['error'=>'房间人数已达上限，无法进入']);
         }
-        $teachernum = $cs->teachernum($course_id);
+        $teachernum = $cs->teachernum($course_id, $users_id);
         if (!$teachernum) {
             return response()->json(['error'=>'已经有老师进入课堂，请核对信息']);
         }
@@ -243,7 +243,7 @@ class LiveController extends Controller
     {
         $data = [201, '无法进入直播间'];
     	if (!$iswhite && $course['invite_type'] == 0) {
-    		return [201, '无法进入直播间'];dd(111);
+    		return [201, '无法进入直播间'];
     	}
     	if (!$iswhite && $course['invite_type'] == 1) {
     		return [203, '请输入口令'];

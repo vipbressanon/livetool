@@ -150,12 +150,12 @@ var liveroom = function () {
         this.bmsrtc = bmsrtc;
         this.tic = null;
         
-        // var isChrome;
-        // if(isChrome == window.google && window.chrome){
-        //     console.log('谷歌');
-        // } else{
-        //     location = '/livetool/browser';
-        // }
+        var isChrome;
+        if(isChrome == window.google && window.chrome){
+            console.log('谷歌');
+        } else{
+            location = '/livetool/browser';
+        }
         
         if (this.role[0] == 200 || this.role[0] == 202 || this.role[0] == 204) {
             initData();

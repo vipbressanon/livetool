@@ -31,6 +31,7 @@ var bmsboard = function () {
             console.log('======================:  ', 'TEB_WARNING');
         });
         this.teduBoard.on(TEduBoard.EVENT.TEB_IMAGE_STATUS_CHANGED, (code, data) => {
+            this.fileload = false;
             console.log('======================:  ', 'TEB_IMAGE_STATUS_CHANGED');
         });
         this.teduBoard.on(TEduBoard.EVENT.TEB_DELETEBOARD, (boardId, fid) => {
@@ -307,6 +308,7 @@ var bmsboard = function () {
         
         $(document).on("click",".boardTab i",function(){
             $(this).parent('li').hide();
+            switchFile('#DEFAULT');
             return false;
         });
     };

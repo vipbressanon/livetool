@@ -109,6 +109,7 @@ body{
     height: 100%!important;
     background: #282A31;
     display: flex;
+    padding-left: 0.04rem;
 }
 .gatherBox .headTx{
     width: .92rem!important;
@@ -335,7 +336,7 @@ body{
 .dialog .title .Tab{
     font-size: .15rem;
 }
-.dialog .title .btns .banbtn{
+.dialog .title .btns{
     display: none;
 }
 .discussList{
@@ -346,7 +347,6 @@ body{
     overflow-y: scroll;
     font-size: .12rem;
 }
-
 .discussList::-webkit-scrollbar {
     width: 5px;
 }
@@ -371,10 +371,6 @@ body{
 .discussList li p i:after{
     content: "：";
 }
-
-
-
-
 .relayBox {
     width: 100%;
     height: 30%;
@@ -409,7 +405,18 @@ body{
     bottom: 10px;
     right: 14px;
 }
-
+.dialogClose{
+    width: 0.3rem;
+    height: 0.3rem;
+    line-height: 0.3rem;
+    text-align: center;
+    position: absolute;
+    left: -0.3rem;
+    bottom: 0;
+    color: #fff;
+    background: #282A31;
+    font-size: 0.2rem;
+}
 /*提示弹框*/
 .swal2-popup.swal2-toast{
     font-size: 62.5%!important;

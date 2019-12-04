@@ -65,27 +65,27 @@ var bmsrtc = function () {
         });
         $(document).on("click", ".teacherHead .icon03", function(){
             if (_this.room.roomspeak == 1) {
-                _this.room.roomspeak = 0;
+                _this.bmsajax.roomspeak(0);
                 $(this).addClass("current").attr('title', '点击全员上台');
                 _this.bmsim.sendcustom('', '{"users_id":"","nickname":"","type":"ALLSPEAK","text":"0"}');
             } else {
-                _this.room.roomspeak = 1;
+                _this.bmsajax.roomspeak(1);
                 $(this).removeClass("current").attr('title', '点击全员下台');
                 _this.bmsim.sendcustom('', '{"users_id":"","nickname":"","type":"ALLSPEAK","text":"1"}');
             }
-            _this.bmsajax.roomspeak();
+            
         });
         $(document).on("click", ".teacherHead .icon04", function(){
             if (_this.room.roomhand == 1) {
-                _this.room.roomhand = 0;
+                _this.bmsajax.roomhand(0);
                 $(this).addClass("current").attr('title', '点击允许举手');
                 _this.bmsim.sendcustom('', '{"users_id":"","nickname":"","type":"ALLHAND","text":"0"}');
             } else {
-                _this.room.roomhand = 1;
+                _this.bmsajax.roomhand(1);
                 $(this).removeClass("current").attr('title', '点击禁止举手');
                 _this.bmsim.sendcustom('', '{"users_id":"","nickname":"","type":"ALLHAND","text":"1"}');
             }
-            _this.bmsajax.roomhand();
+            
         });
         
         // 邀请上台
@@ -103,9 +103,8 @@ var bmsrtc = function () {
         $(document).on("click", ".studentHead .icon02", function(){
             var users_id = $(this).attr("data-id");
             var nickname = $("#users"+users_id+" .nickname").html();
-            var num = parseInt($(".zannum").html())+1;
+            var num = parseInt($("#users"+users_id+" .zannum").html())+1;
             _this.bmsajax.operatetype(users_id, 'zan');
-            $(".zannum").html(num);
             _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"ZAN","text":"'+num+'"}');
         });
         // 踢出

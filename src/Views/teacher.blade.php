@@ -242,7 +242,7 @@
                                 <div class="ewm">
                                     <img id="code_img" src="{{$course['code_url']}}">
                                     <!-- <button class="load_code">下载二维码</button> -->
-                                    <a id="download_code_img" class="load_code" href="{{$course['code_url']}}" target="_blank">下载二维码</a>
+                                    <a id="download_code_img" class="load_code" href="javascript:;" data-url="{{$course['code_url']}}" title="{{$course['title']}}二维码">下载二维码</a>
                                 </div>
                             </div>
                         </div>

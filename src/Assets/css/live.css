@@ -1451,6 +1451,6 @@ body{
 
 
 /*pc端竖屏样式隐藏*/
-.PortCourse .desc{
+.PortCourse .desc,.dialogClose{
 	display: none;
 }

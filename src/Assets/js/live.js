@@ -27,7 +27,7 @@ function hansUp(){
     },5000)
 }
 
-var  arr = [];
+var arr = [];
 //摄像头弹框
 layui.use(['laypage', 'layer'], function(){
     var $ = layui.jquery, 
@@ -43,7 +43,7 @@ layui.use(['laypage', 'layer'], function(){
         // 获取点击的nickname
         var oTitle = $(this).parents('.headTx').find('.nickname').text();
         console.log(oTitle)
-        //获取父级索引    
+        //获取父级索引
         var Index = $(this).parents('.headTx').index()
         var active = 'active_' + Index
         var length = arr.length
@@ -155,5 +155,23 @@ layui.use('form', function(){
         document.execCommand("Copy");//执行复制
         layer.msg("复制成功！");
     }); 
-    
+    $(document).on("click", "#download_code_img", function(){
+        var _this = $(this);
+        var image = new Image();
+        image.setAttribute('crossOrigin', 'anonymous');
+        image.onload = function () {
+          var canvas = document.createElement('canvas');
+          canvas.width = image.width;
+          canvas.height = image.height;
+          var context = canvas.getContext('2d');
+          context.drawImage(image, 0, 0, image.width, image.height);
+          var url = canvas.toDataURL('image/png'); // 得到图片的base64编码数据
+          var a = document.createElement('a'); // 生成一个a元素
+          var event = new MouseEvent('click'); // 创建一个单击事件
+          a.download = _this.attr('title'); // 设置图片名称
+          a.href = url; // 将生成的URL设置为a.href属性
+          a.dispatchEvent(event); // 触发a的单击事件
+        }
+        image.src = $(this).attr('data-url');
+    }); 
 });

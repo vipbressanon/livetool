@@ -6,8 +6,8 @@
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
 }
-html{width:100%;overflow:hidden;}
-body {width:100%;overflow:hidden;margin:0 auto; height:100%; -webkit-user-select:none;background: #eee!important;font-size: .28rem;}
+html{width:100%;}
+body {width:100%;margin:0 auto;-webkit-user-select:none;background: #eee!important;font-size: .28rem;}
 body>iframe { display: none; }
 html {-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%;/* font-size: 62.5%; */}
 /*html, button, input, select, textarea { font-family: "Microsoft YaHei","Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif; }*/
@@ -74,6 +74,9 @@ body{
 	height: .83rem!important;
 	background: #282A31;
 	border-bottom: 1px solid #4C4E53;
+}
+.gatherContent{
+	display: block!important;
 }
 .gatherBox{
 	width: 100%;
@@ -303,6 +306,7 @@ body{
 .dialog{
 	/*height: 5.89rem;*/
 	position: relative;
+	display: block!important;
 }
 .dialog .relayBox{
 	width: 100%;
@@ -356,11 +360,6 @@ body{
 .swal2-popup.swal2-toast{
 	font-size: 62.5%!important;
 }
-
-
-
-
-
 .swiper-container {
     width: 100%;
     overflow: hidden;
@@ -382,6 +381,8 @@ body{
     -webkit-align-items: center;
     align-items: center;
 }
-.cameraClose{
+
+/*竖屏不显示元素*/
+.cameraClose,.dialogClose{
 	display: none;
 }
