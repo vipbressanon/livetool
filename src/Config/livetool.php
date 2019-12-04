@@ -2,7 +2,7 @@
 return [
     'auth' => 'users',                                      // auth认证
     'domainurl' => 'https://zjclass.xueyoubangedu.com',     // 网站地址
-    'socketurl' => 'http://127.0.0.1:2120',                 // socket地址
+    'socketurl' => 'https://zjclass.xueyoubangedu.com',      // socket地址
     'loginurl' => '/live/login',                            // 登录地址
     'fileurl' => '/course/file/save',                       // 课件上传地址
     'whitenum' => 13,                                       // 白名单人数上限,含讲师
@@ -115,6 +115,7 @@ return [
             'id' => 'id',                                   // 编号
             'course_id' => 'course_id',                     // 课程编号
             'users_id' => 'users_id',                       // 用户编号
+            'type' => 'type',                               // 讲师或学生
             'created_at' => 'created_at',                   // 创建时间
             'updated_at' => 'updated_at'                    // 更新时间
         ]
@@ -140,7 +141,7 @@ return [
         'field' => [                                        // 字段名
             'id' => 'id',                                   // 编号
             'team_id' => 'team_id',                         // 团队编号
-            'top_users_id' => 'top_users_id',               // 超管编号
+            'top_usersid' => 'top_usersid',                 // 超管编号
             'course_id' => 'course_id',                     // 课程编号
             'consume_money' => 'consume_money',             // 消耗的账户余额
             'consume_time' => 'consume_time',               // 消耗的剩余分钟

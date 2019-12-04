@@ -87,7 +87,7 @@ class BalanceServer
                 )
                 ->select(
                     $course['table'].'.'.$course['field']['id'].' as course_id',
-                    $course['table'].'.'.$course['field']['top_users_id'].' as top_users_id',
+                    $course['table'].'.'.$course['field']['top_usersid'].' as top_usersid',
                     $course['table'].'.'.$course['field']['team_id'].' as team_id',
                     $team['table'].'.'.$team['field']['amount_money'].' as amount_money',
                     $team['table'].'.'.$team['field']['amount_time'].' as amount_time',
@@ -162,7 +162,7 @@ class BalanceServer
         } else {
             DB::table($orders['table'])->insert([
                 $orders['field']['team_id'] => $account->team_id,
-                $orders['field']['top_users_id'] => $account->top_users_id,
+                $orders['field']['top_usersid'] => $account->top_usersid,
                 $orders['field']['course_id'] => $account->course_id,
                 $orders['field']['consume_money'] => $money['consume_money'],
                 $orders['field']['consume_time'] => $money['consume'],
