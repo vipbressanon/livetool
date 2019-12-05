@@ -27,8 +27,6 @@ class MsgPush extends Command
     //PHPSocketIO服务
     private static $senderIo = null;
     
-    private $timer_id;
-
     public function __construct()
     {
         parent::__construct();
@@ -97,8 +95,8 @@ class MsgPush extends Command
                     $interval = config('livetool.intervaltime');
                     $balance = new BalanceServer();
                     // 每隔一段时间执行一次结算
-                    $this->timer_id = Timer::add($interval, [$balance, 'handle'], [$course_id], true);
-                    // $this->timer_id = Timer::add(3, function(){var_dump(1);});
+                    $socket->timer_id = Timer::add($interval, [$balance, 'handle'], [$course_id], true);
+                    // $socket->timer_id = Timer::add(3, function(){var_dump(1);});
                 }
             });
             
@@ -120,7 +118,9 @@ class MsgPush extends Command
                 $us = new UsersServer();
                 $us->end($socket->room_id, $socket->users_id);
                 self::onlinenum($socket->room_id, $socket->users_id, 'cut');
-                Timer::del($this->timer_id);
+                if (isset($socket->timer_id)) {
+                    Timer::del($socket->timer_id);
+                }
             });
             
         });
