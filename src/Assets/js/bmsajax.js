@@ -96,10 +96,10 @@ var bmsajax = function () {
             display = '';
         } else {
             local = 'id="'+users.hash_id+'video"';
-            display = 'style="display:none"';
+            display = this.isteacher ? '' : 'style="display:none"';
         }
         if (this.course.teacher_id == users.id) {
-            str += '<div id="users'+users.id+'" class="headTx swiper-slide teacherHead">';
+            str += '<div id="users'+users.id+'" data-index="" class="headTx swiper-slide teacherHead">';
             str += '<div class="txImg">';
             str += '<video poster="'+users.imgurl+'" '+local+' data-teacher="1" autoplay></video>';
             str += '</div>';
@@ -147,13 +147,13 @@ var bmsajax = function () {
                 str += '</div>';
             }
             str += '<div class="teacher-zuidahua">';
-            str += '<span class="iconfont icon-zuidahua" title="最大化"></span>';
+            str += '<span class="iconfont icon-zuidahua" data-id="'+users.id+'" title="最大化"></span>';
             str += '</div>';
             str += '</div>';
             str += '</div>';
             $(".gatherBox").prepend(str);
         } else {
-            str += '<div id="users'+users.id+'" class="headTx swiper-slide studentHead" '+display+'>';
+            str += '<div id="users'+users.id+'" data-index="" class="headTx swiper-slide studentHead" '+display+'>';
             str += '<div class="txImg">';
             str += '<video src="" poster="'+users.imgurl+'" '+local+' data-teacher="0" autoplay></video>';
             str += '</div>';
@@ -180,14 +180,14 @@ var bmsajax = function () {
                 str += '<span class="iconfont icon-dianzan" data-id="'+users.id+'"></span>';
                 str += '</div>';
                 str += '<div class="icon03" data-id="'+users.id+'" title="最大化">';
-                str += '<span class="iconfont icon-zuidahua"></span>';
+                str += '<span class="iconfont icon-zuidahua" data-id="'+users.id+'"></span>';
                 str += '</div>';
                 str += '<div class="icon04" data-id="'+users.id+'" title="退出">';
                 str += '<span class="iconfont icon-tuichu"></span>';
                 str += '</div>';
             } else {
                 str += '<div class="teacher-zuidahua">';
-                str += '<span class="iconfont icon-zuidahua" title="最大化"></span>';
+                str += '<span class="iconfont icon-zuidahua" data-id="'+users.id+'" title="最大化"></span>';
                 str += '</div>';
             }
             str += '</div>';

@@ -33,6 +33,8 @@ var bmsrtc = function () {
 
         $(document).on("click", ".roomtype1", function(){
             if(_this.isenter){
+                $('.roomtype1').addClass("active");
+                $('.roomtype2').removeClass("active");
                 _this.bmsajax.roomtype(1);
                 pushScreen();
                 _this.bmsim.sendcustom('', '{"nickname":"","type":"SHARE","text":""}');
@@ -41,6 +43,8 @@ var bmsrtc = function () {
         
         $(document).on("click", ".roomtype2", function(){
             if(_this.isenter){
+                $('.roomtype1').removeClass("active");
+                $('.roomtype2').addClass("active");
                 _this.bmsajax.roomtype(2);
                 startRTC();
                 _this.bmsim.sendcustom('', '{"nickname":"","type":"BOARD","text":""}');
@@ -162,41 +166,41 @@ var bmsrtc = function () {
                 _this.bmsim.toast("讲师已禁止举手", "error");
             }
         });
-    };
-    
-    var roomtype = function(){
-        if(this.room.roomtype==1){
-            $('.roomtype1').addClass("active");
-            $('.roomtype2').removeClass("active");
-            if (!this.isteacher) {  // 讲师视频最大化
-                
+        
+        // 录制
+        $(document).on("click", ".recordbtn", function(){
+            if ($(this).attr('data-record') == 0) {
+                $(this).attr('data-record', 1);
+                $(this).addClass('recording');
+                $(this).find('label').removeClass('sideIcon5').addClass('sideIcon6');
+                $(this).find('span').html('录制中');
+                _this.bmsajax.roomrecord(1);
+            } else if ($(this).attr('data-record') == 1) {
+                $(this).attr('data-record', 2);
+                $(this).removeClass('recording');
+                $(this).find('label').removeClass('sideIcon6').addClass('sideIcon5');
+                $(this).find('span').html('课程录制');
+                _this.bmsajax.roomrecord(2);
+            } else if ($(this).attr('data-record') == 2) {
+                $(this).attr('data-record', 1);
+                $(this).addClass('recording');
+                $(this).find('label').removeClass('sideIcon5').addClass('sideIcon6');
+                $(this).find('span').html('录制中');
+                _this.bmsajax.roomrecord(1);
             }
-        }else if(this.room.roomtype==2){
-            $('.roomtype1').removeClass("active");
-            $('.roomtype2').addClass("active");
-            if (!this.isteacher) {  // 讲师视频恢复
-                
-            }
-        }
+        });
     };
     
     var start = function(){
         if (this.isteacher) {
             if (this.room.roomtype == 1) {
-                pushScreen();
+                $(".roomtype1").click();
             } else if (this.room.roomtype == 2) {
-                startRTC();
+                $(".roomtype2").click();
             }
         } else {
             startRTC();
         }
-        if (this.room.roomspeak == 1) {
-            
-            this.teduBoard.setDrawEnable(true);
-        } else {
-            this.teduBoard.setDrawEnable(false);
-        }
-        
     };
 
     // 启动推流(推摄像头)
@@ -218,8 +222,8 @@ var bmsrtc = function () {
                     if (!this.isteacher) {
                         this.TRTC.closeAudio();
                     }
+                    this.bmsim.speakstatus('', this.room.roomspeak);
                     this.isstart = true;
-                    roomtype();
                 }, (error) => {
                     console.log('更新流失败');
                 });
@@ -231,8 +235,8 @@ var bmsrtc = function () {
                     if (!this.isteacher) {
                         this.TRTC.closeAudio();
                     }
+                    this.bmsim.speakstatus('', this.room.roomspeak);
                     this.isstart = true;
-                    roomtype();
                 }, (error) => {
                     this.bmsajax.errors(2, '推流失败');
                 });
@@ -264,8 +268,8 @@ var bmsrtc = function () {
                     stream: data.stream
                 }, () => {
                     // 成功
+                    this.bmsim.speakstatus('', this.room.roomspeak);
                     this.isstart = true;
-                    roomtype();
                 }, (error) => {
                     console.log('更新流失败');
                 });
@@ -275,8 +279,8 @@ var bmsrtc = function () {
                     role: 'user'
                 }, (data) => {
                     // 成功
+                    this.bmsim.speakstatus('', this.room.roomspeak);
                     this.isstart = true;
-                    roomtype();
                 }, (error) => {
                     console.log('推流失败');
                 });

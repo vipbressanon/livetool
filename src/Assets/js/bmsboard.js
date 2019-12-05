@@ -20,8 +20,13 @@ var bmsboard = function () {
             console.log('======================:  ', 'TEB_SYNCDATA');
         });
         this.teduBoard.on(TEduBoard.EVENT.TEB_INIT, () => {
-            $("#edu-toolbar-box").show();
-            this.bmsim.speakstatus('', this.room.roomspeak);
+            if (this.isteacher || this.room.roomspeak == 1) {
+                $("#edu-toolbar-box").show();
+                this.teduBoard.setDrawEnable(true);
+            } else {
+                $("#edu-toolbar-box").hide();
+                this.teduBoard.setDrawEnable(false);
+            }
             console.log('======================:  ', 'TEB_INIT');
         });
         this.teduBoard.on(TEduBoard.EVENT.TEB_ERROR, (code, msg) => {
@@ -268,6 +273,7 @@ var bmsboard = function () {
         $(document).on("click",".filebtn",function(){
             var id = $(this).attr("data-id");
             $("#file"+id).show();
+            $(".boardTab li:eq("+id+")").click();
         });
         
         $(document).on("click",".delbtn",function(){
@@ -308,7 +314,7 @@ var bmsboard = function () {
         
         $(document).on("click",".boardTab i",function(){
             $(this).parent('li').hide();
-            switchFile('#DEFAULT');
+            $(".boardTab li:eq(0)").click();
             return false;
         });
     };

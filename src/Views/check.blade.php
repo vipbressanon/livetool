@@ -122,9 +122,8 @@
     </div>
 </body>
 </html>
-<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 <script src="/vendor/livetool/js/check.js"></script>
-<script>check.init()</script>
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 <script src="https://sqimg.qq.com/expert_qq/webrtc/3.4.2/WebRTCAPI.min.js"></script>
 <script src="/vendor/livetool/js/jquery.min.js"></script>
 <script src="/vendor/livetool/layui/layui.js"></script>
@@ -141,3 +140,4 @@ layui.use(['layer','jquery','form'], function(){
     });
 });
 </script>
+<script>check.init()</script>

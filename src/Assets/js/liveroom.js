@@ -117,27 +117,6 @@ var liveroom = function () {
                 });
         	}
         });
-        $(document).on("click", ".recordbtn", function(){
-            if ($(this).attr('data-record') == 0) {
-                $(this).attr('data-record', 1);
-                $(this).addClass('recording');
-                $(this).find('label').removeClass('sideIcon5').addClass('sideIcon6');
-                $(this).find('span').html('录制中');
-                _this.bmsajax.roomrecord(1);
-            } else if ($(this).attr('data-record') == 1) {
-                $(this).attr('data-record', 2);
-                $(this).removeClass('recording');
-                $(this).find('label').removeClass('sideIcon6').addClass('sideIcon5');
-                $(this).find('span').html('课程录制');
-                _this.bmsajax.roomrecord(2);
-            } else if ($(this).attr('data-record') == 2) {
-                $(this).attr('data-record', 1);
-                $(this).addClass('recording');
-                $(this).find('label').removeClass('sideIcon5').addClass('sideIcon6');
-                $(this).find('span').html('录制中');
-                _this.bmsajax.roomrecord(1);
-            }
-        });
     };
     
     //步骤-》1.登录-》2.点击开始直播创建课堂-》3.加入课堂-》4.邀请其他人进入房间-》5.点击下课直播结束
@@ -184,7 +163,6 @@ var liveroom = function () {
                         data: {
                             course_id: _this.course.id,
                             users_id: _this.users.id,
-                            isteacher: _this.isteacher,
                             word: result.value,
                             _token: $("#_token").val()
                         },

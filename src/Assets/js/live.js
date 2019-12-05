@@ -34,9 +34,16 @@ layui.use(['laypage', 'layer'], function(){
     layer = layui.layer,
     laypage = layui.laypage;
     $(document).on('click', '.icon-zuidahua', function() {
+        var id = $(this).attr('data-id');
         //获取到当前点击的摄像头
         var $this = $(this);
-        var oDiv = $(this).parents('.headTx').find('.txImg')
+        var oDiv = $(this).parents('.headTx').find('.txImg');
+        if ($('#zuida'+id).length == 0) {
+            var div = $("<div>");
+            div.attr('id','zuida'+id);
+            $("body").append(div);
+            div.append(oDiv);
+        }
         // 背景头像
         var headImg = oDiv.find('video').attr('poster')
         $(this).parents('.headTx').css("background-image","url("+headImg+")");
@@ -48,15 +55,15 @@ layui.use(['laypage', 'layer'], function(){
         var active = 'active_' + Index
         var length = arr.length
         //设置最大化弹框的尺寸
-        var areaWidth = $('.middle').width()/3
-        var areaHeight = areaWidth*1.5
+        var areaWidth = $('.middle').width()
+        var areaHeight = $('.middle').height()
         //设置弹框的坐标
         var middleTop = $('.middle').offset().top;
         var middleLeft = $('.middle').offset().left;
         var offsetTop;
         var offsetLeft;
         if(length <= 2){
-            offsetTop = middleTop
+            offsetTop = middleTop - 42
             offsetLeft = middleLeft+length*areaWidth
         }else if(length >= 3 && length <= 5){
             offsetTop = middleTop + $('.middle').height()/6
@@ -70,25 +77,32 @@ layui.use(['laypage', 'layer'], function(){
         }
 
         if(arr.includes(active)){
-            layer.msg('摄像头已经最大化了哦');
+            arr.splice($.inArray(active,arr),1);
+            $(this).parents('.headTx').prepend($('#zuida'+id).find('.txImg'));
+            layer.close($(this).parents('.headTx').attr('data-index'));
+            $('#zuida'+id).remove();
+            $("#layui-layer"+$this.parents('.headTx').attr('data-index')).remove();
         }else{
-            arr.push(active)
+            arr.push(active);
             // var video = document.getElementById('teachervideo').srcObject;
-            layer.open({
+            var layindex = layer.open({
                 type: 1,
                 title: oTitle,
-                area: [areaWidth+'px', ''],
+                area: [areaWidth+'px', areaHeight+'px'],
                 shade: 0,
                 offset: [offsetTop,offsetLeft],
-                content: oDiv,
+                content: $('#zuida'+id),
                 cancel: function(){
-                    layer.close()
                     arr.splice($.inArray(active,arr),1);
-                    $this.parents('.headTx').prepend(oDiv);
-                    $this.parents('.headTx').css("background","#000");
+                    $this.parents('.headTx').prepend($('#zuida'+id).find('.txImg'));
+                    layer.close($this.parents('.headTx').attr('data-index'));
+                    $('#zuida'+id).remove();
+                    $("#layui-layer"+$this.parents('.headTx').attr('data-index')).remove();
                 }
             });
+            $(this).parents('.headTx').attr('data-index', layindex);
         }
+        return false;
     });
     // laypage.render({
     //     elem: 'page',

@@ -39,7 +39,6 @@ var bmstic = function () {
                 this.isenter = true;
                 // 白板初始化
                 this.teduBoard = this.tic.getBoardInstance();
-                this.teduBoard.setDrawEnable(false);
                 this.bmsboard.init();
                 // 直播流初始化
                 this.TRTC = this.tic.getWebRTCInstance();
@@ -64,7 +63,7 @@ var bmstic = function () {
                 this.bmsajax.errors(5, res.desc);
             } else {
                 this.bmsim.toast('退出课堂成功');
-                
+                this.course.status = 2;
                 this.tic.logout((res) => {
                     console.log(res);
                 });

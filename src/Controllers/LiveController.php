@@ -214,18 +214,22 @@ class LiveController extends Controller
     {
         $course_id = $request->input('course_id');
         $users_id = $request->input('users_id');
-        $isteacher = $request->input('isteacher');
         $word = $request->input('word');
         $cs = new CourseServer();
+        $checkword = $cs->checkword($course_id, $word);
+        if (!$checkword) {
+            return response()->json(['error'=>'口令不正确，请重新输入']);
+        }
         $wordnum = $cs->whitenum($course_id);
         if (!$wordnum) {
             return response()->json(['error'=>'房间人数已达上限，无法进入']);
         }
-        $teachernum = $cs->teachernum($course_id, $users_id);
+        
+        $teachernum = $cs->teachernum($course_id, $users_id, $checkword->type);
         if (!$teachernum) {
             return response()->json(['error'=>'已经有老师进入课堂，请核对信息']);
         }
-        $res = $cs->word($course_id, $users_id, $isteacher, $word);
+        $res = $cs->word($course_id, $users_id, $word, $checkword->type);
         if ($res) {
             return response()->json(['error'=>'']);
         } else {

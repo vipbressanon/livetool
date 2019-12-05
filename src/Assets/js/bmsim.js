@@ -68,9 +68,15 @@ var bmsim = function () {
                     }
                 } else if (json.type == 'BOARD') {  //白板模式
                     this.room.roomtype = 2;
+                    if($('#zuida'+this.course.teacher_id).length > 0) {
+                        $('.teacherHead .icon-zuidahua').click();
+                    }
                     showToast('讲师切换为白板教学模式');
                 } else if (json.type == 'SHARE') { //屏幕分享模式
                     this.room.roomtype = 1;
+                    if($('#zuida'+this.course.teacher_id).length == 0) {
+                        $('.teacherHead .icon-zuidahua').click();
+                    }
                     showToast('讲师切换为屏幕共享模式');
                 } else if (json.type == 'CHAT') {  //禁止，解除聊天
                     if (json.text == '1') {
@@ -227,8 +233,8 @@ var bmsim = function () {
                         console.log('===sendTextMessage:', res);
                     });
                 } else { // 群组 文本
-                    if(!_this.isenter){
-                        showToast('上课之前无法发送消息', 'error');
+                    if(_this.course.status == 2){
+                        showToast('已下课无法发送消息', 'error');
                         return;
                     }
                     _this.tic.sendGroupCustomMessage(data, function (res) {
