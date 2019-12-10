@@ -5,7 +5,6 @@ return [
     'socketurl' => 'https://zjclass.xueyoubangedu.com',      // socket地址
     'loginurl' => '/live/login',                            // 登录地址
     'fileurl' => '/course/file/save',                       // 课件上传地址
-    'whitenum' => 13,                                       // 白名单人数上限,含讲师
     'intervaltime' => 1800,                                 // 结算的间隔时间,单位秒
     'fee' => -200,                                          // 欠费达到指定金额,停止直播,单位元
     'error_status' => true,                                 // 是否记录错误信息
@@ -100,33 +99,17 @@ return [
             'type' => 'type'                                // 讲师或学生
         ]
     ],
-    'course_word' => [                                      // 课程口令表
-        'table' => 'course_word',                           // 表名称
-        'field' => [                                        // 字段名
-            'id' => 'id',                                   // 编号
-            'course_id' => 'course_id',                     // 课程编号
-            'word' => 'word',                               // 口令内容
-            'type' => 'type'                                // 讲师或学生
-        ]
-    ],
-    'course_word_white' => [                                // 课程口令白名单表
-        'table' => 'course_word_white',                     // 表名称
-        'field' => [                                        // 字段名
-            'id' => 'id',                                   // 编号
-            'course_id' => 'course_id',                     // 课程编号
-            'users_id' => 'users_id',                       // 用户编号
-            'type' => 'type',                               // 讲师或学生
-            'created_at' => 'created_at',                   // 创建时间
-            'updated_at' => 'updated_at'                    // 更新时间
-        ]
-    ],
     'team' => [                                             // 团队表
         'table' => 'team',                                  // 表名称
         'field' => [                                        // 字段名
             'id' => 'id',                                   // 编号
             'amount_money' => 'amount_money',               // 账户余额
             'amount_time' => 'amount_time',                 // 剩余分钟数
-            'cash_id' => 'cash_id'                          // 收费套餐编号
+            'amount_play' => 'amount_play',                 // 剩余点播流量（M）
+            'amount_space' => 'amount_space',               // 使用存储空间（M）
+            'cash_id' => 'cash_id',                         // 收费套餐编号
+            'created_at' => 'created_at',                   // 创建时间
+            'updated_at' => 'updated_at'                    // 更新时间
         ]
     ],
     'cash_desc' => [                                        // 收费单价表
