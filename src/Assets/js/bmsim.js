@@ -57,9 +57,9 @@ var bmsim = function () {
                     }
                 } else if (json.type == 'TEXT') {
                     if (this.course.teacher_id == json.users_id) {
-                        $('.discussList').append("<li class='yellow'><p><i>" + json.nickname + "</i>" + json.text + "</p></li>");
+                        $('.discussList').append("<li class='yellow'><p><i>" + json.nickname +":" + "</i>" + json.text + "</p></li>");
                     } else {
-                       $('.discussList').append("<li><p><i>" + json.nickname + "</i>" + json.text + "</p></li>"); 
+                       $('.discussList').append("<li><p><i>" + json.nickname + ":" + "</i>" + json.text + "</p></li>"); 
                     }
                     if (this.ischat) {
                         $(".discussBtn .redDot").hide();
@@ -68,13 +68,13 @@ var bmsim = function () {
                     }
                 } else if (json.type == 'BOARD') {  //白板模式
                     this.room.roomtype = 2;
-                    if($('#zuida'+this.course.teacher_id).length > 0) {
+                    if($('#zuida'+this.course.teacher_id).length > 0 && !this.isteacher) {
                         $('.teacherHead .icon-zuidahua').click();
                     }
                     showToast('讲师切换为白板教学模式');
                 } else if (json.type == 'SHARE') { //屏幕分享模式
                     this.room.roomtype = 1;
-                    if($('#zuida'+this.course.teacher_id).length == 0) {
+                    if($('#zuida'+this.course.teacher_id).length == 0 && !this.isteacher) {
                         $('.teacherHead .icon-zuidahua').click();
                     }
                     showToast('讲师切换为屏幕共享模式');

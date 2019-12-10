@@ -9,10 +9,19 @@ layui.use('layer', function(){
         layer.msg('请在手机设置里开启允许横屏模式')
     })
 });
-//点击显示摄像头
-$(document).on("click", ".cameraBtn", function(){
-    $('.gatherContent,.cameraClose').show();
-});
-$(document).on("click", ".cameraClose", function(){
-    $('.gatherContent,.cameraClose').hide();
-});
+
+
+//点击显示隐藏摄像头
+$('.cameraBtn').click(function(){
+	$('.gatherContent,.cameraClose').show();
+})
+$('.cameraClose').click(function(){
+	$('.gatherContent,.cameraClose').hide();
+})
+//点击显示隐藏讨论区
+$('.discussBtn').click(function(){
+	$('.dialog').show();
+})
+$('.dialogClose').click(function(){
+	$('.dialog').hide();
+})

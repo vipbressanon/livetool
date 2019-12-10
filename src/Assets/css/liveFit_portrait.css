@@ -248,7 +248,15 @@ body{
 }
 .PortCourse .desc .row1{
 	font-size: .3rem;
-	color: #333;
+    color: #333;
+    width: 91%;
+    height: 0.5rem;
+    line-height: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 .PortCourse .desc .row1 span{
 	display: inline-block;
@@ -336,6 +344,7 @@ body{
 	margin-right: .22rem;
 }
 .dialog .relayBox textarea{
+	float: left;
 	width: 6.4rem;
 	height: .72rem;
 	padding: .15rem .2rem;
@@ -343,6 +352,7 @@ body{
 	resize:none;
 }
 .dialog .relayBox .send{
+	float: right;
 	width: .42rem;
 	height: .42rem;
 	background: url(../images/send.png) no-repeat;
@@ -383,6 +393,6 @@ body{
 }
 
 /*竖屏不显示元素*/
-.cameraClose,.dialogClose{
-	display: none;
+.cameraClose,.dialogClose,.cameraClose{
+	display: none!important;
 }

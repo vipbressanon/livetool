@@ -79,7 +79,9 @@ layui.use(['laypage', 'layer'], function(){
         if(arr.includes(active)){
             arr.splice($.inArray(active,arr),1);
             $(this).parents('.headTx').prepend($('#zuida'+id).find('.txImg'));
-            layer.close($(this).parents('.headTx').attr('data-index'));
+            layer.close(
+                $(this).parents('.headTx').attr('data-index').css("background","#000")
+            );
             $('#zuida'+id).remove();
             $("#layui-layer"+$this.parents('.headTx').attr('data-index')).remove();
         }else{
@@ -95,7 +97,7 @@ layui.use(['laypage', 'layer'], function(){
                 cancel: function(){
                     arr.splice($.inArray(active,arr),1);
                     $this.parents('.headTx').prepend($('#zuida'+id).find('.txImg'));
-                    layer.close($this.parents('.headTx').attr('data-index'));
+                    layer.close($this.parents('.headTx').attr('data-index').css("background","#000"));
                     $('#zuida'+id).remove();
                     $("#layui-layer"+$this.parents('.headTx').attr('data-index')).remove();
                 }

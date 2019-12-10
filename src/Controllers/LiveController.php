@@ -11,7 +11,7 @@ use Vipbressanon\LiveTool\Servers\CourseServer;
 use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
 use Vipbressanon\LiveTool\Servers\RecordServer;
-
+use Vipbressanon\LiveTool\Servers\BalanceServer;
 class LiveController extends Controller
 {
     // 进入直播间
@@ -51,6 +51,10 @@ class LiveController extends Controller
             $balance = $cs->balance($course['team_id']);
             // 判断是否有权限进入
             $role = $this->role($course, $black, $iswhite, $balance);
+            if ($role[0] == 203) {
+                $url = config('livetool.loginurl');
+                return redirect($url.'/'.$hash_id);
+            }
             return view($view)
                     ->with('course', $course)
                     ->with('room', $room)
@@ -209,34 +213,6 @@ class LiveController extends Controller
         return response()->json(['error'=>'']);
     }
     
-    // 验证课堂口令
-    public function postRoomWord(Request $request)
-    {
-        $course_id = $request->input('course_id');
-        $users_id = $request->input('users_id');
-        $word = $request->input('word');
-        $cs = new CourseServer();
-        $checkword = $cs->checkword($course_id, $word);
-        if (!$checkword) {
-            return response()->json(['error'=>'口令不正确，请重新输入']);
-        }
-        $wordnum = $cs->whitenum($course_id);
-        if (!$wordnum) {
-            return response()->json(['error'=>'房间人数已达上限，无法进入']);
-        }
-        
-        $teachernum = $cs->teachernum($course_id, $users_id, $checkword->type);
-        if (!$teachernum) {
-            return response()->json(['error'=>'已经有老师进入课堂，请核对信息']);
-        }
-        $res = $cs->word($course_id, $users_id, $word, $checkword->type);
-        if ($res) {
-            return response()->json(['error'=>'']);
-        } else {
-            return response()->json(['error'=>'口令不正确，请重新输入']);
-        }
-    }
-    
     public function getBrowser(Request $request)
     {
         return view('livetool::browser');
@@ -263,8 +239,6 @@ class LiveController extends Controller
                 $data = [204, '讲师账户余额不足'];
             } elseif ($black) {
                 $data = [201, '被讲师踢出'];
-            } elseif (!$iswhite && $course['invite_type'] == 0) {
-                return [201, '无法进入直播间'];
             } else {
                 $data = [200, '正常进入'];
             }

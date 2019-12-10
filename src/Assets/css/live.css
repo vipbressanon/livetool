@@ -6,7 +6,6 @@
     -webkit-box-sizing: border-box;
 }
 body {
-    min-width: 1366px;
     font-size: 14px;
     color: #333;
     font-family: "Poppins", sans-serif;
@@ -276,13 +275,19 @@ body{
 	color: #fff;
 }
 .gatherBox .studentTag .name{
-	width: 65%;
+	width: 60%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 11px;
 }
 .gatherBox .teacherTag .nikename{
 	color: #fff;
+}
+.gatherBox .studentTag .zanNum{
+	width: 40%;
+	font-size: 12px;
+	text-align: right;
 }
 .headTx:hover .handle{
 	display: flex;
@@ -304,7 +309,7 @@ body{
 .gatherBox .headTx .studentTag .zanNum img{
 	position: relative;
 	top: -1px;
-	margin-right: 7px;
+	margin-right: 5%;
 }
 .handle{
 	display: none;
@@ -1144,9 +1149,6 @@ body{
 }
 .discussList li{
 	margin-bottom: 15px;
-}
-.discussList li p i:after{
-	content: '：';
 }
 .discussList .yellow{
 	color: #FF9900;

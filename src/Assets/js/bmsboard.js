@@ -301,7 +301,7 @@ var bmsboard = function () {
                     data: file,
                 }, (total, data) => {
                 }, (err) => {
-                    _this.bmsim.toast('文件加载失败，请重试');
+                    _this.bmsim.toast('文件加载失败，请重试', 'error');
                 });
                 _this.bmsajax.addfile(file);
             }

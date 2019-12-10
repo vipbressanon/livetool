@@ -10,13 +10,13 @@ class BalanceServer
     {
     }
 
-    public function handle($course_id)
+    public function handle($course_id, $room_id)
     {
-        $over = false;
         // 统计耗时
         $consume = $this->consume($course_id);
-        // 保存结算时间
-        $this->balance($course_id, $consume->now);
+        if ($consume->total == 0) {
+            return;
+        }
         // 获取团队账户余额
         $account = $this->getmoney($course_id);
         // 消耗的分钟数
@@ -27,6 +27,16 @@ class BalanceServer
         $this->orders($account, $money, $consume->now);
         
         $this->orderslog($account, $money, $consume->now);
+        // 保存结算时间
+        $this->balance($course_id, $consume->now);
+        
+        if ($money['over']) {
+            $domainurl = config('livetool.domainurl');
+            $this->sendRequest($domainurl.':2121/type=feeover&to='.$room_id);
+        } elseif ($money['owe']) {
+            $domainurl = config('livetool.domainurl');
+            $this->sendRequest($domainurl.':2121/type=feeowe&to='.$room_id);
+        }
     }
     
     // 当前时间课程内成员耗时情况
@@ -103,6 +113,7 @@ class BalanceServer
     private function setmoney($account, $now, $mins)
     {
         $over = false;
+        $owe = false;
         $consume_money = 0;
         $consume = 0;
         // 账户剩余分钟数大于等于消耗的分钟数
@@ -124,6 +135,10 @@ class BalanceServer
             if ($amount_money <= config('livetool.fee')) {
                 $over = true;
             }
+            // 欠费提醒
+            if ($amount_money <= 0) {
+                $owe = true;
+            }
         }
         $team = config('livetool.team');
         $tres = DB::table($team['table'])
@@ -140,7 +155,8 @@ class BalanceServer
             'consume_z' => $mins,
             'amount_money' => $amount_money,
             'amount_time' => $amount_time,
-            'over' => $over
+            'over' => $over,
+            'owe' => $owe
         ];
     }
     
@@ -192,5 +208,28 @@ class BalanceServer
             $orders_log['field']['created_at'] => $now,
             $orders_log['field']['updated_at'] => $now
         ]);
+    }
+    
+    public function sendRequest($url, $option = array(), $header = array(), $type = 'POST') {
+        $curl = curl_init (); // 启动一个CURL会话
+        curl_setopt ( $curl, CURLOPT_URL, $url ); // 要访问的地址
+        curl_setopt ( $curl, CURLOPT_SSL_VERIFYPEER, FALSE ); // 对认证证书来源的检查
+        curl_setopt ( $curl, CURLOPT_SSL_VERIFYHOST, FALSE ); // 从证书中检查SSL加密算法是否存在
+        curl_setopt ( $curl, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)' ); // 模拟用户使用的浏览器
+        if(!empty($option)){
+            $options = json_encode ( $option );
+            curl_setopt ( $curl, CURLOPT_POSTFIELDS, $options ); // Post提交的数据包
+        }
+        if(empty($header)){
+            $header = array('Content-Type: application/json');
+        }
+        curl_setopt ( $curl, CURLOPT_TIMEOUT, 30 ); // 设置超时限制防止死循环
+        curl_setopt ( $curl, CURLOPT_HTTPHEADER, $header ); // 设置HTTP头
+        curl_setopt ( $curl, CURLOPT_RETURNTRANSFER, 1 ); // 获取的信息以文件流的形式返回
+        curl_setopt ( $curl, CURLOPT_CUSTOMREQUEST, $type );
+        $result = curl_exec ( $curl ); // 执行操作
+        $result = json_decode($result);
+        curl_close ( $curl ); // 关闭CURL会话
+        return $result;
     }
 }

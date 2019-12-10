@@ -106,65 +106,6 @@ class CourseServer
         return $res ? 1 : 0;
     }
     
-    public function checkword($course_id, $word)
-    {
-        $cw = config('livetool.course_word');
-        $res = DB::table($cw['table'])
-                ->select($cw['field']['type'].' as type')
-                ->where($cw['field']['course_id'], $course_id)
-                ->where($cw['field']['word'], $word)
-                ->first();
-        return $res;
-    }
-    
-    public function whitenum($course_id)
-    {
-        $cww = config('livetool.course_word_white');
-        $whitenum = config('livetool.whitenum');
-        $count = DB::table($cww['table'])
-                ->where($cww['field']['course_id'], $course_id)
-                ->count();
-        return $count < $whitenum ? true : false;
-    }
-    
-    public function teachernum($course_id, $users_id, $type)
-    {
-        if ($type == 2) {
-            $cww = config('livetool.course_word_white');
-            $count = DB::table($cww['table'])
-                    ->where($cww['field']['course_id'], $course_id)
-                    ->where($cww['field']['type'], 2)
-                    ->where($cww['field']['users_id'], '<>', $users_id)
-                    ->count();
-            return $count == 0 ? true : false;
-        } else {
-            return true;
-        }
-    }
-    
-    public function word($course_id, $users_id, $word, $type)
-    {
-        $now = date('Y-m-d H:i:s');
-        $cww = config('livetool.course_word_white');
-        $res = DB::table($cww['table'])->insert([
-            $cww['field']['course_id'] => $course_id,
-            $cww['field']['users_id'] => $users_id,
-            $cww['field']['type'] => $type,
-            $cww['field']['created_at'] => $now,
-            $cww['field']['updated_at'] => $now
-        ]);
-        if ($type == 2) {
-            $course = config('livetool.course');
-            DB::table($course['table'])
-                ->where($course['field']['id'], $course_id)
-                ->update([
-                    $course['field']['teacher_id'] => $users_id,
-                    $course['field']['updated_at'] => $now
-                ]);
-        }
-        return true;
-    }
-    
     public function balance($team_id)
     {
         $team = config('livetool.team');

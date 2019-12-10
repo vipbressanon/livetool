@@ -83,6 +83,9 @@ class RoomServer
                     $course['field']['status'] => 2,
                     $course['field']['updated_at'] => $now
                 ]);
+            $room = Room::find($room_id);
+            $room->roomrecord = 3;
+            $room->save();
             $api = new ApiServer();
             $api->roomend($room_id, $now);
             $api->recordend($room_id);

@@ -19,6 +19,7 @@ var liveroom = function () {
         this.isstart = false;   //推流开始状态
         this.isspeak = false;   //是否在台上
         this.socket = null;
+        this.loading = false;   //加载中
         
         this.tic = new TIC({});
         this.tic.init(this.users.sdkappid, res => {
@@ -32,7 +33,7 @@ var liveroom = function () {
             userSig: this.users.usersig
         }, (res) => {
             if (res.code) {
-                this.bmsim.toast('登录失败');
+                this.bmsim.toast('登录失败', 'error');
                 this.islogin = false;
             } else {
                 this.islogin = true;
@@ -73,6 +74,17 @@ var liveroom = function () {
         this.socket.on('over', function () {
             _this.bmstic.quit();
             _this.socket.close();
+        });
+        // 欠费终止上课
+        this.socket.on('feeover', function () {
+            _this.bmsim.toast('已欠费达上限终止上课', 'error');
+            location.reload();
+        });
+        // 欠费提醒
+        this.socket.on('feeowe', function () {
+            if (_this.isteacher) {
+                _this.bmsim.toast('已欠费请及时充值', 'error');
+            }
         });
     };
     
@@ -130,54 +142,21 @@ var liveroom = function () {
         this.tic = null;
         
         var isChrome;
-        if(isChrome == window.google && window.chrome){
-            console.log('谷歌');
-        } else{
-            location = '/livetool/browser';
+        if(navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i)){
+            console.log('当前设备：移动端')
+        }else {
+            console.log('当前设备：pc')
+            if(isChrome == window.google && window.chrome){
+                console.log('谷歌'); 
+            } else{
+                location = '/livetool/browser';
+            }
         }
         
-        if (this.role[0] == 200 || this.role[0] == 202 || this.role[0] == 204) {
+        if (this.role[0] == 200 || this.role[0] == 202) {
             initData();
         }
         
-        var _this = this;
-        $(document).on("click", "#courseword", function(){
-            swal.fire({   
-                title: "请输入口令",   
-                input: 'text',
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                confirmButtonText: "确定",
-                showLoaderOnConfirm: true
-            }).then((result) => {
-                if (result.value == '') {
-                    _this.bmsim.toast("请输入口令", 'error');
-                } else {
-                    $.ajax({
-                        type: "post",
-                        url: "/livetool/room/word",
-                        dataType: 'json',
-                        data: {
-                            course_id: _this.course.id,
-                            users_id: _this.users.id,
-                            word: result.value,
-                            _token: $("#_token").val()
-                        },
-                        success: function(json){
-                            if(json.error){
-                                _this.bmsim.toast(json.error, 'error');
-                            } else {
-                                _this.bmsim.toast('口令输入正确');
-                                location.reload();
-                            }
-                        }
-                    });
-                }
-            });
-        });
     };
     
     return {

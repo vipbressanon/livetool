@@ -94,22 +94,32 @@ var bmsrtc = function () {
         
         // 邀请上台
         $(document).on("click", ".studentHead .icon01", function(){
-            var users_id = $(this).attr("data-id");
-            var nickname = $("#users"+users_id+" .nickname").html();
-            if ($(this).hasClass("current")) {
-                _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"NOSPEAK","text":""}');
+            if (_this.loading) {
+                _this.bmsim.toast("点击太快，请慢一点", "error");
             } else {
-                _this.bmsajax.operatetype(users_id, 'speak');
-                _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"SPEAK","text":"1"}');
+                _this.loading = true;
+                var users_id = $(this).attr("data-id");
+                var nickname = $("#users"+users_id+" .nickname").html();
+                if ($(this).hasClass("current")) {
+                    _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"NOSPEAK","text":""}');
+                } else {
+                    _this.bmsajax.operatetype(users_id, 'speak');
+                    _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"SPEAK","text":"1"}');
+                }
             }
         });
         // 点赞
         $(document).on("click", ".studentHead .icon02", function(){
-            var users_id = $(this).attr("data-id");
-            var nickname = $("#users"+users_id+" .nickname").html();
-            var num = parseInt($("#users"+users_id+" .zannum").html())+1;
-            _this.bmsajax.operatetype(users_id, 'zan');
-            _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"ZAN","text":"'+num+'"}');
+            if (_this.loading) {
+                _this.bmsim.toast("点击太快，请慢一点", "error");
+            } else {
+                _this.loading = true;
+                var users_id = $(this).attr("data-id");
+                var nickname = $("#users"+users_id+" .nickname").html();
+                var num = parseInt($("#users"+users_id+" .zannum").html())+1;
+                _this.bmsajax.operatetype(users_id, 'zan');
+                _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"ZAN","text":"'+num+'"}');
+            }
         });
         // 踢出
         $(document).on("click", ".studentHead .icon04", function(){
@@ -131,39 +141,49 @@ var bmsrtc = function () {
         });
         
         $(document).on("click", ".studentHead .hands", function(){
-            var users_id = $(this).attr("data-id");
-            var nickname = $("#users"+users_id+" .nickname").html();
-            var that = $(this);
-            swal.fire({   
-                title: "提示",   
-                text: "是否允许 "+nickname+" 上台吗？",   
-                icon: "warning",
-                confirmButtonText: "允许",
-                cancelButtonText: "拒绝",
-                showCancelButton: true
-            }).then((result) => {
-                if (result.value) {
-                    _this.bmsajax.operatetype(users_id, 'speak');
-                    _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"SPEAK","text":"2"}');
-                }
-                that.hide();
-            });
+            if (_this.loading) {
+                _this.bmsim.toast("点击太快，请慢一点", "error");
+            } else {
+                _this.loading = true;
+                var users_id = $(this).attr("data-id");
+                var nickname = $("#users"+users_id+" .nickname").html();
+                var that = $(this);
+                swal.fire({   
+                    title: "提示",   
+                    text: "是否允许 "+nickname+" 上台吗？",   
+                    icon: "warning",
+                    confirmButtonText: "允许",
+                    cancelButtonText: "拒绝",
+                    showCancelButton: true
+                }).then((result) => {
+                    if (result.value) {
+                        _this.bmsajax.operatetype(users_id, 'speak');
+                        _this.bmsim.sendcustom('', '{"users_id":"'+users_id+'","nickname":"'+nickname+'","type":"SPEAK","text":"2"}');
+                    }
+                    that.hide();
+                });
+            }
         });
         
         
         // 举手次数
         $(document).on("click", ".handBtn", function(){
-            if (_this.room.roomhand) {
-                if (_this.isspeak) {
-                    _this.bmsim.toast("已经在台上不用举手了", "error");
-                } else {
-                    _this.bmsim.toast("已向讲师举手，请稍候");
-                    _this.bmsajax.operatetype(_this.users.id, 'hand');
-                    _this.bmsim.sendcustom('', '{"users_id":"'+_this.users.id+'","nickname":"'+_this.users.nickname+'","type":"HAND","text":""}');
-                }
-                
+            if (_this.loading) {
+                _this.bmsim.toast("点击太快，请慢一点", "error");
             } else {
-                _this.bmsim.toast("讲师已禁止举手", "error");
+                _this.loading = true;
+                if (_this.room.roomhand) {
+                    if (_this.isspeak) {
+                        _this.bmsim.toast("已经在台上不用举手了", "error");
+                    } else {
+                        _this.bmsim.toast("已向讲师举手，请稍候");
+                        _this.bmsajax.operatetype(_this.users.id, 'hand');
+                        _this.bmsim.sendcustom('', '{"users_id":"'+_this.users.id+'","nickname":"'+_this.users.nickname+'","type":"HAND","text":""}');
+                    }
+                    
+                } else {
+                    _this.bmsim.toast("讲师已禁止举手", "error");
+                }
             }
         });
         

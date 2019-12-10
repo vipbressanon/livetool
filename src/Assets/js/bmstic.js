@@ -5,7 +5,7 @@ var bmstic = function () {
     var createroom = function(){
         this.tic.createClassroom(this.room.hash_id, (res) => {
             if (res.code) {
-                this.bmsim.toast('创建课堂失败');
+                this.bmsim.toast('创建课堂失败', 'error');
                 this.bmsajax.errors(4, res.desc);
                 if (res.code == 10021 && this.isteacher) {    //课堂已存在，直接进入课堂
                     this.socket.emit('create');
@@ -30,7 +30,7 @@ var bmstic = function () {
             boardContentFitMode: 1
         }, res => {
             if (res.code) {
-                this.bmsim.toast('加入课堂失败');
+                this.bmsim.toast('加入课堂失败', 'error');
                 this.bmsajax.errors(3, res.desc);
             } else {
                 this.bmsim.toast('加入课堂成功');
@@ -59,17 +59,18 @@ var bmstic = function () {
     var quitroom = function(){
         this.tic.quitClassroom(res => {
             if (res.code) {
-                this.bmsim.toast('退出课堂失败');
+                this.bmsim.toast('退出课堂失败', 'error');
                 this.bmsajax.errors(5, res.desc);
             } else {
                 this.bmsim.toast('退出课堂成功');
-                this.course.status = 2;
-                this.tic.logout((res) => {
-                    console.log(res);
-                });
-                clearTimeout(this.timeadd);
-                $(".online").html("0");
-                $(".status").html('<a class="tag end" href="javascript:;">已下课</a>').show();
+                location.reload();
+                // this.course.status = 2;
+                // this.tic.logout((res) => {
+                //     console.log(res);
+                // });
+                // clearTimeout(this.timeadd);
+                // $(".online").html("0");
+                // $(".status").html('<a class="tag end" href="javascript:;">已下课</a>').show();
             }
         });
     };
@@ -78,17 +79,17 @@ var bmstic = function () {
     var kickroom = function(){
         this.tic.quitClassroom(res => {
             if (res.code) {
-                this.bmsim.toast('退出课堂失败');
+                this.bmsim.toast('退出课堂失败', 'error');
                 this.bmsajax.errors(6, res.desc);
             } else {
                 this.bmsim.toast('您已被讲师踢出课堂');
-                
-                this.tic.logout((res) => {
-                    console.log(res);
-                });
-                clearTimeout(this.timeadd);
-                $(".online").html("0");
-                $(".status").html('<a class="tag end" href="javascript:;">被讲师踢出</a>').show();
+                location.reload();
+                // this.tic.logout((res) => {
+                //     console.log(res);
+                // });
+                // clearTimeout(this.timeadd);
+                // $(".online").html("0");
+                // $(".status").html('<a class="tag end" href="javascript:;">被讲师踢出</a>').show();
             }
         });
     };

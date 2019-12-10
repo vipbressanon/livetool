@@ -3,16 +3,16 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" id="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5">
         <title>直击课堂</title>
 		<link href="" id="css1" rel="stylesheet" type="text/css">
         <link href="/vendor/livetool/css/common.css" rel="stylesheet" type="text/css">
-        <link href="" id="css2" rel="stylesheet" type="text/css">
         <link href="/vendor/livetool/font/iconfont.css" rel="stylesheet">
+        <link href="" id="css2" rel="stylesheet" type="text/css">
         <link href="/vendor/livetool/css/swiper.min.css" rel="stylesheet" type="text/css">
         <link href="https://cdn.bootcss.com/jquery-toast-plugin/1.3.2/jquery.toast.css" rel="stylesheet">   
     </head>
-    <body style="visibility:hidden">
+    <body style="visibility:hidden"> 
         <div class="fullScreen">
             <div class="mount">
                 <div class="wrapper align_item">
@@ -50,10 +50,6 @@
                 @elseif($role[0] == 202)
                 <div class="status">
                     <a class="tag start" href="javascript:;">请等待讲师开课</a>
-                </div>
-                @elseif($role[0] == 203)
-                <div class="status">
-                    <a id="courseword" class="tag start" href="javascript:;">{{$role[1]}}</a>
                 </div>
                 @elseif($role[0] == 204)
                 <div class="status">
@@ -172,16 +168,16 @@
             </div>
             <p id="qqq" style="width:100%;height:1px;background:#fff;"></p>								 
             <!-- 讨论区 start -->
-            <div class="discussBtn align_item">
+            <a class="discussBtn align_item" href="javascript:;">
                 <span class="iconfont icon-liaotian"></span>
                 <i class="redDot" style="display:none;"></i>
-            </div>
+            </a>
 			<!-- 手机端 摄像头按钮 -->
             <div class="cameraBtn align_item">
                 <span class="iconfont icon-shexiangtou"></span>
             </div>
             <!-- 手机端 摄像头关闭按钮 -->
-            <div class="cameraClose iconfont icon-close"></div>
+            <a class="cameraClose iconfont icon-close" href="javascript:;"></a>
 
             <div class="dialog">
                 <div class="title between">
@@ -199,7 +195,7 @@
                     <button id="chatbtn" class="fr row send">发送</button>
                     <input type="hidden" id="tousers" value="" />
                 </div>
-                <div class="closebtn dialogClose iconfont icon-close"></div>
+                <a class="closebtn dialogClose iconfont icon-close" href="javascript:;"></a>
             </div>
             <!-- 讨论区 end -->
         </div>
@@ -237,5 +233,6 @@
     this.socketurl = '{{config("livetool.socketurl")}}';
     this.isteacher = {{$isteacher}};
     this.role = JSON.parse('{!!json_encode($role)!!}');
+    this.fileurl = '{{config("livetool.fileurl")}}';
 </script>
 <script src="/vendor/livetool/js/loadroom.js"></script>

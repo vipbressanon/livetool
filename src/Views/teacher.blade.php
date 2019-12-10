@@ -91,10 +91,6 @@
                 <div class="status">
                     <a id="startbtn" class="tag start" href="javascript:;">开始上课</a>
                 </div>
-                @elseif($role[0] == 203)
-                <div class="status">
-                    <a id="courseword" class="tag start" href="javascript:;">{{$role[1]}}</a>
-                </div>
                 @elseif($role[0] == 204)
                 <div class="status">
                     <a class="tag end" href="javascript:;">{{$role[1]}}</a>

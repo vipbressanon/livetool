@@ -73,12 +73,13 @@ var bmsajax = function () {
                     });
                     $.each(json.cut, function(i, v){
                         $("#users"+v).remove();
+                        $('#zuida'+v).remove();
                     });
                     _this.roster = arr;
                     $(".teacount").html(teacount);
                     $(".stucount").html(stucount);
                     // 课程已经开始，直接进入课堂
-                    if (_this.course.status == 1) {
+                    if (!_this.isenter && _this.course.status == 1) {
                         _this.bmstic.join();
                     }
                 }
@@ -212,10 +213,11 @@ var bmsajax = function () {
                 type: type,
                 _token: $("#_token").val()
             },
-            success: function(json){console.log(json);
+            success: function(json){
                 if(json.error){
                     _this.bmsim.toast(json.error, 'error');
                 }
+                _this.loading = true;
             }
         });
     };

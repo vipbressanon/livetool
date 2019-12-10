@@ -8,9 +8,9 @@ use Workerman\Lib\Timer;
 use PHPSocketIO\SocketIO;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use Vipbressanon\LiveTool\Servers\CourseServer;
-use Vipbressanon\LiveTool\Servers\RoomServer;
+use Vipbressanon\LiveTool\Servers\RecordServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
-use Vipbressanon\LiveTool\Servers\BalanceServer;
+
 use Log;
 use DB;
 
@@ -95,7 +95,7 @@ class MsgPush extends Command
                     $interval = config('livetool.intervaltime');
                     $balance = new BalanceServer();
                     // 每隔一段时间执行一次结算
-                    $socket->timer_id = Timer::add($interval, [$balance, 'handle'], [$course_id], true);
+                    $socket->timer_id = Timer::add($interval, [$balance, 'handle'], [$course_id, $room_id], true);
                     // $socket->timer_id = Timer::add(3, function(){var_dump(1);});
                 }
             });
@@ -103,9 +103,11 @@ class MsgPush extends Command
             // 下课
             $socket->on('over', function () use ($socket) {
                 var_dump('over');
+                $record = new RecordServer();
+                $record->hander($socket->room_id, 3);
                 $balance = new BalanceServer();
                 // 10秒以后执行一次结算,定时器只执行一次
-                Timer::add(10, [$balance, 'handle'], [$socket->course_id], false);
+                Timer::add(10, [$balance, 'handle'], [$socket->course_id, $socket->room_id], false);
                 self::$senderIo->to($socket->room_id)->emit('over');
             });
             
@@ -137,21 +139,17 @@ class MsgPush extends Command
                 $to = (string)($_REQUEST['to'] ?? '');
                 
                 // 推送数据的url格式 type=publish&to=uid&content=xxxx
-                switch ($type) {
-                    case 'publish':
-                        // 有指定uid则向uid所在socket组发送数据
-                        if ($to) {
-                            self::$senderIo->to($to)->emit('new_msg', $content);
-                        } else {
-                            // 否则向所有uid推送数据
-                            self::$senderIo->emit('new_msg', $content);
-                        }
-                        // http接口返回，如果用户离线socket返回fail
-                        if ($to && !isset(self::$userscount[$to])) {
-                            return $httpConnection->send('offline');
-                        } else {
-                            return $httpConnection->send('ok');
-                        }
+                if ($to) {
+                    self::$senderIo->to($to)->emit($type, $content);
+                } else {
+                    // 否则向所有uid推送数据
+                    self::$senderIo->emit($type, $content);
+                }
+                // http接口返回，如果用户离线socket返回fail
+                if ($to && !isset(self::$userscount[$to])) {
+                    return $httpConnection->send('offline');
+                } else {
+                    return $httpConnection->send('ok');
                 }
                 return $httpConnection->send('fail');
             };
@@ -174,13 +172,13 @@ class MsgPush extends Command
             if (!in_array($users_id, self::$userscount[$room_id])) {
                 self::$userscount[$room_id][] = $users_id;
             }
-            self::$senderIo->to($room_id)->emit('online', self::$userscount[$room_id]);
+            self::$senderIo->to($room_id)->emit('online', array_values(self::$userscount[$room_id]));
         } else {
             self::$userscount[$room_id] = array_diff(self::$userscount[$room_id], [$users_id]);
             if (count(self::$userscount[$room_id]) == 0) {
                 unset(self::$userscount[$room_id]);
             } else {
-                self::$senderIo->to($room_id)->emit('online', self::$userscount[$room_id]);
+                self::$senderIo->to($room_id)->emit('online', array_values(self::$userscount[$room_id]));
             }
         }
     }

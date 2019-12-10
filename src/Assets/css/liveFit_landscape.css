@@ -230,8 +230,9 @@ body{
     bottom: 0;
     color: #fff;
     background: #282A31;
-    font-size: 0.2rem;
+    font-size: 0.2rem!important;
     display: none;
+    cursor: pointer;
 }
 
 /* 直播状态 */
@@ -415,7 +416,8 @@ body{
     bottom: 0;
     color: #fff;
     background: #282A31;
-    font-size: 0.2rem;
+    font-size: 0.2rem!important;
+    cursor: pointer;
 }
 /*提示弹框*/
 .swal2-popup.swal2-toast{
