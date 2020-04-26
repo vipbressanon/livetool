@@ -251,6 +251,9 @@ class LiveController extends Controller
     	if (!$iswhite && $course['invite_type'] == 1) {
     		return [203, '请输入口令'];
     	}		
+        if(!$iswhite && $course['invite_type'] == 2){
+            return [ 201 ,'不再白名单内，无法进入'];
+        }   
         if ($course['status'] == 0) {
             if ($balance) {
                 $data = [202, '请等待讲师开课'];
