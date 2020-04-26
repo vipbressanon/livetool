@@ -296,7 +296,7 @@ class MsgTest extends Command
                 $type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
                 $content = isset($_REQUEST['content']) ? $_REQUEST['content'] : '';
                 $room_id = isset($_REQUEST['room_id']) ? $_REQUEST['room_id'] : '';
-                
+                Log::info("socket收到队列定时消息", [$_REQUEST]);
                 // 推送数据的url格式 type=publish&to=uid&content=xxxx
                 if ($room_id == '') {
                     return $httpConnection->send(json_encode(['error'=>'暂不支持全局消息']));
