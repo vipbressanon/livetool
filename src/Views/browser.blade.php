@@ -18,8 +18,8 @@
                 </div>
                 <div class="content">
                     <img class="browserPic" src="/vendor/livetool/images/browserPic.png">
-                    <p class="desc">您当前的浏览器暂不支持直播，仅支持谷歌浏览器观看直播</p>
-                    <a class="download" target="_blank" href="https://www.google.cn/intl/zh-CN/chrome/">
+                    <p class="desc">您当前的浏览器暂不支持直播，请下载或升级谷歌浏览器观看直播</p>
+                    <a class="download" target="_blank" href="https://zjclass.xueyoubangedu.com/chrome/ChromeSetup.exe">
                         <img src="/vendor/livetool/images/chromeIcon.png">
                         <span>下载谷歌浏览器</span>
                     </a>

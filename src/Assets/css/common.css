@@ -363,4 +363,4 @@
     padding: 50px;
 }
 
-.hide{display: none;}
+.hide{display: none !important;}
