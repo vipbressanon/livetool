@@ -2,6 +2,7 @@
 namespace Vipbressanon\LiveTool\Servers;
 
 use DB;
+use Vipbressanon\LiveTool\Models\Room;
 
 class BalanceServer
 {
@@ -10,15 +11,19 @@ class BalanceServer
     {
     }
 
-    public function handle($course_id, $room_id)
+    public function handle($room_id)
     {
+        $room = Room::find($room_id);
+        if (!$room) {
+            return;
+        }
         // 统计耗时
-        $consume = $this->consume($course_id);
+        $consume = $this->consume($room->course_id);
         if ($consume->total == 0) {
             return;
         }
         // 获取团队账户余额
-        $account = $this->getmoney($course_id);
+        $account = $this->getmoney($room->course_id);
         // 消耗的分钟数
         $mins = ceil($consume->total/60);
         // 扣除团队消耗
@@ -28,14 +33,14 @@ class BalanceServer
         
         $this->orderslog($account, $money, $consume->now);
         // 保存结算时间
-        $this->balance($course_id, $consume->now);
+        $this->balance($room->course_id, $consume->now);
         
         if ($money['over']) {
             $domainurl = config('livetool.domainurl');
-            $this->sendRequest($domainurl.':2121/type=feeover&to='.$room_id);
+            $this->sendRequest($domainurl.':2121?type=feeover&to='.$room_id);
         } elseif ($money['owe']) {
             $domainurl = config('livetool.domainurl');
-            $this->sendRequest($domainurl.':2121/type=feeowe&to='.$room_id);
+            $this->sendRequest($domainurl.':2121?type=feeowe&to='.$room_id);
         }
     }
     

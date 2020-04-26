@@ -52,11 +52,14 @@ class RoomServer
     {
         $now = date('Y-m-d H:i:s');
         $course = config('livetool.course');
+        $detail = DB::table($course['table'])->where($course['field']['id'], $course_id)->first();
+        $expectendtime = date('Y-m-d H:i:s', time() + strtotime($detail->expectend) - strtotime($detail->expectstart));
         DB::table($course['table'])
             ->where($course['field']['id'], $course_id)
             ->update([
                 $course['field']['starttime'] => $now,
                 $course['field']['endtime'] => null,
+                $course['field']['expectendtime'] => $expectendtime,
                 $course['field']['status'] => 1,
                 $course['field']['updated_at'] => $now
             ]);
@@ -88,7 +91,8 @@ class RoomServer
             $room->save();
             $api = new ApiServer();
             $api->roomend($room_id, $now);
-            $api->recordend($room_id);
+            // 在socket中进行结算
+            // $api->recordend($room_id);
         }
         return true;
     }
@@ -119,16 +123,6 @@ class RoomServer
         $res = Room::find($room_id);
         $res->roomhand = $hand;
         $res->save();
-    }
-    
-    public function kick($course_id, $room_id, $users_id)
-    {
-        $res = new RoomBlack();
-        $res->course_id = $course_id;
-        $res->room_id = $room_id;
-        $res->users_id = $users_id;
-        $res->save();
-        return true;
     }
     
     public function black($room_id, $users_id)

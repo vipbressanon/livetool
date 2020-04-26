@@ -3,6 +3,8 @@ namespace Vipbressanon\LiveTool\Servers;
 
 use DB;
 use Log;
+use Vipbressanon\LiveTool\Models\Room;
+use Vipbressanon\LiveTool\Models\RoomSig;
 
 class CourseServer
 {
@@ -15,36 +17,54 @@ class CourseServer
     {
         $course = config('livetool.course');
         $res = DB::table($course['table'])
-                ->select(
-                    $course['field']['id'].' as id',
-                    $course['field']['hash_id'].' as hash_id',
-                    $course['field']['title'].' as title',
-                    $course['field']['teacher_id'].' as teacher_id',
-                    $course['field']['status'].' as status',
-                    $course['field']['expectstart'].' as expectstart',
-                    $course['field']['starttime'].' as starttime',
-                    $course['field']['endtime'].' as endtime',
-                    $course['field']['invite_type'].' as invite_type',
-                    $course['field']['top_usersid'].' as top_usersid',
-                    $course['field']['team_id'].' as team_id',
-                    $course['field']['code_url'].' as code_url'
+                ->leftJoin(
+                    'room_sig',
+                    $course['table'].'.'.$course['field']['teacher_id'],
+                    '=',
+                    'room_sig.users_id'
                 )
-                ->where($course['field']['hash_id'], $hash_id)
+                ->select(
+                    $course['table'].'.'.$course['field']['id'].' as id',
+                    $course['table'].'.'.$course['field']['hash_id'].' as hash_id',
+                    $course['table'].'.'.$course['field']['title'].' as title',
+                    $course['table'].'.'.$course['field']['type'].' as type',
+                    $course['table'].'.'.$course['field']['teacher_id'].' as teacher_id',
+                    $course['table'].'.'.$course['field']['status'].' as status',
+                    $course['table'].'.'.$course['field']['expectstart'].' as expectstart',
+                    $course['table'].'.'.$course['field']['expectend'].' as expectend',
+                    $course['table'].'.'.$course['field']['starttime'].' as starttime',
+                    $course['table'].'.'.$course['field']['expectendtime'].' as expectendtime',
+                    $course['table'].'.'.$course['field']['endtime'].' as endtime',
+                    $course['table'].'.'.$course['field']['invite_type'].' as invite_type',
+                    $course['table'].'.'.$course['field']['top_usersid'].' as top_usersid',
+                    $course['table'].'.'.$course['field']['team_id'].' as team_id',
+                    $course['table'].'.'.$course['field']['code_url'].' as code_url',
+                    $course['table'].'.'.$course['field']['up_top'].' as up_top',
+                    $course['table'].'.'.$course['field']['down_top'].' as down_top',
+                    'room_sig.hash_id as teacher_hash_id'
+                )
+                ->where($course['table'].'.'.$course['field']['hash_id'], $hash_id)
                 ->first();
         if ($res) {
             return [
                 'id' => $res->id,
                 'hash_id' => $res->hash_id,
                 'title' => $res->title,
+                'type' => $res->type,
                 'teacher_id' => $res->teacher_id,
+                'teacher_hash_id' => $res->teacher_hash_id,
                 'status' => $res->status,
                 'expectstart' => $res->expectstart,
+                'expectend' => $res->expectend,
                 'starttime' => $res->starttime,
+                'expectendtime' => $res->expectendtime,
                 'endtime' => $res->endtime,
                 'invite_type' => $res->invite_type,
                 'top_usersid' => $res->top_usersid,
                 'team_id' => $res->team_id,
-                'code_url' => $res->code_url
+                'code_url' => $res->code_url,
+                'up_top' => $res->up_top,
+                'down_top' => $res->down_top
             ];
         } else {
             return null;
@@ -67,13 +87,17 @@ class CourseServer
         ]);
     }
     
-    public function starttime($course_id)
+    public function starttime($room_id)
     {
+        $room = Room::find($room_id);
+        if (!$room) {
+            return '';
+        }
         $course = config('livetool.course');
         $res = DB::table($course['table'])
-                ->where($course['field']['id'], $course_id)
+                ->where($course['field']['id'], $room->course_id)
                 ->first();
-        return $res ? $res->starttime : '';
+        return $res ? ['starttime' => $res->starttime, 'expectendtime' => $res->expectendtime]: '';
     }
     
     public function share($course_id)

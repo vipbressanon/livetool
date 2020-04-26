@@ -12,6 +12,9 @@ use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
 use Vipbressanon\LiveTool\Servers\RecordServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
+use Log;
+use Session;
+
 class LiveController extends Controller
 {
     // 进入直播间
@@ -28,19 +31,18 @@ class LiveController extends Controller
         $cs = new CourseServer();
         $course = $cs->detail($hash_id);
         if ($course) {
-            $platform = 0;
+            $platform = $this->platform();
             $rs = new RoomServer();
             // 获取房间信息
             $room = $rs->detail($course['id'], $course['teacher_id']);
             $us = new UsersServer();
             // 获取房间用户信息
-            $us->detail($course['id'], $room['id'], $users->id, $platform);
+            $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
             // 获取用户令牌
-            $info = $us->sig($users->hash_id, $users->id);
+            $info = $us->sig($users->hash_id, $users->id, $course['team_id']);
             // 判断用户是否为讲师
             $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
-            // 根据用户身份进入不同页面
-            $view = $isteacher ? 'livetool::teacher' : 'livetool::student';
+            
             // 用户黑名单,被讲师踢出的将不能再次进入
             $black = $rs->black($room['id'], $info['id']);
             // 获取课程分享信息
@@ -55,7 +57,18 @@ class LiveController extends Controller
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);
             }
+            // 根据用户身份进入不同页面
+            $viewtype = 'livetool::small';
+            if ($course['type'] == 1) {
+                $viewtype = 'livetool::small';
+            } elseif ($course['type'] == 2) {
+                $viewtype = 'livetool::large';
+            } elseif ($course['type'] == 3) {
+                $viewtype = 'livetool::public';
+            }
+            $view = $isteacher ? $viewtype.'.teacher' : $viewtype.'.student';
             return view($view)
+                    ->with('platform', $platform)
                     ->with('course', $course)
                     ->with('room', $room)
                     ->with('info', $info)
@@ -65,6 +78,23 @@ class LiveController extends Controller
         } else {
             abort(404);
         }
+    }
+    
+    private function platform()
+    {
+        $num = 0;
+        $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+        $is_pc = (strpos($agent, 'windows nt')) ? true : false;
+        $is_mobile = (strpos($agent, 'iphone') || strpos($agent, 'android') || strpos($agent, 'ios')) ? true : false;
+        $is_ipad = (strpos($agent, 'ipad') || strpos($agent, 'ipod')) ? true : false;
+        if ($is_mobile) {
+            $num = 1;
+        } else if ($is_ipad) {
+            $num = 2;
+        } else {
+            $num = 0;
+        }
+        return $num;
     }
     
     // 记录报错信息
@@ -140,36 +170,14 @@ class LiveController extends Controller
         return response()->json(['error'=>'']);
     }
     
-    // 用户进入直播间
-    public function postUsersStart(Request $request)
-    {
-        $course_id = $request->input('course_id');
-        $room_id = $request->input('room_id');
-        $users_id = $request->input('users_id');
-        $us = new UsersServer();
-        $us->start($course_id, $room_id, $users_id);
-        return response()->json(['error'=>'']);
-    }
-    
-    // 用户离开直播间
-    public function postUsersEnd(Request $request)
-    {
-        $course_id = $request->input('course_id');
-        $room_id = $request->input('room_id');
-        $users_id = $request->input('users_id');
-        $us = new UsersServer();
-        $us->end($course_id, $room_id, $users_id);
-        return response()->json(['error'=>'']);
-    }
-    
     // 踢出课堂
     public function postRoomKick(Request $request)
     {
         $course_id = $request->input('course_id');
         $room_id = $request->input('room_id');
-        $users_id = $request->input('users_id');
-        $rs = new RoomServer();
-        $rs->kick($course_id, $room_id, $users_id);
+        $hash_id = $request->input('hash_id');
+        $us = new UsersServer();
+        $us->kick($course_id, $room_id, $hash_id);
         return response()->json(['error'=>'']);
     }
     
@@ -177,45 +185,60 @@ class LiveController extends Controller
     public function postOperate(Request $request)
     {
         $room_id = $request->input('room_id');
-        $users_id = $request->input('users_id');
+        $hash_id = $request->input('hash_id');
         $type = $request->input('type');
         $us = new UsersServer();
-        $res = $us->operate($room_id, $users_id, $type);
+        $res = $us->operate($room_id, $hash_id, $type);
         return response()->json(['error'=>'']);
     }
     
     // 在线人员信息
     public function postOnline(Request $request)
     {
-        $old = $request->input('old', []);
-        $new = $request->input('new', []);
+        $add = $request->input('add', []);
         $room_id = $request->input('room_id');
         $us = new UsersServer();
-        $info = $us->info($old, $new, $room_id);
-        return response()->json(['error'=>'', 'add'=>$info[0], 'cut'=>$info[1]]);
+        $info = $us->info($add, $room_id);
+        return response()->json(['error'=>'', 'info'=>$info]);
     }
-    
+
     // 设备选择，检测
     public function getCheck(Request $request)
     {
-        $type = $request->input('type', '1');
+        $type = $request->input('type', 1);
+        $tea = $request->input('tea', 0);
         return view('livetool::check')
-                ->with('type', $type);
+                ->with('type', $type)
+                ->with('tea', $tea);
     }
     
     // 录制开始
     public function postRecord(Request $request)
     {
+        Log::info("录制事件 request",array('re' => $request->all()));
         $room_id = $request->input('room_id');
         $status = $request->input('status');
         $rs = new RecordServer();
         $res = $rs->hander($room_id, $status);
         return response()->json(['error'=>'']);
     }
+
+    // 录制回调
+    public function postRecordCallBack(Request $request)
+    {
+        
+        $rs = new RecordServer();
+        $res = $rs->balance($request->all());
+        return response()->json(['error'=>'']);
+    }
     
     public function getBrowser(Request $request)
     {
         return view('livetool::browser');
+    }
+
+    public function getSpeedTest() {
+        return view('livetool::speedtest');
     }
     
     
