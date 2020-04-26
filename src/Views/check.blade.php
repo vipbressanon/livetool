@@ -84,7 +84,8 @@
             </div>
             <div class="selectBox between">
                 <label for="audioSource">麦克风：</label>
-                <select id="audioSource" lay-filter="audioSource"></select>
+                <select id="audioSource" lay-filter="audioSource">
+                </select>
             </div>
             <div class="selectBox between">
                 <label for="audioOutput">扬声器：</label>
@@ -92,12 +93,15 @@
             </div>
             <div class="selectBox between">
                 <label for="videoSource">视频：</label>
-                <select id="videoSource" lay-filter="videoSource"></select>
+                <select id="videoSource" lay-filter="videoSource">
+                </select>
             </div>
             @else
             <div class="selectBox between">
                 <label for="audioSource">麦克风：</label>
-                <select id="audioSource" lay-filter="audioSource"></select>
+                <select id="audioSource" lay-filter="audioSource">
+                    <option value="no">禁用</option>
+                </select>
             </div>
             <div class="selectBox between">
                 <label for="audioOutput">扬声器：</label>
@@ -105,7 +109,9 @@
             </div>
             <div class="selectBox between">
                 <label for="videoSource">视频：</label>
-                <select id="videoSource" lay-filter="videoSource"></select>
+                <select id="videoSource" lay-filter="videoSource">
+                    <option value="no">禁用</option>
+                </select>
             </div>
             @endif
             <div>
@@ -120,12 +126,13 @@
             <a class="keepBtn" href="javascript:;">确 定</a>
         </div>
     </div>
+    <input type="hidden" id="isteacher" value="{{$tea}}" />
 </body>
 </html>
-<script src="/vendor/livetool/js/check.js"></script>
-<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
-<script src="https://sqimg.qq.com/expert_qq/webrtc/3.4.2/WebRTCAPI.min.js"></script>
 <script src="/vendor/livetool/js/jquery.min.js"></script>
+<script src="/vendor/livetool/js/check.js"></script>
+<script src="/vendor/livetool/js/adapter-latest.js"></script>
+<script src="https://sqimg.qq.com/expert_qq/webrtc/3.4.2/WebRTCAPI.min.js"></script>
 <script src="/vendor/livetool/layui/layui.js"></script>
 <script type="text/javascript">
 layui.use(['layer','jquery','form'], function(){
@@ -133,11 +140,14 @@ layui.use(['layer','jquery','form'], function(){
         $ = layui.jquery,
         form = layui.form;
     form.render();
-    $('.keepBtn').on('click', function(){
-        parent.bmsrtc.switchrtc($("#videoSource").get(0).selectedIndex, $("#audioSource").get(0).selectedIndex);
+    $('.keepBtn').on('click', function(){console.log(parent.localStream);
+        if (parent.localStream) {
+            parent.bmsrtc.switchrtc($("#videoSource").val(), $("#audioSource").val());
+        }
         var index = parent.layer.getFrameIndex(window.name);
         parent.layer.close(index);
     });
 });
 </script>
-<script>check.init()</script>
+
+<script>check.init();</script>
