@@ -4,6 +4,7 @@ namespace Vipbressanon\LiveTool\Servers;
 use DB;
 use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomSig;
+use Vipbressanon\LiveTool\Models\RoomBlack;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 
 class UsersServer
@@ -13,7 +14,7 @@ class UsersServer
     {
     }
 
-    public function sig($hash_id, $users_id)
+    public function sig($hash_id, $users_id, $team_id)
     {
         $now = date('Y-m-d H:i:s');
         $res = RoomSig::where('users_id', $users_id)->first();
@@ -35,12 +36,15 @@ class UsersServer
             $res->overtime = $sig ? $sig->overtime : null;
             $res->save();
         }
-        $users = config('livetool.users');
-        $info = DB::table($users['table'])
+        $users_from = config('livetool.users_from');
+        $info = DB::table($users_from['table'])
             ->select(
-                $users['field']['nickname'].' as nickname'
+                $users_from['field']['nickname'].' as nickname'
             )
-            ->where($users['field']['id'], $users_id)
+            ->where($users_from['field']['users_id'], $users_id)
+            ->whereNull($users_from['field']['deleted_at'])
+            ->where($users_from['field']['display'], 2)
+            ->where($users_from['field']['team_id'], $team_id)
             ->first();
         $nickname = $info ? $info->nickname : '';
         return [
@@ -52,16 +56,28 @@ class UsersServer
         ];
     }
     
-    public function detail($course_id, $room_id, $users_id, $platform)
+    public function detail($course_id, $room_id, $users_id, $platform, $team_id)
     {
         $course_users = config('livetool.course_users');
         $res = DB::table($course_users['table'])
+                ->select(
+                    $course_users['field']['id'].' as id',
+                    $course_users['field']['platform'].' as platform'
+                )
                 ->where($course_users['field']['room_id'], $room_id)
                 ->where($course_users['field']['users_id'], $users_id)
                 ->first();
-        if (!$res) {
+        if ($res) {
+            if ($platform != $res->platform) {
+                DB::update(
+                    "update ".$course_users['table']." set ".$course_users['field']['platform'].
+                    "=".$platform." where ".$course_users['field']['id']."=".$res->id
+                );
+            }
+        } else {
             $now = date('Y-m-d H:i:s');
             $id = DB::table($course_users['table'])->insertGetId([
+                $course_users['field']['team_id'] => $team_id,
                 $course_users['field']['course_id'] => $course_id,
                 $course_users['field']['room_id'] => $room_id,
                 $course_users['field']['users_id'] => $users_id,
@@ -75,14 +91,22 @@ class UsersServer
         }
     }
     
-    public function start($course_id, $room_id, $users_id)
+    public function start($room_id, $hash_id)
     {
-        $this->end($room_id, $users_id);
+        $room = Room::find($room_id);
+        if (!$room) {
+            return false;
+        }
+        $this->end($room_id, $hash_id);
+        $users_id = $this->hashid($hash_id);
+        if ($users_id == '') {
+            return false;
+        }
         $now = date('Y-m-d H:i:s');
         $users_log = config('livetool.course_users_log');
         DB::table($users_log['table'])->insert([
             $users_log['field']['room_id'] => $room_id,
-            $users_log['field']['course_id'] => $course_id,
+            $users_log['field']['course_id'] => $room->course_id,
             $users_log['field']['users_id'] => $users_id,
             $users_log['field']['starttime'] => $now,
             $users_log['field']['balancetime'] => null,
@@ -97,11 +121,14 @@ class UsersServer
         return true;
     }
     
-    public function end($room_id, $users_id)
+    public function end($room_id, $hash_id)
     {
         $now = date('Y-m-d H:i:s');
         $users_log = config('livetool.course_users_log');
-        
+        $users_id = $this->hashid($hash_id);
+        if ($users_id == '') {
+            return false;
+        }
         $res = DB::table($users_log['table'])
                 ->select($users_log['field']['starttime'].' as starttime', $users_log['field']['id'].' as id')
                 ->where($users_log['field']['room_id'], $room_id)
@@ -125,46 +152,74 @@ class UsersServer
         return true;
     }
     
-    public function operate($room_id, $users_id, $type)
+    public function operate($room_id, $hash_id, $type)
     {
-        $course_users = config('livetool.course_users');
-        $res = DB::table($course_users['table'])
-                ->where($course_users['field']['room_id'], $room_id)
-                ->where($course_users['field']['users_id'], $users_id)
-                ->increment($type);
+        if (is_array($hash_id)) {
+            $users_id = RoomSig::whereIn('hash_id', $hash_id)->pluck('users_id')->toArray();
+            if (count($users_id) == 0) {
+                return false;
+            }
+            $course_users = config('livetool.course_users');
+            $res = DB::table($course_users['table'])
+                    ->where($course_users['field']['room_id'], $room_id)
+                    ->whereIn($course_users['field']['users_id'], $users_id)
+                    ->increment($type);
+        } else {
+            $users_id = $this->hashid($hash_id);
+            if ($users_id == '') {
+                return false;
+            }
+            $course_users = config('livetool.course_users');
+            $res = DB::table($course_users['table'])
+                    ->where($course_users['field']['room_id'], $room_id)
+                    ->where($course_users['field']['users_id'], $users_id)
+                    ->increment($type);
+        }
+        
         return true;
     }
     
-    public function info($old, $new, $room_id)
+    public function info($add, $room_id)
     {
-        $add = array_diff($new, $old);
-        $cut = array_diff($old, $new);
-        $users = config('livetool.users');
-        $course_users = config('livetool.course_users');
-        $res = DB::table($course_users['table'])
-                ->leftJoin(
-                $users['table'],
-                $course_users['table'].'.'.$course_users['field']['users_id'],
-                '=',
-                $users['table'].'.'.$users['field']['id']
-                )->leftJoin(
-                'room_sig',
-                $course_users['table'].'.'.$course_users['field']['users_id'],
-                '=',
-                'room_sig.users_id'
-                )
+        $usersinfo = config('livetool.usersinfo');
+        $table = DB::table($usersinfo['table'])
                 ->select(
-                    $users['table'].'.'.$users['field']['id'].' as id',
-                    $users['table'].'.'.$users['field']['nickname'].' as nickname',
-                    $users['table'].'.'.$users['field']['imgurl'].' as imgurl',
-                    $course_users['table'].'.'.$course_users['field']['zan'].' as zan',
-                    'room_sig.hash_id as hash_id'
-                    // $course_users['table'].'.'.$course_users['field']['speak'].' as speak',
-                    // $course_users['table'].'.'.$course_users['field']['hand'].' as hand'
+                    $usersinfo['field']['users_id'].' as id',
+                    $usersinfo['field']['nickname'].' as nickname',
+                    $usersinfo['field']['zan'].' as zan',
+                    $usersinfo['field']['platform'].' as platform',
+                    $usersinfo['field']['hash_id'].' as hash_id',
+                    $usersinfo['field']['imgurl'].' as imgurl'
                 )
-                ->where($course_users['table'].'.'.$course_users['field']['room_id'], $room_id)
-                ->whereIn($course_users['table'].'.'.$course_users['field']['users_id'], $add)
-                ->get();
-        return [$res, $cut];
+                ->where($usersinfo['field']['room_id'], $room_id);
+        
+        if (is_array($add)) {
+            $table->whereIn($usersinfo['field']['hash_id'], $add);
+        } else {
+            $table->where($usersinfo['field']['hash_id'], $add);
+        }
+        $res = $table->get();  
+        return $res;
     }
+    
+    public function kick($course_id, $room_id, $hash_id)
+    {
+        $users_id = $this->hashid($hash_id);
+        if ($users_id == '') {
+            return false;
+        }
+        $res = new RoomBlack();
+        $res->course_id = $course_id;
+        $res->room_id = $room_id;
+        $res->users_id = $users_id;
+        $res->save();
+        return true;
+    }
+    
+    private function hashid($hash_id)
+    {
+        $res = RoomSig::where('hash_id', $hash_id)->first();
+        return $res ? $res->users_id : '';
+    }
+
 }
