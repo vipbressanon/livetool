@@ -35,15 +35,16 @@ class LiveController extends Controller
         if ($course) {
             $platform = $this->platform();
             $rs = new RoomServer();
+            // 判断用户是否为讲师
+            $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
             // 获取房间信息
-            $room = $rs->detail($course['id'], $course['teacher_id'],$users->hash_id);
+            $room = $rs->detail($course['id'], $course['teacher_id'],$users->hash_id,$isteacher);
             $us = new UsersServer();
             // 获取房间用户信息
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
             // 获取用户令牌
             $info = $us->sig($users->hash_id, $users->id, $course['team_id']);
-            // 判断用户是否为讲师
-            $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
+            
             
             // 用户黑名单,被讲师踢出的将不能再次进入
             $black = $rs->black($room['id'], $info['id']);
