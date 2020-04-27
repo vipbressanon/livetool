@@ -6,6 +6,7 @@ use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomBlack;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use App\Common\SendRequest;
+use Log;
 
 class RoomServer
 {
@@ -40,7 +41,8 @@ class RoomServer
         $request = new SendRequest();
         $url = 'http://47.94.254.25:3121'.'/?type=userlist&room_id='.$res->id;
         $re = $request->sendRequest($url,[],[],'GET');  
-        $re = json_decode(json_encode($re),true);  
+        $re = json_decode(json_encode($re),true); 
+        Log::info("RoomServer online_num re",$re); 
         $online_num = 0;
         if(!$isteacher){
             $white_3 = DB::table('course_word_white')
@@ -56,6 +58,7 @@ class RoomServer
                 $online_num = $white_3-1;
             }
         }
+        Log::info("online_num".$online_num.'||users_hash_id'.$users_hash_id);
         
         
         return [
