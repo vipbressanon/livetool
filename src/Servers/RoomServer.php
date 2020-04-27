@@ -42,7 +42,7 @@ class RoomServer
         $re = $request->sendRequest($url,[],[],'GET');  
         $re = json_decode(json_encode($re),true);  
         $online_num = 0;
-        if($isteacher){
+        if(!$isteacher){
             $white_3 = DB::table('course_word_white')
                 ->where('type','=',3)
                 ->where('course_id','=',$course_id)
