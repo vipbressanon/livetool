@@ -23,7 +23,7 @@ class LiveController extends Controller
     {
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
-
+        
         if (!$users) {
             //Auth::guard($auth)->loginUsingId($request->input('uid'));
             //$users = Auth::guard($auth)->user();
