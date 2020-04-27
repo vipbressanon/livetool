@@ -1,0 +1,1750 @@
+* {
+    margin: 0;
+    padding: 0;
+    outline: none;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+body {
+    font-size: 14px;
+    color: #333;
+    font-family: "Poppins", sans-serif;
+}
+li {
+    list-style: none;
+}
+a {  
+    text-decoration: none;
+    cursor: pointer;
+    color: #333;
+    outline: none;
+}
+a:hover {
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+    text-decoration: none;
+}
+a img, a:hover img {
+    border: 0 none;
+}
+h1, h2, h3, h4, h5 {
+    font-weight: normal;
+}
+b{
+    font-weight: normal;
+}
+i{
+    font-style: normal;
+}
+input, button, select, textarea {
+    outline: none;
+    border: 0 none;
+    font-family: "微软雅黑";
+}
+.wrapper {
+    width: 82.29%;
+    margin: 0 auto;
+}
+.fl {
+    float: left;
+}
+.fr {
+    float: right;
+}
+.clearfix:after {
+    display: block;
+    clear: both;
+    content: "";
+    visibility: hidden;
+    height: 0;
+}
+.clearfix {
+    zoom: 1
+}
+.clear {
+    clear: both;
+}
+.grey_bg {
+    background: #f5f8fe;
+}
+table {
+    border-collapse: collapse;
+    /*border-spacing: 1;*/
+    border-spacing: 0;
+}
+label{
+    font-weight: normal;
+}
+.over {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.href_aaa {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 10;
+}
+.row{
+    display: -ms-flex;
+    display: flex;
+    flex-direction: row;
+}
+.column{
+    display: -ms-flex;
+    display: flex;
+    flex-direction: column;
+}
+.align_item{
+    display: -ms-flex;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.between{
+    display: -ms-flex;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.around{
+    display: -ms-flex;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+.redXing{
+    display: inline-block;
+    position: relative;
+    top: 2px;
+    margin-right: 2px;
+    color: #FF1919;
+    font-weight: bold;
+}
+
+.layui-layer-page .layui-layer-content,.layui-layer-title{
+	background: #000!important;
+}
+.layui-layer-title{
+	color: #fff!important;
+}
+
+.layui-layer-ico{
+	background: url('/vendor/livetool/images/close.png') no-repeat!important;
+	background-position: 0 0!important;
+	background-size: 100%!important;
+    top: -4px!important;
+    width: 20px!important;
+    height: 20px!important;
+}
+.layui-layer{
+	background: #000!important;
+}
+.layui-layer-content::-webkit-scrollbar {
+	width : 10px;
+	height: 10px;
+}
+.layui-layer-content::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+	background: #ededed;
+}
+.layui-layer-content::-webkit-scrollbar-track {
+	box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+	background: #535353;
+}
+/* ---------------- */
+body{
+	background:#34363B;
+}
+.fullScreen{
+    width:100%;
+    height:auto;
+    background:#34363B;
+}
+
+.mount{
+	width: 100%;
+	height: 37px;
+	margin: 0 auto;
+	vertical-align: middle;
+	font-size: 13px;
+	box-shadow: 0px 2px 5px #1B1D21;
+	border-bottom: 1px solid #4C4E53;
+	position: relative;
+	z-index: 10;
+}
+.mount .wrapper{
+	height: 37px;
+    padding: 10px 0px;
+    position: relative;
+}
+.mount span{
+	margin-right: 2.7%;
+	color: #fff;
+}
+.shareBtn,.overBtn{
+	height: 19px;
+	border-radius:4px;
+	text-align: center;
+	color: #2F2F35;
+}
+.shareBtn{
+	width: 79px;
+	background: #FF9900;
+    display: inline-block;
+    margin-right: 2.7%;
+}
+.overBtn{
+	width:54px;
+	background:#F5685E;
+	display: inline-block;
+    position: absolute;
+    top: 10px;
+    right: 0px;
+}
+.unusnal{
+	width: 100%;
+	height: 100%;
+	color: #686868;
+	justify-content: center;
+	position: relative;
+}
+.unusnal span{
+	font-size: 60px;
+}
+.unusnal .icon-xiantiao{
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin: -30px 0 0 -31px;
+	z-index: 2;
+}
+.teacherSign{
+	width: 10%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 11;
+}
+
+.teacherTag, .studentTag{
+	width: 100%;
+	height: 30px;
+    line-height: 30px;
+	padding: 0 15px;
+	background: rgba(0, 0, 0, 0.7);
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	z-index: 11;
+	font-size: 13px;
+	color: #fff;
+    align-items: center;
+}
+
+.teachervideo .volume{
+    position: absolute;
+    width: 11px;
+    left: 15px;
+    bottom: 30px;
+    z-index: 5;
+}
+
+.teachervideo .volume div{
+    width: 11px;
+    height: 5px;
+    margin-bottom: 2px;
+}
+
+.teachervideo .network{
+    width: 19px;
+    height: 14px;
+    display: inline-block;
+    margin-left: 7px;
+    position: relative;
+}
+
+.studentvideo .volume{
+    position: absolute;
+    width: 11px;
+    left: 5px;
+    bottom: 30px;
+    z-index: 5;
+}
+
+.studentvideo .volume div{
+    width: 11px;
+    height: 5px;
+    margin-bottom: 2px;
+}
+
+.studentvideo .network{
+    width: 19px;
+    height: 14px;
+    display: inline-block;
+    margin-left: 7px;
+    position: relative;
+}
+
+
+.studentTag .name, .teacherTag .name{
+	width: 80%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    align-items: center;
+}
+.nickname{
+	color: #fff;
+    max-width: 65%;
+    height: 24px;
+    line-height: 24px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.zanNum{
+    position: absolute;
+    right: 7px;
+    top: 7px;
+	font-size: 12px;
+    width:49px;
+    height:17px;
+    opacity:0.4;
+    border-radius: 8px;
+    z-index: 5;
+    background-color:rgba(1, 1, 1, 0.4);
+    color: #ffffff;
+}
+
+.zanNum i{
+    position: absolute;
+    left: 7px;
+    top: 2px;
+}
+
+.zanNum b{
+    position: absolute;
+    left: 25px;
+}
+
+.studentvideo .livevideo{
+    position: relative;
+}
+
+.videodiv{
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* background: url('/novideo.jpg'); */
+    background: url('/novideo_a.png');
+    background-size: 100% 100%;
+}
+
+.studentvideo .studentTag{
+	padding: 0 5px;	
+}
+.studentvideo .studentTag .icon-user{
+	font-size: 10px;
+	color: #838383;
+	margin-right: 4px;
+}
+.studentvideo .studentTag .icon-yinpin{
+	color:#3DB974;
+	margin-left: 3px;
+	font-size: 12px;
+	display: none;
+}
+.teachervideo:hover .handle{
+	display: flex;
+}
+.studentvideo .livevideo:hover .handle{
+	display: flex;
+}
+.handle{
+	width: 100%;
+	height: 100%;
+	background: rgba(104,104,106, 0.9);
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	z-index: 20;
+    cursor: pointer;
+    display: none;
+}
+
+.teachervideo .handle div{
+	width: 60px;
+	height: 60px;
+	cursor: pointer;
+	position: absolute;
+}
+
+.teachervideo .handle div span{
+	display: inline-block;
+	width: 60px;
+	height: 60px;
+	line-height: 60px;
+	text-align: center;
+	background: #FF9900;
+	color: #000;
+	border-radius: 50%;
+	font-size: 30px;
+}
+.teachervideo .handle div.icon01{
+	left: 20%;
+	top: 20%;
+}
+.teachervideo .handle div.icon02{
+	right: 20%;
+	top: 20%;
+}
+.teachervideo .handle  div.icon03{
+	left: 41%;
+	bottom: 20%;
+}
+.teachervideo .handle  div.icon04{
+	left: 41%;
+	bottom: 39%;
+}
+
+.studentvideo .handle div{
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	position: absolute;
+}
+
+.studentvideo .handle div span{
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	text-align: center;
+	background: #FF9900;
+	color: #000;
+	border-radius: 50%;
+	font-size: 20px;
+}
+.studentvideo .handle div.icon01{
+	left: 20%;
+	top: 20%;
+}
+.studentvideo .handle div.icon02{
+	right: 20%;
+	top: 20%;
+}
+.studentvideo .handle  div.icon03{
+	left: 41%;
+	bottom: 20%;
+}
+.studentvideo .handle  div.icon04{
+	left: 41%;
+	bottom: 39%;
+}
+
+.studentvideo .handle  span.icon-xueshengshangtai{
+    background: #F5685E;
+}
+
+.studentvideo .handle  i.icon-xiantiao{
+	position: absolute;
+    left: 2px;
+    top: 1px;
+    font-size: 25px;
+    z-index: 2;
+    color: #000;
+    font-weight: bold;
+}
+
+
+.handle div span.icon-tuichu{
+	background: #F5685E;
+	font-size: 16px;
+}
+.handle div .disable{
+	position: absolute;
+	width: 60px;
+	height: 60px;
+	display: none;
+	left: 0;
+	top: 0;
+	z-index: 6;
+}
+.handle div .disable span{
+	background: #F5685E;
+}
+.handle div .disable i{
+	position: absolute;
+    left: 10px;
+    top: 8px;
+    font-size: 40px;
+    z-index: 2;
+    color: #000;
+}
+.handle div.current .disable{
+	display: block;
+}
+.hands{
+	color: #FF9900;
+	justify-content: center;
+}
+.hands span{
+	font-size: 40px;
+}
+
+.teachervideo .micicon{
+    width: 12px;
+    height: 14px;
+    margin-right: 7px;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -12px 0px;
+    display: inline-block;
+}
+
+.teachervideo.speaking .micicon{
+    width: 12px;
+    height: 14px;
+    margin-right: 7px;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: 0px 0px;
+    display: inline-block;
+}
+
+.studentvideo .micicon{
+    width: 12px;
+    height: 14px;
+    margin-right: 7px;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: 0px 0px;
+    display: inline-block;
+}
+
+.sideBar{
+	width: 88px;
+	position: absolute;
+	left: 0;
+    top: 120px;
+	z-index: 1000;
+}
+.sideTab{
+	width: 88px;
+	padding-top: 9px;
+	background: #24272A;
+	display: flex;
+	flex-direction: column;
+}
+.sideTab li{
+	padding-left: 7px;
+	margin-bottom: 9px;
+	text-align: center;
+	cursor: pointer;
+}
+.toggleside{
+    position: absolute;
+    left: 88px;
+    bottom: 0px;
+    width: 25px;
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
+    color: #D2D2D2;
+    display: block;
+    border-radius: 0px 10px 10px 0px;
+    font-size: 12px;
+    background: #24272A;
+}
+.blackCircle{
+	width: 74px;
+	height: 74px;
+	padding: 6px 7px 0;
+	border-radius:8px;
+	position: relative;
+}
+.blackCircle .gantanhao{
+	width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    background: #FF0000;
+    position: absolute;
+    right: 11px;
+    top: 4px;
+    z-index: 1;
+    color: #fff;
+    display: none;
+}
+.sideTab .active{
+	background: #191B1D;
+}
+.sideTab li .sidePic{
+	display: block;
+	width: 38px;
+	height: 38px;
+	background-image: url('/vendor/livetool/images/leftTools.png');
+	background-repeat: no-repeat;
+	margin: 0 auto 6px;
+	cursor: pointer;
+}
+.sideIcon1{
+	background-position: 0 0;
+}
+.sideIcon2{
+	background-position: -38px 0;
+}
+.sideIcon3{
+	background-position: -76px 0;
+}
+.sideIcon4{
+	background-position: -114px 0;
+}
+.sideIcon5{
+	background-position: -152px 0;
+}
+.sideIcon6{
+	background-position: -190px 0;
+}
+.sideTab li .sideName{
+	color: #D2D2D2;
+	font-size: 12px;
+}
+.sideBar .recording{
+    background: #191B1D;
+}
+.sideBar .recording .sideName{
+	color: #F3033B;
+}
+.sideTab li:hover .blackCircle{
+	background: #191B1D;
+}
+.sideTab li:hover .course{
+	display: block;
+}
+.course{
+	width: 206px;
+	padding: 11px 5px 0;
+	height: 459px;
+	background: #24272A;
+	position: absolute;
+	left: 81px;
+	top: -40px;
+	border-left: 1px solid #3A3F43;
+	display: none;
+}
+.course .addBtn{
+	display: block;
+	width: 195px;
+	height: 25px;
+	line-height: 25px;
+	text-align: center;
+	background: #3A3F43;
+	border-radius:6px;
+	color: #D2D2D2;
+	margin-bottom: 3px;
+}
+.course .support{
+	height: 30px;
+	line-height: 30px;
+	border-bottom: 1px solid #3A3F43;
+	font-size: 12px;
+	color: #D2D2D2;
+	text-align: left;
+	padding-left: 5px;
+}
+.course .list{
+	height: 385px;
+	padding-top: 24px;
+	overflow-y: scroll;
+}
+.course .list::-webkit-scrollbar {
+	width: 8px;
+}
+.course .list::-webkit-scrollbar-track {
+	background: #24272A;
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
+.course .list::-webkit-scrollbar-thumb {
+	background: #3A3F43;
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
+.course .list .between{
+	width: 100%;
+	text-align: center;
+	margin-bottom: 20px;
+}
+.course .list .between>div{
+	width: 114px;
+}
+.course .list .between label{
+	display: block;
+	width: 28px;
+	height: 28px;
+	line-height: 28px;
+	border-radius: 3px;
+	margin: 0 auto;
+}
+.course .list .between label.ppt{
+	background: #F34E19;
+	font-size: 18px;
+}
+.course .list .between label.pdf{
+	background: #D93838;
+	font-size: 13px;
+}
+.course .list .between label.word{
+	background: #3A80FC;
+	font-size: 18px;
+}
+.course .list .between label.excel{
+	background: #039E55;
+	font-size: 18px;
+}
+.course .list .between span{
+	display: block;
+	font-size: 13px;
+	color: #D2D2D2;
+	margin-top: 10px;
+}
+.course .list .between .Btn,.course .list .between .delbtn{
+	width: 43px;
+	height: 18px;
+	line-height: 18px;
+	text-align: center;
+	border-radius: 8px;
+	color: #fff;
+	margin-right: 9px;
+	font-size: 12px;
+}
+.course .list .between .share{
+	background: #3C9CFE;
+}
+.course .list .between .cancel{
+	background: #3C9CFE;
+}
+.delbtn{
+	font-size: 12px;
+	margin-bottom: 5px;
+    background: #F5685E;
+    margin-top: 5px;
+}		
+
+
+.room-left{
+    position: absolute;
+    left: 0px;
+    right: 350px;
+    top: 44px;
+    bottom: 7px;
+	background: #2E3037;
+    overflow: hidden;
+}
+
+.room-right{
+    position: absolute;
+    top: 37px;
+    bottom: 0px;
+    right: 0px;
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0px 2px 5px #1B1D21;
+    border-left: 1px solid #4C4E53;
+}
+
+.room-right .teachervideo{
+    width: 100%;
+    height: 275px;
+    position: relative;
+}
+
+.room-right .livevideo .videobg{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 10;
+}
+
+.room-right .studentvideo{
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    
+}
+.room-right .studentvideo .livevideo{
+    width: 50%;
+    height: 175px;
+}
+
+.room-right .nav{
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+
+.room-right .nav-tabs{
+    border-bottom: 1px solid #D2D2D2;
+}
+
+.room-right .nav-tabs .nav-link {
+    border: none;
+    background-color: #2E3037;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    height: 50px;
+    line-height: 50px;
+    padding: 0px;
+    border-top: 1px solid #4C4E53;
+    border-bottom: 1px solid #4C4E53;
+    display: block;
+    color:#D2D2D2;
+}
+
+.room-right .nav-tabs .nav-link.active {
+    background-color: #34363B;
+    border-bottom: 1px solid #34363B;
+}
+
+.room-right .nav-fill .nav-item{
+    width: 50%;
+}
+
+.room-right .nav-fill .nav-item{
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+.room-right .nav-tabs .nav-item{
+    margin-bottom: -1px;
+}
+
+.room-right .tab-content {
+    width: 100%;
+}
+
+.room-right .tab-content .tabdiv {
+    width: 100%;
+    position: absolute;
+    top: 325px;
+    /* top: 500px; */
+    right: 0px;
+    bottom: 0px;
+    display: flex;
+    flex-direction: column;
+}
+
+.room-right .chatroom-list {
+    overflow-y: auto;
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding: 15px;
+    line-height: 28px;
+    word-wrap: break-word;
+    color:#D2D2D2;
+    word-break:break-all;
+}
+
+#student-list>div{
+    height: 35px;
+    line-height: 35px;
+}
+
+#student-list>div img{
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin-right: 15px;
+    margin-bottom: 2px;
+}
+
+#student-list>div img[src=""],#student-list>div img:not([src]){
+    opacity:0;
+}
+
+#student-list .yellow,#chatroom-list .yellow{
+    color: #FF9900;
+}
+
+#student-list>div:hover a{
+    display:inline-block;
+}
+
+#student-list>div a{
+    margin-left: 10px;
+    color: #fff;
+    padding: 0px 10px;
+    background: #3C9CFE;
+    border-radius: 5px;
+    height: 30px;
+    line-height: 30px;
+    display: none;
+}
+
+
+
+
+.room-right .chatroom-speaking {
+    position: static;
+    bottom: 0px;
+    left: 0px;
+    border-top: solid 1px #4C4E53;
+    padding: 8px;
+}
+
+.room-right .chatroom-text {
+    position: relative;
+}
+
+.room-right .chatroom-text input {
+    width: 280px;
+    height: 50px;
+    padding: 15px;
+    background-color: transparent;
+    border: 1px solid #3C9CFE;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+    color: #D2D2D2;
+}
+
+.room-right .chatroom-text button {
+    position: absolute;
+    left: 280px;
+    top: 0px;
+    border: none;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: #3C9CFE;
+    width: 53px;
+    height: 50px;
+    line-height: 50px;
+    cursor: pointer;
+    color: #ffffff;
+}
+
+#paint_box{
+	height:100%!important;
+}
+
+.status{
+	width: 100%;
+	height: 100%;
+	color: #fff;
+	font-size: 16px;
+	position: absolute;
+    left: 0;
+    top: 0;
+	z-index: 999;
+}
+.status .tag{
+	padding: 0px 20px;
+	height: 66px;
+	line-height: 66px;
+	text-align: center;
+	border-radius: 18px;
+	font-size: 22px;
+	color: #fff;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin: -33px 0 0 -113px;
+	z-index: 1;
+}
+.status .start{
+    background: #3C9CFE;
+}
+.status .end{
+	background: #979797;
+}
+
+.maxWindow{
+	width: 50%;
+	background: #000000;
+	position: absolute;
+	top: 22px;
+	left: 25%;
+	z-index: 1000;
+	overflow: hidden;
+	display: none;
+}
+.maxWindow .icon-close{
+	color: #686868;
+	font-size: 30px;
+	font-weight: bold;
+	position: absolute;
+	right: 20px;
+	top: 15px;
+	z-index: 1;
+	cursor: pointer;
+}
+.without,.with{
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	overflow: hidden;
+}
+.without .icon-shexiangtou{
+	font-size: 250px;
+	color: #686868;
+}
+.without .icon-xiantiao{
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin: -138px 0 0 -139px;
+	font-size: 260px;
+	color: #686868;
+}
+
+.room-left .boardTab{
+	max-width: calc(100% - 300px);
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	z-index: 100;
+	margin: 0!important;
+}
+.boardTab li{
+	float: left;
+	height: 34px;
+	line-height: 36px;
+	border-radius: 12px 12px 0 0;
+	-webkit-border-radius: 12px 12px 0 0;
+	background: #8D919E;
+	color: #fff;
+	margin-right: 1px;
+	padding: 0 18px;
+	cursor: pointer;
+}
+.boardTab li.active{
+	background: #60636E;
+}
+
+.operate{
+	width: 300px;
+	height: 51px;
+	position: absolute;
+	bottom: 0;
+	right: 48px;
+	color: #fff;
+	justify-content: center;
+	font-size: 12px;
+	background: rgb(36,39,42);
+	border-radius: 10px;
+	z-index: 200
+}
+.up_down{
+	width: 120px;
+	height: 31px;
+	position: relative;
+}
+.allPage{
+	display: block;
+	width: 120px;
+	height: 31px;
+	line-height: 31px;
+	text-align: center;
+	color: #ccc;
+	font-size: 12px;
+}
+#page{
+	width: 120px;
+	height: 31px;
+	margin: 0;
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 1;
+}
+.layui-laypage a{
+	width: 31px;
+	height: 31px;
+	border: 1px solid #fff;
+	border-radius: 50%;
+	padding: 0!important;
+	margin: 0!important;
+	background-image: url('/vendor/livetool/images/bottomTools.png');
+	background-repeat: no-repeat;
+	border: none;
+	text-indent: -9999px;
+	outline: none;
+	background-color:transparent!important;
+}
+.layui-laypage{
+	width: 100%;
+	margin: 0!important;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+
+}
+.layui-laypage a:first-child{
+	background-position: 0 0;
+}
+.layui-laypage a:last-child{
+	background-position: -31px 0;
+}
+.operate span.add,.operate span.del{
+	width: 31px;
+	height: 31px;
+	background-image: url('/vendor/livetool/images/bottomTools.png');
+	background-repeat: no-repeat;
+	text-indent: -9999px;
+	outline: none;
+	margin-left:25px;
+	cursor: pointer;
+}
+.operate span.add{
+	background-position: -62px 0;
+}
+.operate span.del{
+	background-position: -93px 0;
+}
+
+
+
+
+.edu-toolbar-box{
+	width: 48px;
+	background: #24272A;
+	position: absolute;
+	right: 0;
+	top: 120px;
+    z-index: 100;
+}
+
+.edu-toolbar-box .edu-toolbar-menu{
+   margin: 5px 8px;
+}
+
+.edu-toolbar-box .edu-toolbar-menu>li{
+   width: 32px;
+   height: 32px;
+   border-radius: 10%;
+   background:#24272A;
+   padding: 5px;
+   position: relative;
+   margin-bottom: 6px;
+}
+
+.edu-toolbar-box .edu-toolbar-menu>li:hover{
+   background:#191b1d;
+}
+
+.tool-bgcolor .choose-state .tool {
+  background-image: url(/images/mini-class-201801301143.png);
+  background-position: -30px -102px;
+}
+
+.tool-bgcolor .choose-state span {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #ffffff;
+}
+
+.bg-blue {
+  background-color: #006eff;
+}
+
+.bg-red {
+  background-color: #ff0100;
+}
+
+.bg-green {
+  background-color: #0c0;
+}
+
+.bg-yellow {
+  background-color: #ff9903;
+}
+
+.bg-black {
+  background-color: #000;
+}
+
+.bg-gray {
+  background-color: #ccc;
+}
+
+.choose-drop-down {
+  position: absolute;
+  right: 40px;
+  top: -3px;
+  font-size: 0;
+  line-height: 39px;
+  background-color: rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  vertical-align: middle;
+  padding: 0 5px;
+  z-index: 100;
+  display: none;
+}
+
+.choose-drop-down > ul > li {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.choose-drop-down > ul > li > span {
+  display: inline-block;
+  width: 24px;
+  height: 20px;
+  line-height: 16px;
+  vertical-align: middle;
+  font-size: 12px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.graphical .choose-drop-down > ul li {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  padding: 5px;
+  border: 1px solid transparent;
+  line-height: 1;
+}
+
+.graphical .choose-drop-down > ul li.hover {
+  border-radius: 2px;
+  border: 1px solid #ddd;
+}
+
+.graphical .graphical-square-empty {
+  height: 20px;
+  width: 24px;
+  border: 2px solid #ccc;
+  margin: 0;
+}
+
+.graphical .graphical-square-entity {
+  height: 20px;
+  width: 24px;
+  border: 2px solid #ccc;
+  margin: 0;
+  background-color: #ccc;
+}
+
+.graphical .graphical-ellipse-empty {
+  height: 20px;
+  width: 24px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  margin: 0;
+}
+
+.graphical .graphical-ellipse-entity {
+  height: 20px;
+  width: 24px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  margin: 0;
+  background-color: #ccc;
+}
+
+.graphical .choose-drop-down {
+  height: auto;
+  line-height: initial;
+}
+
+.graphical .graphical-title {
+  font-size: 10px;
+  color: #fff;
+  line-height: 14px;
+  text-align: left;
+  padding: 5px 10px;
+}
+
+.graphical .graphical-size .paint-brush-size-4 {
+  width: 4px;
+  height: 4px;
+}
+
+.graphical .graphical-size .paint-brush-size-8 {
+  width: 8px;
+  height: 8px;
+}
+
+.graphical .graphical-size .paint-brush-size-12 {
+  width: 12px;
+  height: 12px;
+}
+
+.graphical .graphical-size span {
+  background-color: #bbb;
+  border-radius: 50%;
+  margin: 0 10px;
+}
+
+.paint-brush ul > li.hover span {
+  background-color: #fff;
+}
+
+.paint-brush ul > li span {
+  background-color: #bbb;
+  border-radius: 50%;
+  margin: 0 10px;
+}
+
+.paint-brush .paint-brush-size-4 {
+  width: 4px;
+  height: 4px;
+}
+
+.paint-brush .paint-brush-size-8 {
+  width: 8px;
+  height: 8px;
+}
+
+.paint-brush .paint-brush-size-12 {
+  width: 12px;
+  height: 12px;
+}
+
+.roomicon{background-image: url(/vendor/livetool/images/roomicon.png);display: inline-block;}
+
+.ri-tools1 {
+  width: 22px;
+  height: 22px;
+  background-position: 0px 0px;
+}
+
+.ri-tools2 {
+  width: 22px;
+  height: 22px;
+  background-position: -22px 0px;
+}
+
+.ri-tools3 {
+  width: 22px;
+  height: 22px;
+  background-position: -44px 0px;
+}
+
+.ri-tools4 {
+  width: 22px;
+  height: 22px;
+  background-position: -66px 0px;
+}
+
+.ri-tools5 {
+  width: 22px;
+  height: 22px;
+  background-position: -88px 0px;
+}
+
+.ri-tools6 {
+  width: 22px;
+  height: 22px;
+  background-position: -110px 0px;
+}
+
+.ri-tools7 {
+  width: 22px;
+  height: 22px;
+  background-position: -132px 0px;
+}
+
+.ri-tools8 {
+  width: 22px;
+  height: 22px;
+  background-position: -154px 0px;
+}
+
+.ri-tools9 {
+  width: 22px;
+  height: 22px;
+  background-position: -176px 0px;
+}
+
+.ri-tools10 {
+  width: 22px;
+  height: 22px;
+  background-position: -198px 0px;
+}
+
+.ri-tools11 {
+  width: 22px;
+  height: 22px;
+  background-position: -220px 0px;
+}
+
+
+.relayBox{
+	width: 100%;
+	height: 30.5%;
+	padding: 0 14px;
+	border-top: 1px solid #303342;
+	position: relative;
+} 
+.relayBox textarea{
+	display: block;
+	width: 80%;
+	height: 85%;
+	margin-top: 3.8%;
+	resize: none;
+	background: none;
+	color: #fff;
+}
+.relayBox textarea::-webkit-scrollbar {
+	width: 5px;
+}
+.relayBox textarea::-webkit-scrollbar-track {
+	background: #3E414A;
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
+.relayBox textarea::-webkit-scrollbar-thumb {
+	background: #383941;
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
+.send{
+	width: 16.9%;
+	height: 1.8rem;
+	background: #3C9CFE;
+	align-items: center;
+	justify-content: center;
+	font-size: 13px;
+	border-radius: 4px;
+	color: #fff;
+	position: absolute;
+	top: 10px;
+	right: 14px;
+}
+.askBox{
+	width: 100%;
+	height: 90.5%;
+	padding: 20px 14px;
+	overflow-y: scroll;
+	display: none;
+}
+.askBox::-webkit-scrollbar {
+	width: 8px;
+}
+.askBox::-webkit-scrollbar-track {
+	background: #3E414A;
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
+.askBox::-webkit-scrollbar-thumb {
+	background: #383941;
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius:2em;
+}
+.askBox ul li{
+	line-height: 21px;
+	color: #fff;
+	margin-bottom: 15px;
+}
+
+/* ============è®¾å¤‡æ£€æµ‹============ */
+.testBg{
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 1000;
+    display: none;
+}
+.testBox{
+    width: 560px;
+    background: #fff;
+    margin: 50px auto 0;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -242px 0 0 -280px;
+    z-index: 100;
+}
+.testBox .title{
+    padding: 0 32px 0 27px;
+    height: 70px;
+    line-height: 70px;
+    border-bottom: 1px solid #DEDEDE;
+}
+.testBox .title h4{
+    font-size: 20px;
+    color: #333;
+}
+.testBox .title .icon-close{
+    font-size: 26px;
+    color: #666;
+    cursor: pointer;
+}
+.testContent{
+    padding: 24px 115px 0;
+}
+.videoBox{
+    width: 330px;
+    height: 170px;
+    background: url('/images/videoBg.png');
+    margin-bottom: 23px;
+}
+.videoBox #video{
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.selectBox{
+    margin-bottom: 15px;
+    align-items: center;
+}
+.selectBox .layui-form-select{
+    width: 265px;
+}
+.testBtns{
+    height: 55px;
+    padding: 12px 39px 13px;
+    border-top: 1px solid #DEDEDE;
+    margin-top: 20px;
+}
+.testBtns .keepBtn{
+    float: right;
+    width: 83px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    background: #00B1F6;
+    color: #fff;
+    border-radius: 3px;
+}
+
+.handBtn{
+	width: 66px;
+	height: 66px;
+	background: #46474D;
+	position: fixed;
+	right: 0.57%;
+	bottom: 250px;
+	z-index: 100;
+	border-radius: 50%;
+	-webkit-border-radius: 50%;
+	color: #D2D2D2;
+	justify-content: center;
+	cursor: pointer;
+}
+.handBtn .icon-jushou{
+	font-size: 30px;
+    margin-left: 5px;
+}
+
+
+.TelCourse,#qqq,.PortDiscussTitle{
+	display: none;
+}
+
+.layui-progress{
+	width: 190px!important;
+	height: 20px!important;
+	position: fixed;
+    left: 50%;
+    top: 50%;
+	margin: -10px 0 0 -95px;
+	z-index: 100;
+	background: #3A3F43;
+	box-shadow: inset 0 2px 3px #2E3037;
+	border-radius:10px;
+	display: none;
+}
+.loading{
+	width: 70px;
+	height: 20px;
+	line-height: 20px;
+	background: #FF9900;
+	color: #fff;
+	border-radius:10px;
+	position: absolute;
+	left: -56px;
+	top: 0;
+	z-index: 1;
+}
+.loading img{
+	display: block;
+	width: 70px;
+	height: 20px;
+}
+
+.layui-progress-bar{
+	height: 20px!important;
+	background: #FF9900;
+}
+
+
+/*å…¨å±æ˜¾ç¤ºæŒ‰é’®*/
+.fullBtn{
+	width: 66px;
+    height: 66px;
+    background: #46474D;
+    position: fixed;
+    right: 0.57%;
+    bottom: 100px;
+    z-index: 100;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    color: #D2D2D2;
+    display: flex;
+    justify-content: center;
+    align-items:center;
+    cursor: pointer;
+    line-height: 16px;
+}
+
+.straight-line .draw_line_solid{
+	height: 2px;
+	border-top:2px solid #bbb;
+}
+
+.straight-line .draw_line_dotted{
+	height: 2px;
+	border-top:2px dashed #bbb;
+}
+.checkNet{
+	margin-left:10px;
+}
+.netSpeed{
+    color: #1cda81;
+}
+
+.layui-layer .layui-layer-wrap{
+    height: 100%;
+}
+.layui-layer .videodiv img{
+	width:50%;
+	height: auto;
+	left:25%;
+}
+.layui-layer .videodiv video{
+    object-fit: contain!important;
+}
+
+.layui-layer .layui-layer-setwin .layui-layer-close2{
+    right:10px;
+}
+
+.righticon{
+    width: 20%;
+    justify-content: flex-end;
+}
+
+
+.teachervideo .speakicon{
+    width: 13px;
+    height: 14px;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -37px 0px;
+    display: inline-block;
+}
+
+.teachervideo.speaking .speakicon{
+    width: 13px;
+    height: 14px;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -24px 0px;
+    display: inline-block;
+}
+
+.studentvideo .speakicon{
+    width: 13px;
+    height: 14px;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -24px 0px;
+    display: inline-block;
+}
+
+.roomicon1{
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: 0px 0px;
+}
+
+.roomicon2{
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -12px 0px;
+}
+
+.roomicon3{
+    width: 13px;
+    height: 14px;
+    display: inline-block;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -24px 0px;
+}
+
+.roomicon4{
+    width: 13px;
+    height: 14px;
+    display: inline-block;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -37px 0px;
+}
+
+.roomicon5{
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -50px -2px;
+}
+
+.roomicon6{
+    width: 13px;
+    height: 14px;
+    display: inline-block;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -62px 0px;
+}
+
+.network3{
+    width: 19px;
+    height: 14px;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -75px 0px;
+}
+
+.network2{
+    width: 13px;
+    height: 10px;
+    position: absolute;
+    left: 0px;
+    top: 3px;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -94px -4px;
+}
+
+.network1{
+    width: 13px;
+    height: 11px;
+    position: absolute;
+    left: 0px;
+    top: 3px;
+    background-image: url(/vendor/livetool/images/icon.png);
+    background-position: -107px -3px;
+}

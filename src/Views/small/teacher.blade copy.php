@@ -46,19 +46,20 @@
                     <span>{{$course['title']}}</span>
                     <span>在线学员（<b class="stucount">0</b>人）</span>
                     <!-- 只展示一种 -->
-                    <span class="roomtime">开课时间：<b>00:00</b></span>
-                    <span class="span_red" style="display: none;">请点击右方上课按钮立即开课！</span>
+                    <span>开课时间：<b class="roomtime">00:00</b></span>
+                    <!-- <span class='span_orange'>剩余时间：<b class="roomtime">00:00</b></span>
+                    <span class='span_red'>拖堂时间：<b class="roomtime">00:00</b>（拖堂20分钟自动下课）</span> -->
                     @if(!$course['endtime'])
                     <!--下课不检测网络状态-->
                     <span class="checkNet">您当前网络状态：<b class="netStatus">--</b></span>
                     <span>当前网速：<b class="netSpeed">0K/S</b></span>
                     @endif
-                    @if($room['roomrecord']==1)
+                    {{-- @if($room['roomrecord']==1) --}}
                     <a class='span_red span_record' data-record="1" href="javascript:;">
                         <img src="/vendor/livetool/images/img_record.png" alt="">
                         录制中
                     </a>
-                    @endif
+                    {{-- @endif --}}
                     <a id="startbtn" class="startBtn @if($course['status'] != 0) hide @endif" href="javascript:;">开始上课</a>
                     <a id="endbtn" class="overBtn @if($course['status'] != 1) hide @endif" href="javascript:;">下课</a>
                 </div>
@@ -74,9 +75,10 @@
                <div class="layui-progress-bar" lay-percent="0%"></div>
             </div>
             
+            
             <div class="roommain">
                 <div class="gatherBox"></div>
-
+                
                 <!-- 侧边栏 -->
                 <div class="sideBar" @if($course['status']==2) style="display: none;" @endif>
                     <ul class="sideTab">
@@ -147,11 +149,11 @@
                     @endif
                     <!-- 课件按钮 -->
                     <div class="boardTab clearfix"></div>
-                    <div id="edu-toolbar-fieldset" style="width: 225px;position: absolute;left: 30px;top: 10px;z-index: 1;">
+                    <div id="edu-toolbar-fieldset" style="width: 225px;position: absolute;left: 30px;top: 10px;z-index: 1; display:none;">
                         <fieldset class="layui-elem-field layui-field-title" id="slideTest1" title="拖动放大白板"></fieldset>
                         <div class="percentBox"><span id="percentShow">0</span>%</div>
                     </div>
-                    <div id="edu-toolbar-box" class="edu-toolbar-box">
+                    <div id="edu-toolbar-box" class="edu-toolbar-box" style="display: none;">
                         <ul class="edu-toolbar-menu">
                             <li class="tool-bgcolor" title="色板">
                                 <div class="choose-state showoption"><span class="bg-red"></span></div>
@@ -281,7 +283,7 @@
                         <li class="active">讨论</li>
                     </ul>
                     <div class="btns row">
-                        <span class="iconfont icon-liaotian banbtn" title=""></span>
+                        <span class="iconfont icon-liaotian banbtn" title="@if($room['roomchat']==1)禁止全员讨论@else允许全员讨论@endif"></span>
                         <span class="iconfont icon-close closebtn" title="关闭"></span>
                     </div>
                 </div>
@@ -326,10 +328,16 @@
                 </div>
             </div>
 
-            <div class="handUpBtn align_item">
-                <i class="handimg handimg1"></i>
-                <span><span class="handcount">0</span>/{{$course['down_top']+$course['up_top']}}</span>
-                <div class='handUpList'></div>
+            <div class="handUpBtn align_item shan">
+                <img src="/vendor/livetool/images/hand.png" alt="">
+                <!-- <img src="/vendor/livetool/images/hand_no.png" alt=""> -->
+                <span>0/25</span>
+                <div class='handUpList'>
+                    <p>郑菲<img src="/vendor/livetool/images/hmc_up.png" alt=""></p>
+                    <p>郑菲</p>
+                    <p>郑菲</p>
+                    <p>郑菲</p>
+                </div>
             </div>
 
             <!-- 在线人数 end -->
@@ -341,6 +349,7 @@
 <script src="/vendor/livetool/js/jquery.min.js"></script>
 <script src="/vendor/livetool/font/iconfont.js"></script>
 <script src="/vendor/livetool/layui/layui.js"></script>
+<script src="/vendor/livetool/js/small/live.js"></script> 
 <!-- axios SDK -->
  <script src="https://resources-tiw.qcloudtrtc.com/thirdpart/axios/axios.min.js"></script>
 <!-- WebRTC SDK -->				  
@@ -373,4 +382,3 @@
 </script>
 <script src="/vendor/livetool/js/small/loadroom.js"></script>
 <script src="/vendor/livetool/js/checkNetwork.js?t="+Math.random()></script>
-<script src="/vendor/livetool/js/small/live.js"></script> 

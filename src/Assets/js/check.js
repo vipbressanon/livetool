@@ -1,25 +1,31 @@
 var check = function () {
-    const videoElement = document.querySelector('#video');
-    const audioInputSelect = document.querySelector('select#audioSource');
-    const audioOutputSelect = document.querySelector('select#audioOutput');
-    const videoSelect = document.querySelector('select#videoSource');
-    const selectors = [audioInputSelect, audioOutputSelect, videoSelect];
+    var videoElement = document.querySelector('#video');
+    var audioInputSelect = document.querySelector('select#audioSource');
+    var audioOutputSelect = document.querySelector('select#audioOutput');
+    var videoSelect = document.querySelector('select#videoSource');
+    var selectors = [audioInputSelect, audioOutputSelect, videoSelect];
 
     audioOutputSelect.disabled = !('sinkId' in HTMLMediaElement.prototype);
 
     var gotDevices = function(deviceInfos){
+      audioOutputSelect.innerHTML = '';
+      videoSelect.innerHTML = '';
+      videoSelect.innerHTML = '';
+      console.log("gotDevices");
       // Handles being called several times to update labels. Preserve values.
-      const values = selectors.map(select => select.value);
-      selectors.forEach(select => {
-        while (select.firstChild) {
-          select.removeChild(select.firstChild);
-        }
-      });
+      // const values = selectors.map(select => select.value);
+      // selectors.forEach(select => {
+      //   while (select.firstChild) {
+      //     select.removeChild(select.firstChild);
+      //   }
+      // });
+      console.log(deviceInfos.length);
       for (let i = 0; i !== deviceInfos.length; ++i) {
-        const deviceInfo = deviceInfos[i];
-        const option = document.createElement('option');
+        let deviceInfo = deviceInfos[i];
+        let option = document.createElement('option');
         option.value = deviceInfo.deviceId;
         if (deviceInfo.kind === 'audioinput') {
+          console.log('audioinput');
           option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
           audioInputSelect.appendChild(option);
         } else if (deviceInfo.kind === 'audiooutput') {
@@ -32,11 +38,30 @@ var check = function () {
           console.log('Some other kind of source/device: ', deviceInfo);
         }
       }
-      selectors.forEach((select, selectorIndex) => {
-        if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
-          select.value = values[selectorIndex];
+        // selectors.forEach((select, selectorIndex) => {
+        //   if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+        //     select.value = values[selectorIndex];
+        //   }
+        // });
+        // 设备检测显示感叹号   
+        if (audioOutputSelect.children.length == 0 || videoSelect.children.length == 0 || audioInputSelect.children.length == 0) {
+            $(window.parent.document).find('.blackCircle .gantanhao').show();
+        } else {
+            $(window.parent.document).find('.blackCircle .gantanhao').hide();
         }
-      });
+        if ($("#isteacher").val()=="1") {
+            var option1 = document.createElement('option');
+            option1.value = "no";
+            option1.text = "禁用";
+            audioInputSelect.appendChild(option1);
+            var option2 = document.createElement('option');
+            option2.value = "no";
+            option2.text = "禁用";
+            videoSelect.appendChild(option2);
+        }
+        console.log(audioInputSelect);
+        $(audioInputSelect).find("option[value='"+parent.checkmic+"']").attr("selected",true);
+        $(videoSelect).find("option[value='"+parent.checkcamera+"']").attr("selected",true);
     };
     navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
@@ -61,13 +86,12 @@ var check = function () {
     };
 
     var changeAudioDestination = function(){
-        const audioDestination = audioOutputSelect.value;
+        let audioDestination = audioOutputSelect.value;
         attachSinkId(videoElement, audioDestination);
         console.log(videoElement)
     };
 
     var gotStream = function(stream){
-        console.log(stream);
         soundMeter(stream);
         window.stream = stream; // make stream available to console
         videoElement.srcObject = stream;
@@ -76,19 +100,21 @@ var check = function () {
     };
 
     var handleError = function(error){
-         console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+        // 设备检测显示感叹号
+        $(window.parent.document).find('.blackCircle .gantanhao').show();
+        // console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
     };
 
     var start = function (){
+      console.log('start');
         if (window.stream) {
             window.stream.getTracks().forEach(track => {
               track.stop();
             });
         }
-        const audioSource = audioInputSelect.value;
-        console.log(audioSource);
-        const videoSource = videoSelect.value;
-        const constraints = {
+        var audioSource = audioInputSelect.value;
+        var videoSource = videoSelect.value;
+        var constraints = {
             audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
             video: {deviceId: videoSource ? {exact: videoSource} : undefined}
         };
@@ -117,6 +143,7 @@ var check = function () {
         })
     };
 
+
     audioInputSelect.onchange = start;
     audioOutputSelect.onchange = changeAudioDestination;
 
@@ -124,7 +151,7 @@ var check = function () {
 
 
     return {
-        init: function () {
+        init: function (isteacher) {
             start();
         }
     };
