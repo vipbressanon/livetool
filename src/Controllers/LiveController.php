@@ -37,7 +37,7 @@ class LiveController extends Controller
             $rs = new RoomServer();
             // 获取房间信息
             $room = $rs->detail($course['id'], $course['teacher_id']);
-            $user_list = Redis::exists($room['id'].'users')?Redis::get($room['id'].'users'):[];
+            $user_list = Redis::exists($room['id'].'.users')?Redis::get($room['id'].'.users'):[];
             Log::info("redis users",[$user_list]);
             $us = new UsersServer();
             // 获取房间用户信息
