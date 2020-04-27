@@ -315,17 +315,19 @@ class MsgTest extends Command
                 switch ($type) {
                     // 超时强制下课
                     case 'classover':
-                        // 改变直播间状态
-                        $rs = new RoomServer();
-                        $rs->end($content['course_id'], $room_id);
-                        // 关闭录制
-                        $record = new RecordServer();
-                        $record->hander($room_id, 3);
-                        // 结算
-                        $balance = new BalanceServer();
-                        // 10秒以后执行一次结算,定时器只执行一次
-                        //Timer::add(10, [$balance, 'handle'], [$socket->room_id], false);
-                        self::$senderIo->to($socket->room_id)->emit('over');
+                        if (array_key_exists('course_id', $content)) {
+                            // 改变直播间状态
+                            $rs = new RoomServer();
+                            $rs->end($content['course_id'], $room_id);
+                            // 关闭录制
+                            $record = new RecordServer();
+                            $record->hander($room_id, 3);
+                            // 结算
+                            $balance = new BalanceServer();
+                            // 10秒以后执行一次结算,定时器只执行一次
+                            //Timer::add(10, [$balance, 'handle'], [$socket->room_id], false);
+                            self::$senderIo->to($room_id)->emit('over');
+                        }
                         return $httpConnection->send(json_encode(['error'=>'']));
                         break;
                     case 'downtips':
