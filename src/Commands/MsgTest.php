@@ -263,6 +263,9 @@ class MsgTest extends Command
                 if (isset($arr[$request['type']])) {
                     $arr[$request['type']] = $request['status'];
                 }
+                if ($request['type'] == 'roomtype') {
+                    $arr['max'] = $request['status'] == 1 ? $socket->hash_id : '';
+                }
                 $index++;
                 Session::put($socket->room_id.'onoff', ['onoff'=>$arr, 'index'=>$index]);
                 self::$senderIo->to($socket->room_id)->emit(
