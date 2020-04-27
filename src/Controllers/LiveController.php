@@ -6,7 +6,7 @@ use Illuminate\Routing\Controller;
 use View;
 use Illuminate\Http\Request;
 use Auth;
-
+use Illuminate\Support\Facades\Redis;
 use Vipbressanon\LiveTool\Servers\CourseServer;
 use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
@@ -17,11 +17,13 @@ use Session;
 
 class LiveController extends Controller
 {
+
     // 进入直播间
     public function getRoom(Request $request, $hash_id = '')
     {
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
+
         if (!$users) {
             //Auth::guard($auth)->loginUsingId($request->input('uid'));
             //$users = Auth::guard($auth)->user();
@@ -35,6 +37,8 @@ class LiveController extends Controller
             $rs = new RoomServer();
             // 获取房间信息
             $room = $rs->detail($course['id'], $course['teacher_id']);
+            $user_list = Redis::exists($room['id'].'users')?Redis::get($room['id'].'users'):[];
+            Log::info("redis users",[$user_list]);
             $us = new UsersServer();
             // 获取房间用户信息
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
