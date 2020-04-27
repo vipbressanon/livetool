@@ -83,15 +83,15 @@ class MsgTest extends Command
                 // 上台人员处理
                 self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
                 // 更新维护 usersocket数组  用于限制单设备登录
-                $usersocket = Session::has($socket->room_id.'.usersocket')?Session::get($socket->room_id.'.usersocket'):[];
+                $usersocket = Session::has($socket->room_id.'usersocket')?Session::get($socket->room_id.'usersocket'):[];
                 $usersocket[$socket->hash_id] = $socket->id;
-                Session::put($socket->room_id.'.usersocket', $usersocket);
+                Session::put($socket->room_id.'usersocket', $usersocket);
                 // 房间开关初始化
-                if (!Session::has($socket->room_id.'.onoff')) {
-                    Session::put($socket->room_id.'.onoff', ['onoff'=>self::$onoffinit, 'index'=>0]);
+                if (!Session::has($socket->room_id.'onoff')) {
+                    Session::put($socket->room_id.'onoff', ['onoff'=>self::$onoffinit, 'index'=>0]);
                 }
-                $users = Session::get($socket->room_id.'.users');
-                $onoff = Session::get($socket->room_id.'.onoff');
+                $users = Session::get($socket->room_id.'users');
+                $onoff = Session::get($socket->room_id.'onoff');
                 
                 self::$senderIo->to($socket->room_id)->emit(
                     'addusers',
@@ -103,6 +103,7 @@ class MsgTest extends Command
                         'hashid' => $socket->hash_id
                     ]
                 );
+                var_dump(Session::all());
             });
             
             // 讲师创建房间后邀请所有人进入
@@ -173,19 +174,19 @@ class MsgTest extends Command
                 //     }
                 // }
                 // 多地登陆，前者被下线 不走用户退出全网通知
-                $usersocket = Session::get($socket->room_id.'.usersocket')?:[];
+                $usersocket = Session::get($socket->room_id.'usersocket')?:[];
                 if (array_key_exists($socket->hash_id, $usersocket) && $usersocket[$socket->hash_id] != $socket->id) {
                     return;
                 }
-                $arr = Session::get($socket->room_id.'.onoff');
+                $arr = Session::get($socket->room_id.'onoff');
                 if ($socket->hash_id == $arr['onoff']['max']) {
                     $arr['onoff']['max'] = '';
-                    Session::put($socket->room_id.'.onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                    Session::put($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                 }
                 self::userlist($socket->room_id, $socket->hash_id, '', '', 'cut');
                 
-                $users = Session::get($socket->room_id.'.users');
-                $onoff = Session::get($socket->room_id.'.onoff');
+                $users = Session::get($socket->room_id.'users');
+                $onoff = Session::get($socket->room_id.'onoff');
                 
                 self::$senderIo->to($socket->room_id)->emit(
                     'cutusers',
@@ -224,8 +225,8 @@ class MsgTest extends Command
                 $users = [];
                 $index = 0;
                 // 从session读取在线人员信息
-                if (Session::has($socket->room_id.'.users')) {
-                    $arr = Session::get($socket->room_id.'.users');
+                if (Session::has($socket->room_id.'users')) {
+                    $arr = Session::get($socket->room_id.'users');
                     $users = $arr['users'];
                     $index = $arr['index'];
                 }
@@ -237,7 +238,7 @@ class MsgTest extends Command
                     }
                 }
                 $index++;
-                Session::put($socket->room_id.'.users', ['users'=>$users, 'index'=>$index]);
+                Session::put($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
                 self::$senderIo->to($socket->room_id)->emit(
                     'platbatch',
                     [
@@ -252,8 +253,8 @@ class MsgTest extends Command
             // 房间开关设置
             $socket->on('onoff', function ($request) use ($socket)  {
                 $index = 0;
-                if (Session::has($socket->room_id.'.onoff')) {
-                    $onoff = Session::get($socket->room_id.'.onoff');
+                if (Session::has($socket->room_id.'onoff')) {
+                    $onoff = Session::get($socket->room_id.'onoff');
                     $arr = $onoff['onoff'];
                     $index = $onoff['index'];
                 } else {
@@ -263,7 +264,7 @@ class MsgTest extends Command
                     $arr[$request['type']] = $request['status'];
                 }
                 $index++;
-                Session::put($socket->room_id.'.onoff', ['onoff'=>$arr, 'index'=>$index]);
+                Session::put($socket->room_id.'onoff', ['onoff'=>$arr, 'index'=>$index]);
                 self::$senderIo->to($socket->room_id)->emit(
                     'onoff',
                     [
@@ -283,9 +284,9 @@ class MsgTest extends Command
                     $request = json_decode($request, true);
                 }
                 if ($request['type'] == 'MAX') {
-                    $arr = Session::get($socket->room_id.'.onoff');
+                    $arr = Session::get($socket->room_id.'onoff');
                     $arr['onoff']['max'] = $request['text'] == 1 ? $request['hash_id'] : '';
-                    Session::put($socket->room_id.'.onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                    Session::put($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                 }
                 self::$senderIo->to($socket->room_id)->emit('im', $request);
             }); 
@@ -327,10 +328,18 @@ class MsgTest extends Command
                             //Timer::add(10, [$balance, 'handle'], [$socket->room_id], false);
                             self::$senderIo->to($room_id)->emit('over');
                         }
-                        return $httpConnection->send(json_encode(['error'=>'']));
+                        return $httpConnection->send($this->output());
                         break;
                     case 'downtips':
                         self::$senderIo->to($room_id)->emit($type, $content);
+                        break;
+                    case 'userlist':
+                        if (Session::has($room_id.'users')) {
+                            $users = Session::get($room_id.'users');
+                            return $httpConnection->send($this->output(200, '操作成功', $users['users']));
+                        } else {
+                            return $httpConnection->send($this->output(201, '数据不存在'));
+                        }
                         break;
                     default:
                         # code...
@@ -352,8 +361,8 @@ class MsgTest extends Command
         $users = [];
         $index = 0;
         // 从session读取在线人员信息
-        if (Session::has($room_id.'.users')) {
-            $arr = Session::get($room_id.'.users');
+        if (Session::has($room_id.'users')) {
+            $arr = Session::get($room_id.'users');
             $users = $arr['users'];
             $index = $arr['index'];
         }
@@ -368,7 +377,7 @@ class MsgTest extends Command
             }
         }
         $index++;
-        Session::put($room_id.'.users', ['users'=>$users, 'index'=>$index]);
+        Session::put($room_id.'users', ['users'=>$users, 'index'=>$index]);
     }
     
     // 权限处理
@@ -378,8 +387,8 @@ class MsgTest extends Command
         $users = [];
         $index = 0;
         // 从session读取在线人员信息
-        if (Session::has($room_id.'.users')) {
-            $arr = Session::get($room_id.'.users');
+        if (Session::has($room_id.'users')) {
+            $arr = Session::get($room_id.'users');
             $users = $arr['users'];
             $index = $arr['index'];
         }
@@ -390,7 +399,7 @@ class MsgTest extends Command
             $users[$hash_id][$type] = $status;
         }
         $index++;
-        Session::put($room_id.'.users', ['users'=>$users, 'index'=>$index]);
+        Session::put($room_id.'users', ['users'=>$users, 'index'=>$index]);
         return [$hash_id => $users[$hash_id]];
     }
 
@@ -402,8 +411,8 @@ class MsgTest extends Command
         $index = 0;
         $stucount = 0;
         // 从session读取在线人员信息
-        if (Session::has($room_id.'.users')) {
-            $arr = Session::get($room_id.'.users');
+        if (Session::has($room_id.'users')) {
+            $arr = Session::get($room_id.'users');
             $users = $arr['users'];
             $index = $arr['index'];
         }
@@ -422,7 +431,7 @@ class MsgTest extends Command
         }
         
         $index++;
-        Session::put($room_id.'.users', ['users'=>$users, 'index'=>$index]);
+        Session::put($room_id.'users', ['users'=>$users, 'index'=>$index]);
         return [$hash_id => $users[$hash_id]];
     }
     
@@ -434,8 +443,8 @@ class MsgTest extends Command
         $index = 0;
         $stucount = 0;
         // 从session读取在线人员信息
-        if (Session::has($room_id.'.users')) {
-            $arr = Session::get($room_id.'.users');
+        if (Session::has($room_id.'users')) {
+            $arr = Session::get($room_id.'users');
             $users = $arr['users'];
             $index = $arr['index'];
         }
@@ -444,7 +453,19 @@ class MsgTest extends Command
         $users[$hash_id]['voice'] = 0;
         $users[$hash_id]['camera'] = 0;
         $index++;
-        Session::put($room_id.'.users', ['users'=>$users, 'index'=>$index]);
+        Session::put($room_id.'users', ['users'=>$users, 'index'=>$index]);
         return [$hash_id => $users[$hash_id]];
+    }
+    
+    private function output($code = 200, $msg = '操作成功', $data = [])
+    {
+        $json = [
+            'meta' => [
+                'code' => $code,
+                'msg' => $msg
+            ],
+            'data' => $data
+        ];
+        return json_encode($json);
     }
 }
