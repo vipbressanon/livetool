@@ -5,6 +5,7 @@ use DB;
 use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomBlack;
 use Vipbressanon\LiveTool\Servers\ApiServer;
+use App\Common\SendRequest;
 
 class RoomServer
 {
@@ -13,7 +14,7 @@ class RoomServer
     {
     }
 
-    public function detail($course_id, $teacher_id)
+    public function detail($course_id, $teacher_id,$users_hash_id)
     {
         $res = Room::select('id', 'hash_id', 'course_id', 'roomtype', 'roomchat', 'roomspeak', 'roomhand', 'roomrecord')
                 ->where('course_id', $course_id)
@@ -36,6 +37,24 @@ class RoomServer
             $res->hash_id = $data ? $data->hash_id : '';
             $res->save();
         }
+        $request = new SendRequest();
+        $url = 'http://47.94.254.25:3121'.'/?type=userlist&room_id='.$res->id;
+        $re = $request->sendRequest($url,[],[],'GET');  
+        $re = json_decode(json_encode($re),true);  
+        $online_num = 0;
+        $white_3 = DB::table('course_word_white')
+            ->where('type','=',3)
+            ->where('course_id','=',$course_id)
+            ->count();
+        if($re['meta']['code'] == '200'){
+            foreach ($re['data'] as $k => $v) {
+                if($k == $users_hash_id) continue;
+                if(!$v['isteacher']) $online_num++;
+            }
+        }else{
+            $online_num = $white_3-1;
+        }
+        
         return [
             'id' => $res->id,
             'hash_id' => $res->hash_id,
@@ -44,7 +63,8 @@ class RoomServer
             'roomchat' => $res->roomchat,
             'roomspeak' => $res->roomspeak,
             'roomhand' => $res->roomhand,
-            'roomrecord' => $res->roomrecord
+            'roomrecord' => $res->roomrecord,
+            'online_num' =>  $online_num
         ];
     }
     
