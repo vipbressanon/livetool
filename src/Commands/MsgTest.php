@@ -9,6 +9,7 @@ use PHPSocketIO\SocketIO;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use Vipbressanon\LiveTool\Servers\CourseServer;
 use Vipbressanon\LiveTool\Servers\RecordServer;
+use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
 
@@ -291,13 +292,13 @@ class MsgTest extends Command
             
             // 连接检测心跳包
             $socket->on('heart', function ($request) use ($socket) {
-				$time = isset($request['time']) ? $request['time'] : time();
+                $time = isset($request['time']) ? $request['time'] : time();
                 $socket->emit('heart', $time);
             });
         });
         
         // 当self::$senderIo启动后监听一个http端口，通过这个端口可以给任意uid或者所有uid推送数据
-        self::$senderIo->on('workerStart', function ($socket) {
+        self::$senderIo->on('workerStart', function () {
             // 监听一个http端口
             $innerHttpWorker = new Worker('http://0.0.0.0:3121');
             // 当http客户端发来数据时触发
@@ -305,14 +306,24 @@ class MsgTest extends Command
                 $type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
                 $content = isset($_REQUEST['content']) ? $_REQUEST['content'] : '';
                 $room_id = isset($_REQUEST['room_id']) ? $_REQUEST['room_id'] : '';
-                
                 // 推送数据的url格式 type=publish&to=uid&content=xxxx
                 if ($room_id == '') {
                     return $httpConnection->send(json_encode(['error'=>'暂不支持全局消息']));
                 }
                 switch ($type) {
+                    // 超时强制下课
                     case 'classover':
-                        self::$senderIo->to($room_id)->emit($type, $content);
+                        // 改变直播间状态
+                        $rs = new RoomServer();
+                        $rs->end($content['course_id'], $room_id);
+                        // 关闭录制
+                        $record = new RecordServer();
+                        $record->hander($room_id, 3);
+                        // 结算
+                        $balance = new BalanceServer();
+                        // 10秒以后执行一次结算,定时器只执行一次
+                        //Timer::add(10, [$balance, 'handle'], [$socket->room_id], false);
+                        self::$senderIo->to($socket->room_id)->emit('over');
                         return $httpConnection->send(json_encode(['error'=>'']));
                         break;
                     case 'downtips':
