@@ -14,7 +14,7 @@ class RoomServer
     {
     }
 
-    public function detail($course_id, $teacher_id,$users_hash_id)
+    public function detail($course_id, $teacher_id,$users_hash_id=0,$isteacher=0)
     {
         $res = Room::select('id', 'hash_id', 'course_id', 'roomtype', 'roomchat', 'roomspeak', 'roomhand', 'roomrecord')
                 ->where('course_id', $course_id)
@@ -42,18 +42,21 @@ class RoomServer
         $re = $request->sendRequest($url,[],[],'GET');  
         $re = json_decode(json_encode($re),true);  
         $online_num = 0;
-        $white_3 = DB::table('course_word_white')
-            ->where('type','=',3)
-            ->where('course_id','=',$course_id)
-            ->count();
-        if($re['meta']['code'] == '200'){
-            foreach ($re['data'] as $k => $v) {
-                if($k == $users_hash_id) continue;
-                if(!$v['isteacher']) $online_num++;
+        if($isteacher){
+            $white_3 = DB::table('course_word_white')
+                ->where('type','=',3)
+                ->where('course_id','=',$course_id)
+                ->count();
+            if($re['meta']['code'] == '200'){
+                foreach ($re['data'] as $k => $v) {
+                    if($k == $users_hash_id) continue;
+                    if(!$v['isteacher']) $online_num++;
+                }
+            }else{
+                $online_num = $white_3-1;
             }
-        }else{
-            $online_num = $white_3-1;
         }
+        
         
         return [
             'id' => $res->id,
