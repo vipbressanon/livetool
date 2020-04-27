@@ -11,7 +11,7 @@ use Vipbressanon\LiveTool\Servers\CourseServer;
 use Vipbressanon\LiveTool\Servers\RecordServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
-
+use Illuminate\Support\Facades\Redis;
 use Log;
 use Session;
 
@@ -228,6 +228,7 @@ class MsgTest extends Command
                 }
                 $index++;
                 Session::put($socket->room_id.'.users', ['users'=>$users, 'index'=>$index]);
+                Redis::set($socket->room_id.'.users',['users'=>$users, 'index'=>$index]);
                 self::$senderIo->to($socket->room_id)->emit(
                     'platbatch',
                     [
@@ -346,6 +347,7 @@ class MsgTest extends Command
         }
         $index++;
         Session::put($room_id.'.users', ['users'=>$users, 'index'=>$index]);
+        Redis::set($room_id.'.users',['users'=>$users, 'index'=>$index]);
     }
     
     // 权限处理
@@ -368,6 +370,7 @@ class MsgTest extends Command
         }
         $index++;
         Session::put($room_id.'.users', ['users'=>$users, 'index'=>$index]);
+        Redis::set($room_id.'.users',['users'=>$users, 'index'=>$index]);
         return [$hash_id => $users[$hash_id]];
     }
 
@@ -400,6 +403,7 @@ class MsgTest extends Command
         
         $index++;
         Session::put($room_id.'.users', ['users'=>$users, 'index'=>$index]);
+        Redis::set($room_id.'.users',['users'=>$users, 'index'=>$index]);
         return [$hash_id => $users[$hash_id]];
     }
     
@@ -422,6 +426,7 @@ class MsgTest extends Command
         $users[$hash_id]['camera'] = 0;
         $index++;
         Session::put($room_id.'.users', ['users'=>$users, 'index'=>$index]);
+        Redis::set($room_id.'.users',['users'=>$users, 'index'=>$index]);
         return [$hash_id => $users[$hash_id]];
     }
 }
