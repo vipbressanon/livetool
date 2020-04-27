@@ -183,9 +183,18 @@ class MsgTest extends Command
                     Session::put($socket->room_id.'.onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                 }
                 self::userlist($socket->room_id, $socket->hash_id, '', '', 'cut');
+                
+                $users = Session::get($socket->room_id.'.users');
+                $onoff = Session::get($socket->room_id.'.onoff');
+                
                 self::$senderIo->to($socket->room_id)->emit(
                     'cutusers',
-                    Session::get($socket->room_id.'.users')
+                    [
+                        'users' => $users['users'],
+                        'index' => $users['index'],
+                        'onoff' => $onoff['onoff']
+                    ]
+                    
                 );
             });
             
