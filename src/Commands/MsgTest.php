@@ -65,8 +65,9 @@ class MsgTest extends Command
             // 登录
             // 传参：room_id(房间id), hash_id(登录人哈希), isteacher(是否讲师), platform(来源)
             $socket->on('login', function ($request) use ($socket) {
-                var_dump('login');
+                var_dump('login111');
                 var_dump($socket->id);
+                
                 if (!is_array($request)) {
                     $request = json_decode($request, true);
                 }
@@ -305,6 +306,7 @@ class MsgTest extends Command
             $innerHttpWorker->onMessage = function ($httpConnection, $data) {
                 $type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
                 $content = isset($_REQUEST['content']) ? $_REQUEST['content'] : '';
+                $content = $content ? json_decode($content, true) : '';
                 $room_id = isset($_REQUEST['room_id']) ? $_REQUEST['room_id'] : '';
                 // 推送数据的url格式 type=publish&to=uid&content=xxxx
                 if ($room_id == '') {
