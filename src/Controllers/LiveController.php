@@ -35,17 +35,17 @@ class LiveController extends Controller
         if ($course) {
             $platform = $this->platform();
             $rs = new RoomServer();
-            // 获取房间信息
-            $room = $rs->detail($course['id'], $course['teacher_id']);
-            $user_list = Redis::exists($room['id'].'.users')?Redis::get($room['id'].'.users'):[];
-            Log::info("redis users",[$user_list]);
-            $us = new UsersServer();
-            // 获取房间用户信息
-            $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
-            // 获取用户令牌
-            $info = $us->sig($users->hash_id, $users->id, $course['team_id']);
             // 判断用户是否为讲师
             $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
+            
+            $us = new UsersServer();
+            // 获取用户令牌
+            $info = $us->sig($users->hash_id, $users->id, $course['team_id']);
+            // 获取房间信息
+            $room = $rs->detail($course['id'], $course['teacher_id'],$info['hash_id'],$isteacher);
+            // 获取房间用户信息
+            $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
+            
             
             // 用户黑名单,被讲师踢出的将不能再次进入
             $black = $rs->black($room['id'], $info['id']);
@@ -56,7 +56,7 @@ class LiveController extends Controller
             // 判断课程所属团队余额是否大于等于0
             $balance = $cs->balance($course['team_id']);
             // 判断是否有权限进入
-            $role = $this->role($course, $black, $iswhite, $balance);
+            $role = $this->role($course, $black, $iswhite, $balance,$room['online_num']);
             if ($role[0] == 203) {
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);
@@ -246,7 +246,7 @@ class LiveController extends Controller
     }
     
     
-    private function role($course, $black, $iswhite, $balance)
+    private function role($course, $black, $iswhite, $balance,$online_num)
     {
         $data = [201, '无法进入直播间'];
     	if (!$iswhite && $course['invite_type'] == 0) {
@@ -258,6 +258,9 @@ class LiveController extends Controller
         if(!$iswhite && $course['invite_type'] == 2){
             return [ 201 ,'不再白名单内，无法进入'];
         }   
+        if($online_num >= $course['up_top']+$course['down_top']){
+            return [ 201 ,'房间人数已满，无法进入'];
+        }
         if ($course['status'] == 0) {
             if ($balance) {
                 $data = [202, '请等待讲师开课'];
