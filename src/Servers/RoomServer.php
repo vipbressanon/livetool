@@ -112,13 +112,15 @@ class RoomServer
                     $course['field']['status'] => 2,
                     $course['field']['updated_at'] => $now
                 ]);
-            $room = Room::find($room_id);
-            $room->roomrecord = 3;
-            $room->save();
-            $api = new ApiServer();
-            $api->roomend($room_id, $now);
-            // 在socket中进行结算
-            // $api->recordend($room_id);
+            if ($room_id) {
+                $room = Room::find($room_id);
+                $room->roomrecord = 3;
+                $room->save();
+                $api = new ApiServer();
+                $api->roomend($room_id, $now);
+                // 在socket中进行结算
+                // $api->recordend($room_id);
+            } 
         }
         return true;
     }
