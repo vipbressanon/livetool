@@ -153,14 +153,6 @@ class MsgTest extends Command
                 //Timer::add(10, [$balance, 'handle'], [$socket->room_id], false);
                 self::$senderIo->to($socket->room_id)->emit('over');
             });
-            // 模拟超时自动下课
-            $socket->on('autoover', function () use ($socket)  {
-                self::$senderIo->to($socket->room_id)->emit('autoover');
-            });
-            // 模拟5分钟倒计时下课提示
-            $socket->on('downtips', function () use ($socket)  {
-                self::$senderIo->to($socket->room_id)->emit('downtips');
-            });
             // 离开页面,退出房间
             $socket->on('disconnect', function () use ($socket) {
                 $us = new UsersServer();
@@ -290,12 +282,6 @@ class MsgTest extends Command
                 }
                 self::$senderIo->to($socket->room_id)->emit('im', $request);
             }); 
-            
-            // 连接检测心跳包
-            $socket->on('heart', function ($request) use ($socket) {
-                $time = isset($request['time']) ? $request['time'] : time();
-                $socket->emit('heart', $time);
-            });
         });
         
         // 当self::$senderIo启动后监听一个http端口，通过这个端口可以给任意uid或者所有uid推送数据
@@ -331,7 +317,8 @@ class MsgTest extends Command
                         return $httpConnection->send($this->output());
                         break;
                     case 'downtips':
-                        self::$senderIo->to($room_id)->emit($type, $content);
+                        self::$senderIo->to($room_id)->emit($type);
+                        return $httpConnection->send($this->output());
                         break;
                     case 'userlist':
                         if (Session::has($room_id.'users')) {
