@@ -103,7 +103,7 @@ class RoomServer
             ->where($course['field']['id'], $course_id)
             ->first();
         if ($res) {
-            $num = strtotime($now) - strtotime($res->starttime);
+            $num = isset($res->starttime) ? (strtotime($now) - strtotime($res->starttime)) : 0;
             DB::table($course['table'])
                 ->where($course['field']['id'], $res->id)
                 ->update([
