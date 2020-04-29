@@ -87,23 +87,25 @@ class MsgTest extends Command
                 $usersocket[$socket->hash_id] = $socket->id;
                 Session::put($socket->room_id.'usersocket', $usersocket);
                 // 房间开关初始化
-                if (!Session::has($socket->room_id.'onoff')) {
-                    Session::put($socket->room_id.'onoff', ['onoff'=>self::$onoffinit, 'index'=>0]);
+                if (Session::has($socket->room_id.'onoff')) {
+                    $arr = Session::get($socket->room_id.'onoff');
+                    $onoff = $arr['onoff'];
+                } else {
+                    $onoff = self::$onoffinit;
+                    Session::put($socket->room_id.'onoff', ['onoff'=>$onoff, 'index'=>0]);
                 }
                 $users = Session::get($socket->room_id.'users');
-                $onoff = Session::get($socket->room_id.'onoff');
                 
                 self::$senderIo->to($socket->room_id)->emit(
                     'addusers',
                     [
                         'users' => $users['users'],
                         'index' => $users['index'],
-                        'onoff' => $onoff['onoff'],
+                        'onoff' => $onoff,
                         'socketid' => $socket->id,
                         'hashid' => $socket->hash_id
                     ]
                 );
-                var_dump(Session::all());
             });
             
             // 讲师创建房间后邀请所有人进入
@@ -170,22 +172,23 @@ class MsgTest extends Command
                 if (array_key_exists($socket->hash_id, $usersocket) && $usersocket[$socket->hash_id] != $socket->id) {
                     return;
                 }
+                
                 $arr = Session::get($socket->room_id.'onoff');
                 if ($socket->hash_id == $arr['onoff']['max']) {
                     $arr['onoff']['max'] = '';
+                    $arr['onoff']['roomtype'] = $socket->isteacher ? 2 : $arr['onoff']['roomtype'];
                     Session::put($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                 }
                 self::userlist($socket->room_id, $socket->hash_id, '', '', 'cut');
                 
                 $users = Session::get($socket->room_id.'users');
-                $onoff = Session::get($socket->room_id.'onoff');
                 
                 self::$senderIo->to($socket->room_id)->emit(
                     'cutusers',
                     [
                         'users' => $users['users'],
                         'index' => $users['index'],
-                        'onoff' => $onoff['onoff']
+                        'onoff' => $arr['onoff']
                     ]
                     
                 );
