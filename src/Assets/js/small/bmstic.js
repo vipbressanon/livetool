@@ -61,14 +61,6 @@ var bmstic = function () {
                 // 白板初始化
                 this.teduBoard = this.tic.getBoardInstance();
                 this.bmsboard.init();
-                // 初始化操作按钮
-                if (this.course.status == 1) {
-                    if (this.isteacher) {
-                        this.bmsrtc.teacherbtn();
-                    } else {
-                        this.bmsrtc.studentbtn();
-                    }
-                }
                 // 记录进入房间的时间
                 this.socket.emit('enter'); 
                 
@@ -86,20 +78,8 @@ var bmstic = function () {
     
     // 进入房间初始化
     var initroom = function(){
-        $('.icon-zuidahua').css('pointer-events', 'auto');
         $(".status").hide();
         var _this = this;
-        // 屏幕共享模式
-        if (this.onoff && this.onoff['roomtype'] == 1) {
-            if (this.isteacher) {
-                this.socket.emit('im', {
-                    type: "SHARE"
-                });
-                // this.bmsim.sendcustom('', '{"nickname":"","type":"SHARE","text":""}');
-            } else {
-                $('.teacherHead .icon-zuidahua').click();
-            }
-        }
     };
     
     var enterroom = function(){

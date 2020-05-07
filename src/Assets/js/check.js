@@ -8,62 +8,55 @@ var check = function () {
     audioOutputSelect.disabled = !('sinkId' in HTMLMediaElement.prototype);
 
     var gotDevices = function(deviceInfos){
-      audioOutputSelect.innerHTML = '';
-      videoSelect.innerHTML = '';
-      videoSelect.innerHTML = '';
       console.log("gotDevices");
+      // console.log(audioInputSelect);
       // Handles being called several times to update labels. Preserve values.
       // const values = selectors.map(select => select.value);
-      // selectors.forEach(select => {
-      //   while (select.firstChild) {
-      //     select.removeChild(select.firstChild);
-      //   }
-      // });
-      console.log(deviceInfos.length);
       for (let i = 0; i !== deviceInfos.length; ++i) {
         let deviceInfo = deviceInfos[i];
         let option = document.createElement('option');
         option.value = deviceInfo.deviceId;
         if (deviceInfo.kind === 'audioinput') {
-          console.log('audioinput');
           option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
-          audioInputSelect.appendChild(option);
+          audioInputSelect.append(option);
         } else if (deviceInfo.kind === 'audiooutput') {
           option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
-          audioOutputSelect.appendChild(option);
+          audioOutputSelect.append(option);
         } else if (deviceInfo.kind === 'videoinput') {
           option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
-          videoSelect.appendChild(option);
+          videoSelect.append(option);
         } else {
           console.log('Some other kind of source/device: ', deviceInfo);
         }
       }
-        // selectors.forEach((select, selectorIndex) => {
-        //   if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
-        //     select.value = values[selectorIndex];
-        //   }
-        // });
-        // 设备检测显示感叹号   
-        if (audioOutputSelect.children.length == 0 || videoSelect.children.length == 0 || audioInputSelect.children.length == 0) {
-            $(window.parent.document).find('.blackCircle .gantanhao').show();
-        } else {
-            $(window.parent.document).find('.blackCircle .gantanhao').hide();
-        }
-        if ($("#isteacher").val()=="1") {
-            var option1 = document.createElement('option');
-            option1.value = "no";
-            option1.text = "禁用";
-            audioInputSelect.appendChild(option1);
-            var option2 = document.createElement('option');
-            option2.value = "no";
-            option2.text = "禁用";
-            videoSelect.appendChild(option2);
-        }
-        console.log(audioInputSelect);
-        $(audioInputSelect).find("option[value='"+parent.checkmic+"']").attr("selected",true);
-        $(videoSelect).find("option[value='"+parent.checkcamera+"']").attr("selected",true);
+      // 设备检测显示感叹号   
+      if (audioOutputSelect.children.length == 0 || videoSelect.children.length == 0 || audioInputSelect.children.length == 0) {
+          $(window.parent.document).find('.blackCircle .gantanhao').show();
+      } else {
+          $(window.parent.document).find('.blackCircle .gantanhao').hide();
+      }
+      if ($("#isteacher").val()=="1") {
+          var option1 = document.createElement('option');
+          option1.value = "no";
+          option1.text = "禁用";
+          audioInputSelect.append(option1);
+          var option2 = document.createElement('option');
+          option2.value = "no";
+          option2.text = "禁用";
+          videoSelect.append(option2);
+      }
+      $(audioInputSelect).find("option[value='"+parent.checkmic+"']").attr("selected",true);
+      $(videoSelect).find("option[value='"+parent.checkcamera+"']").attr("selected",true);
+      layui.use(['layer','jquery','form'], function(){
+        var layer = layui.layer,
+            $ = layui.jquery,
+            form = layui.form;
+        form.render();
+      });
     };
-    navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+    var autoView = function () {
+      navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+    }
 
     var attachSinkId = function(element, sinkId){
         if (typeof element.sinkId !== 'undefined') {
@@ -153,6 +146,7 @@ var check = function () {
     return {
         init: function (isteacher) {
             start();
+            // autoView();
         }
     };
 }();
