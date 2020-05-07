@@ -228,7 +228,8 @@ body{
     line-height: 37px;
     top: 0;
     height: 37px;
-    background: transparent;
+	background: transparent;
+	cursor: pointer;
 }
 .mount .fullBtn_b img {
 	margin-right: 5px;
@@ -296,12 +297,19 @@ body{
 	top: 0;
 	z-index: 1;
 }
+.txImg>div>div{
+	background: none !important;
+}
 .bgimg1{
    background: url('http://liveqn.xueyoubangedu.com/novideo.jpg'); 
    background-size: 100% 100%;
 }
 .bgimg2{
    background: url('http://liveqn.xueyoubangedu.com/novideo_a.png'); 
+   background-size: 100% 100%;
+}
+.bgimg3{
+   background: url('http://liveqn.xueyoubangedu.com/novideo_b.png'); 
    background-size: 100% 100%;
 }
 .txImg>div{
@@ -482,9 +490,16 @@ body{
     margin-right: 0;
 	content: url('/vendor/livetool/images/prize_all.png');
 }
+.teacherHead .handle div.icon04{
+	content: url('/vendor/livetool/images/chat_all.png');
+}
+.teacherHead .handle div.icon04.current{
+	content: url('/vendor/livetool/images/chat_all_no.png');
+}
 .teacherHead .handle div.zuidahua{
 	content: url('/vendor/livetool/images/changeBig.png');
 }
+
 
 .studentHead .handle div.icon01{
 	content: url('/vendor/livetool/images/voice_one.png');
@@ -586,6 +601,7 @@ body{
 	position: fixed;
 	left: 0;
 	z-index: 100;
+	position: absolute;
 }
 .sideTab{
 	width: 88px;
@@ -593,7 +609,7 @@ body{
 	padding: 30px 0 0 0;
 	background: #24272A;
 	position: absolute;
-    top: 100px;
+    top: 0px;
 	flex-direction: column;
 }
 .sideTab li{
@@ -794,13 +810,14 @@ body{
     top: 135px;
     bottom: 0px;
     background: #2E3037;
-    overflow: hidden;
+    /* overflow: hidden; */
     margin: 0 auto;
     left: 88px;
     right: 88px;
 }
 #paint_box{
 	height:100%!important;
+    overflow: hidden;
 }
 /* ç›´æ’­çŠ¶æ€ */
 .status{
@@ -994,7 +1011,7 @@ body{
 	background: #24272A;
 	position: absolute;
 	right: 0;
-	top: 100px;
+	top: 0px;
     z-index: 90;
 }
 
@@ -1286,7 +1303,7 @@ body{
     overflow: hidden;
 	display: none;
 	color: #fff;
-	min-height: 25rem;
+	/* min-height: 25rem; */
 }
 .dialog_online_people::-webkit-scrollbar {
 	background-color: transparent;
@@ -1314,6 +1331,32 @@ body{
 .chatroom-list>table {
 	width: 100%;
 	border-collapse:collapse;
+	display: block;
+    height: 302px;
+    overflow-y: scroll;
+}
+.chatroom-list>table::-webkit-scrollbar {
+    width:9px;
+    height:9px;
+}
+.chatroom-list>table::-webkit-scrollbar-track {
+    width: 6px;
+    -webkit-border-radius: 2em;
+    -moz-border-radius: 2em;
+    border-radius:2em;
+}
+.chatroom-list>table::-webkit-scrollbar-thumb {
+    background-color:#DCDCDC;
+    background-clip:padding-box;
+    min-height:28px;
+    -webkit-border-radius: 2em;
+    -moz-border-radius: 2em;
+    border-radius:2em;
+}
+.chatroom-list>table thead, .chatroom-list tbody tr {
+	display: table;
+	width: 100%;
+	table-layout: fixed;
 }
 .chatroom-list>table th{
 	color: #919398;
@@ -1331,6 +1374,9 @@ body{
 	width: 100%;
 }
 
+.chatroom-list>table tr>td:nth-child(2):hover,
+.chatroom-list>table tr>td:nth-child(3):hover,
+.chatroom-list>table tr>td:nth-child(4):hover,
 .chatroom-list>table tr>td:last-child:hover{
 	background: #191B1D;
 }
@@ -1906,7 +1952,7 @@ body{
 	display: none;
 	position: fixed;
     right: 87px;
-    bottom: 50px;
+	bottom: 50px;
 }
 .handUpList p{
 	border-radius: 0.2rem;

@@ -28,17 +28,16 @@ var bmsboard = function () {
         // 白板同步数据回调(收到该回调时需要将回调数据通过信令通道发送给房间内其他人，接受者收到后调用AddSyncData接口将数据添加到白板以实现数据同步)
         // TIC已经处理好了，可忽略该事件
         teduBoard.on(TEduBoard.EVENT.TEB_SYNCDATA, (data) => {
-            //console.log('======================:  ', 'TEB_SYNCDATA');
+            console.log('======================:  ', 'TEB_SYNCDATA');
         });
 
         // 收到白板初始化完成事件后，表示白板已处于正常工作状态（此时白板为空白白板，历史数据尚未拉取完成）
         teduBoard.on(TEduBoard.EVENT.TEB_INIT, () => {
             console.log('======================:  ', 'TEB_INIT');
-            console.log('TIC', "onTEBInit finished");
         });
 
         teduBoard.on(TEduBoard.EVENT.TEB_HISTROYDATA_SYNCCOMPLETED, () => {
-            //console.log('======================:  ', 'TEB_HISTROYDATA_SYNCCOMPLETED');
+            // console.log('======================:  ', 'TEB_HISTROYDATA_SYNCCOMPLETED');
             //console.log('TIC', "onTEBHistory Sync Completed finished");
 
             // setTimeout(() => {
@@ -72,7 +71,7 @@ var bmsboard = function () {
 
         // 跳转白板页回调
         teduBoard.on(TEduBoard.EVENT.TEB_GOTOBOARD, (boardId, fid) => {
-            //console.log('======================:  ', 'TEB_GOTOBOARD', ' boardId:', boardId, ' fid:', fid);
+            console.log('======================:  ', 'TEB_GOTOBOARD', ' boardId:', boardId, ' fid:', fid);
             proBoardData();
         });
 
@@ -309,15 +308,6 @@ var bmsboard = function () {
     var deleteBoard = function() {
       this.teduBoard.deleteBoard();
     };
-    /**
-     * 重新设置规格
-     */
-    var resetScale = function(){
-        this.teduBoard.setBoardScale(this.boardscale);
-        $('#percentShow').html(this.boardscale - 100);
-        // $('#slideTest1').find('.layui-slider-bar').css({width:"0%"});
-        // $('#slideTest1').find('.layui-slider-wrap').css({left:"0%"});
-    };
 
     var liveboard = function(){
         var _this = this;
@@ -334,14 +324,12 @@ var bmsboard = function () {
         $(document).on("click",".prevBoard",function(){
             if(_this.currentPage>1){
                 prevBoard();
-                resetScale();
             }
         });
         
         $(document).on("click",".nextBoard",function(){
             if(_this.currentPage < _this.allPage){
                 nextBoard();
-                resetScale();
             }
 
         });
@@ -450,15 +438,17 @@ var bmsboard = function () {
         });
         
         $(document).on("click",".filebtn",function(){
-            var id = $(this).attr("data-id");
-            $("#file"+id).show();
-            $(".boardTab li:eq("+id+")").click();
+            var fid = $(this).parents(".between").attr("data-fid");
+            $("#file"+fid).show();
+            $("#file"+fid).click();
         });
         
         $(document).on("click",".delbtn",function(){
-            var fid = $(this).attr("data-fid");
-            var name = $(this).attr("data-name");
-            deleteFile(fid);
+            var fid = $(this).parents(".between").attr("data-fid");
+            var name = $(this).parents(".between").attr("data-name");
+            $("#file"+fid).remove();
+            $(".file"+fid).remove();
+            deleteFile("#"+fid);
             _this.bmsajax.delfile(name);
         });
         
@@ -473,8 +463,8 @@ var bmsboard = function () {
         });
         
         $(document).on("click",".boardTab li",function(){
-            var fid = $(this).attr('data-id');
-            switchFile(fid);
+            var fid = $(this).attr('data-fid');
+            switchFile("#"+fid);
         });
         
         $(document).on("click",".boardTab i",function(){
@@ -513,6 +503,8 @@ var bmsboard = function () {
     
     // 白板事件回调处理
     var proBoardData = function() {
+        this.teduBoard.setBoardScale(this.boardscale);
+        $('#percentShow').html(this.boardscale - 100);
         this.fileInfoList = this.teduBoard.getFileInfoList();
         this.currentFileId = this.teduBoard.getCurrentFile();
         this.thumbUrls = this.teduBoard.getThumbnailImages(this.currentFileId);
@@ -522,7 +514,7 @@ var bmsboard = function () {
             this.currentPage = fileInfo.currentPageIndex + 1;
             this.allPage = fileInfo.pageCount;
         }
-        boardtab();
+        boardtab(); 
     };
     
     // 切换文件
@@ -538,10 +530,6 @@ var bmsboard = function () {
     var resize = function(){
         this.teduBoard.resize();
     }
-    // 缩放
-    var onSetScale = function(scale) {
-      this.teduBoard.setBoardScale(scale);
-    };
     
     var retitle = function(title) {
         var point = title.lastIndexOf(".");  
@@ -566,52 +554,48 @@ var bmsboard = function () {
         var str2 = "";
         var _this = this;
         $.each(this.fileInfoList, function(i, v){
+            var fid = v.fid.replace("#","");
+            var point = v.title.lastIndexOf(".");
+            var type = v.title.substr(point);
+            type = type.toLowerCase();
             var title = "";
             var display = "";
             var temp_title = retitle(v.title);
             title = v.title == '#DEFAULT' ? '默认页' : temp_title['temp_title']+'<i class="layui-icon">&#x1007;</i>';
-            str1 += '<li id="file'+i+'" data-id="'+v.fid+'"';
-            if (_this.currentFileId == v.fid) {
-                str1 += 'class="active"';
-            }
-            if ($("#file"+i).length) {
-                display = $("#file"+i).css("display");
-            } else {
-                display = "block";
-            }
-            str1 += ' style="display:'+display+'">'+title+'</li>';
-        });
-        $(".boardTab").html(str1);
-        $.each(this.fileInfoList, function(i, v){
-            if (v.title != '#DEFAULT') {
-                var point = v.title.lastIndexOf(".");  
-                var type = v.title.substr(point);
-                type = type.toLowerCase();
-                var title = "";
-                str2 += '<div class="between">';
-                str2 += '<div>';
-                if (type == '.ppt' || type == '.pptx') {
-                    str2 += '<label class="ppt">P</label>';
-                } else if (type == '.pdf' || type == '.pdfx') {
-                    str2 += '<label class="pdf">F</label>';
-                } else if (type == '.doc' || type == '.docx') {
-                    str2 += '<label class="word">W</label>';
-                } else if (type == '.xls' || type == '.xlsx') {
-                    str2 += '<label class="excel">E</label>';
-                } else {
-                    str2 += '<label class="word">W</label>';
+            if ($("#file"+fid).length == 0) {
+                str1 = '<li id="file'+fid+'" data-fid="'+fid+'">'+title+'</li>';
+                $(".boardTab").append(str1);
+                
+                if (v.title != '#DEFAULT') {
+                    str2 = '<div class="between file'+fid+'" data-name="'+v.title+'" data-fid="'+fid+'">';
+                    str2 += '<div>';
+                    if (type == '.ppt' || type == '.pptx') {
+                        str2 += '<label class="ppt">P</label>';
+                    } else if (type == '.pdf' || type == '.pdfx') {
+                        str2 += '<label class="pdf">F</label>';
+                    } else if (type == '.doc' || type == '.docx') {
+                        str2 += '<label class="word">W</label>';
+                    } else if (type == '.xls' || type == '.xlsx') {
+                        str2 += '<label class="excel">E</label>';
+                    } else {
+                        str2 += '<label class="word">W</label>';
+                    }
+                    var temp_title = retitle(v.title);
+                    str2 += '<span>'+temp_title['temp_title']+temp_title['type']+'</span>';
+                    str2 += '</div>';
+                    str2 += '<p class="column"><a class="Btn cancel filebtn" href="javascript:;">打开</a>';
+                    str2 += '<a class="delbtn" href="javascript:;">删除</a></p>';
+                    str2 += '</div>';
+                    $(".uploadlist").append(str2);
                 }
-
-                var temp_title = retitle(v.title);
-                str2 += '<span>'+temp_title['temp_title']+temp_title['type']+'</span>';
-                str2 += '</div>';
-                str2 += '<p class="column"><a class="Btn cancel filebtn" data-id="'+i+'" href="javascript:;">打开</a>';
-                str2 += '<a class="delbtn" data-fid="'+v.fid+'" data-name="'+v.title+'" href="javascript:;">删除</a></p>';
-                str2 += '</div>';
             }
+            
         });
-        $(".uploadlist").html(str2);
-        resetScale();
+        var currentfid = this.currentFileId.replace("#","");
+        if (!$("#file"+currentfid).hasClass("active")) {
+            $(".boardTab li").removeClass("active");
+            $("#file"+currentfid).addClass("active");
+        }
     };
     
     return {
@@ -622,9 +606,6 @@ var bmsboard = function () {
         },
         resize: function () {
             resize();
-        },
-        onSetScale: function (value) {
-            onSetScale(value);
         }
     };
 

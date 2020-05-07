@@ -46,7 +46,7 @@
                     <span>{{$course['title']}}</span>
                     <span>在线学员（<b class="stucount">0</b>人）</span>
                     <!-- 只展示一种 -->
-                    <span class="roomtime">开课时间：<b>00:00</b></span>
+                    <span class="roomtime"></span>
                     <span class="span_red" style="display: none;">请点击右方上课按钮立即开课！</span>
                     @if(!$course['endtime'])
                     <!--下课不检测网络状态-->
@@ -129,6 +129,7 @@
                 
                 <!-- 中间部分 -->
                 <div class="middle">
+                    
                     <!-- 直播视频地址 -->
                     <div id="paint_box"></div>
                     <!-- 暂未开课、已下课 -->
@@ -281,7 +282,6 @@
                         <li class="active">讨论</li>
                     </ul>
                     <div class="btns row">
-                        <span class="iconfont icon-liaotian banbtn" title=""></span>
                         <span class="iconfont icon-close closebtn" title="关闭"></span>
                     </div>
                 </div>
@@ -309,14 +309,14 @@
                         <table>
                             <thead>
                             <tr>
-                                <th width='130px'>学生姓名（<span class="stucount2">0</span>/<span class="stucount3">{{$course['down_top']+$course['up_top']}}</span>）</th>
+                                <th width='130'>学生姓名（<span class="stucount2">0</span>/<span class="stucount3">{{$course['down_top']+$course['up_top']}}</span>）</th>
                                 <th>上下台</th>
                                 <th>授权</th>
                                 <th>麦克风</th>
                                 <th>摄像头</th>
                                 <th>设备</th>
                                 <th>奖励</th>
-                                <th width='80px'>举手（<span class="handcount">0</span>）</th>
+                                <th width='80'>举手（<span class="handcount">0</span>）</th>
                                 <th style='color:#ff0000;'>移出</th>
                             </tr>
                             </thead>
@@ -338,7 +338,7 @@
         <input type="hidden" id="_token" name="_token" value="{{csrf_token()}}" />
     </body>
 </html>
-<script src="/vendor/livetool/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
 <script src="/vendor/livetool/font/iconfont.js"></script>
 <script src="/vendor/livetool/layui/layui.js"></script>
 <!-- axios SDK -->
@@ -352,7 +352,7 @@
 <!-- COS SDK -->
 <script src="https://resources-tiw.qcloudtrtc.com/thirdpart/cos/5.1.0/cos.min.js"></script>
 <!-- 白板SDK -->
-<script src="https://resources-tiw.qcloudtrtc.com/board/2.4.0/TEduBoard.min.js"></script>
+<script src="https://resources-tiw.qcloudtrtc.com/board/2.4.6/TEduBoard.min.js"></script>
 <!-- TIC SDK -->
 <script src="https://resources-tiw.qcloudtrtc.com/tic/2.4.1/TIC.min.js"></script>
 <!-- socket.io -->
