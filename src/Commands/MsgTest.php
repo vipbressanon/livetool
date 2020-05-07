@@ -105,7 +105,7 @@ class MsgTest extends Command
                         ]
                     );
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             });
             
@@ -133,7 +133,7 @@ class MsgTest extends Command
                         );
                     }
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             });
             
@@ -151,7 +151,7 @@ class MsgTest extends Command
                     //     $socket->timer_id = Timer::add($interval, [$balance, 'handle'], [$socket->room_id], true);
                     // }
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             });
             
@@ -165,7 +165,7 @@ class MsgTest extends Command
                     //Timer::add(10, [$balance, 'handle'], [$socket->room_id], false);
                     self::$senderIo->to($socket->room_id)->emit('over');
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             });
             // 离开页面,退出房间
@@ -207,7 +207,7 @@ class MsgTest extends Command
                         
                     );
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             });
             
@@ -231,7 +231,7 @@ class MsgTest extends Command
                         ]
                     );
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             });
             
@@ -265,7 +265,7 @@ class MsgTest extends Command
                         ]
                     );
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             });
             
@@ -298,7 +298,7 @@ class MsgTest extends Command
                         ]
                     );
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             }); 
             
@@ -316,7 +316,7 @@ class MsgTest extends Command
                     }
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             }); 
         });
@@ -374,7 +374,7 @@ class MsgTest extends Command
                     }
                     return $httpConnection->send(json_encode(['error'=>'没有匹配的发送类型']));
                 } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             };
             // 执行监听
