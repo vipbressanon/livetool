@@ -22,7 +22,7 @@
                     <span>{{$course['title']}}</span>
                     <span>在线学员（<b class="stucount">0</b>人）</span>
                     <!-- 只展示一种 -->
-                    <span class="roomtime">开课时间：<b>00:00</b></span>
+                    <span class="roomtime"></span>
                     @if(!$course['endtime'])
                     <!--下课不检测网络状态-->
                     <span class="checkNet">您当前网络状态：<b class="netStatus">--</b></span>
@@ -229,7 +229,7 @@
         <input type="hidden" id="_token" name="_token" value="{{csrf_token()}}" />
     </body>
 </html>
-<script src="/vendor/livetool/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
 <script src="/vendor/livetool/font/iconfont.js"></script>
 <script src="/vendor/livetool/layui/layui.js"></script>
 <!-- axios SDK -->
@@ -243,7 +243,7 @@
 <!-- COS SDK -->
 <script src="https://resources-tiw.qcloudtrtc.com/thirdpart/cos/5.1.0/cos.min.js"></script>
 <!-- 白板SDK -->
-<script src="https://resources-tiw.qcloudtrtc.com/board/2.4.0/TEduBoard.min.js"></script>
+<script src="https://resources-tiw.qcloudtrtc.com/board/2.4.6/TEduBoard.min.js"></script>
 <!-- TIC SDK -->
 <script src="https://resources-tiw.qcloudtrtc.com/tic/2.4.1/TIC.min.js"></script>
 <!-- socket.io -->

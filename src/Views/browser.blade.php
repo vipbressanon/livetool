@@ -28,7 +28,7 @@
         </div>
     </body>
 </html>
-<script src="/vendor/livetool/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
 <script>
     //浏览器高度
     $('.browserBox').css('height',$(window).height())

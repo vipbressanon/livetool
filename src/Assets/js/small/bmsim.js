@@ -182,6 +182,7 @@ var bmsim = function () {
         }
         if (status['voice'] == 1) {
             // 更改样式
+            $("#volume"+hash_id).show();
             $(".users"+hash_id).find(".voice").addClass("voice1").removeClass("voice2");
             $("#users"+hash_id).find(".micicon").addClass("micicon1").removeClass("micicon2");
             $("#users"+hash_id).find(".icon01").addClass("current").attr("title", "静音");
@@ -190,6 +191,7 @@ var bmsim = function () {
             }
         } else {
             // 更改样式
+            $("#volume"+hash_id).hide();
             $(".users"+hash_id).find(".voice").addClass("voice2").removeClass("voice1");
             $("#users"+hash_id).find(".micicon").addClass("micicon2").removeClass("micicon1");
             $("#users"+hash_id).find(".icon01").removeClass("current").attr("title", "连麦");
@@ -202,10 +204,10 @@ var bmsim = function () {
     var chatstatus = function(){
         if (this.onoff && this.onoff['ischat'] == 1) {
             $('.discussList').append("<li class='yellow'><b>系统消息：允许全员发送讨论消息</b></li>");
-            $(".banbtn").attr("title", "禁止全员发送消息");
+            $(".teacherHead .icon04").attr("title", "禁止全员发言").addClass("current");
         } else {
             $('.discussList').append("<li class='yellow'><b>系统消息：禁止全员发送讨论消息</b></li>");
-            $(".banbtn").attr("title", "允许全员发送消息");
+            $(".teacherHead .icon04").attr("title", "允许全员发言").removeClass("current");
         }
         $(".discussList").animate({scrollTop:$(".discussList").prop("scrollHeight")}, 400);
     };
@@ -259,6 +261,10 @@ var bmsim = function () {
                 showToast('不可频繁发送消息', 'error');
                 return;
             }
+            issend = false;
+            setTimeout(function() {  
+                issend = true;  
+            }, 5000);
             var text = $('#chattext').val();
             var tousers = $('#tousers').val();
             if(text==''){
@@ -292,10 +298,6 @@ var bmsim = function () {
                     // });
                 }
                 $('#chattext').val('');
-                issend = false;
-                setTimeout(function() {  
-                    issend = true;  
-                }, 5000);
             }
         });
         $('#chattext').keydown(function(event){
@@ -322,43 +324,6 @@ var bmsim = function () {
             _this.ischat = false;
         });
         
-        $(document).on("click", ".banbtn", function(){
-            if (_this.onoff['ischat'] == 1) {
-                swal.fire({   
-                    title: "提示",   
-                    text: "确定要禁止全员发送消息吗？",   
-                    icon: "warning",   
-                    confirmButtonText: "确定",
-                    cancelButtonText: "取消",
-                    showCancelButton: true
-                }).then((result) => {
-                    if (result.value) {
-                        _this.socket.emit('onoff', {
-                            type: 'ischat',
-                            status: 0
-                        });
-                        $(".banbtn").attr("title", "允许全员发送消息");
-                    }
-                });
-            } else {
-                swal.fire({   
-                    title: "提示",   
-                    text: "确定要允许全员发送消息吗？",   
-                    icon: "warning",  
-                    confirmButtonText: "确定",
-                    cancelButtonText: "取消",
-                    showCancelButton: true
-                }).then((result) => {
-                    if (result.value) {
-                        _this.socket.emit('onoff', {
-                            type: 'ischat',
-                            status: 1
-                        });
-                        $(".banbtn").attr("title", "禁止全员发送消息");
-                    }
-                });
-            }
-        });
     };
     
     // 发送自定义消息，c2c或群组
