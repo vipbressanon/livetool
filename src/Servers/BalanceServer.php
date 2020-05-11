@@ -3,6 +3,7 @@ namespace Vipbressanon\LiveTool\Servers;
 
 use DB;
 use Vipbressanon\LiveTool\Models\Room;
+use App\Common\Helper;
 
 class BalanceServer
 {
@@ -10,25 +11,37 @@ class BalanceServer
     public function __construct()
     {
     }
-
+    /**
+     * 计算上课费用（老师上课时长*（（学生人数）*（课单价+白板单价）+白板单价））
+     * @DateTime 2020-05-11T10:55:16+0800
+     * @param    [type]                   $room_id [description]
+     * @return   [type]                            [description]
+     */
     public function handle($room_id)
     {
         $room = Room::find($room_id);
         if (!$room) {
             return;
         }
+
         // 统计耗时
         $consume = $this->consume($room->course_id);
-        if ($consume->total == 0) {
+        
+        $user = $this->getStrudentNum($room->course_id);
+        if ($user['teacher_online_time'] == 0 || $user['num'] <=1) {
             return;
         }
+        //计算费用
+        $Helper = new Helper();
+        $money_total = $Helper->getTotleMoney($user['num']-1,0,$user['teacher_online_time']);
         // 获取团队账户余额
-        $account = $this->getmoney($room->course_id);
+        $account = $this->getmoney($room->course_id);        
         // 消耗的分钟数
-        $mins = ceil($consume->total/60);
+        $mins = $user['teacher_online_time'];
+        //计算白板费用0507
         // 扣除团队消耗
-        $money = $this->setmoney($account, $consume->now, $mins);
-        
+        $money = $this->setmoney($account, $consume->now, $money_total,$mins);
+
         $this->orders($account, $money, $consume->now);
         
         $this->orderslog($account, $money, $consume->now);
@@ -58,10 +71,37 @@ class BalanceServer
                     DB::raw('now() as now')
                 )
                 ->where($course_users_log['field']['course_id'], $course_id)
-                ->first();
+                ->first();        
         return $lres;
     }
     
+    private function getStrudentNum($course_id){
+        DB::connection()->enableQueryLog(); 
+        $course_users_log = config('livetool.course_users_log');
+        $course = DB::table(config('livetool.course')['table'])
+                ->find($course_id);
+        //老师开课前已进入教室，学生开课后才能进入教室,结算时可能还有人为退出房间
+        $teacher = DB::table($course_users_log['table'])
+                ->where($course_users_log['field']['course_id'], $course_id)
+                ->where($course_users_log['field']['users_id'], $course->teacher_id)
+                ->sum('total');
+        $teacher_online_time = number_format($teacher/60,2);
+
+        
+        $sres = DB::table($course_users_log['table'])
+            ->select(DB::raw('sum(total) as total'),'users_id')
+            ->where($course_users_log['field']['course_id'], $course_id)
+            ->groupBy('users_id')
+            ->get()
+            ->toArray();
+        $num = 0;
+        foreach ($sres as $key => &$value) {
+            if($value->total/60 < 10) unset($sres[$key]);
+            $num++;
+        }
+        // $sres['teacher_online_time'] = $teacher_online_time;
+        return ['re' => $sres,'teacher_online_time' =>  $teacher_online_time ,'num' =>$num];
+    }
     // 保存结算时间
     private function balance($course_id, $now)
     {
@@ -115,27 +155,27 @@ class BalanceServer
         return $tres;
     }
     
-    private function setmoney($account, $now, $mins)
+    private function setmoney($account, $now, $money,$mins)
     {
         $over = false;
         $owe = false;
         $consume_money = 0;
         $consume = 0;
         // 账户剩余分钟数大于等于消耗的分钟数
-        if ($account->amount_time >= $mins) {
-            // 消耗情况
-            $consume = $mins;
-            $consume_money = 0;
-            // 剩余情况
-            $amount_time =  $account->amount_time - $consume;
-            $amount_money = $account->amount_money;
-        } else {    // 账户剩余分钟数不足,则按未抵扣完的分钟数乘以单价来消耗账户余额
+        // if ($account->amount_time >= $mins) {
+        //     // 消耗情况
+        //     $consume = $mins;
+        //     $consume_money = 0;
+        //     // 剩余情况
+        //     $amount_time =  $account->amount_time - $consume;
+        //     $amount_money = $account->amount_money - $account->board_money;
+        // } else {    // 账户剩余分钟数不足,则按未抵扣完的分钟数乘以单价来消耗账户余额
             // 消耗情况
             $consume = $account->amount_time;
             $consume_money = ($mins - $account->amount_time) * $account->live;
             // 剩余情况
             $amount_time =  0;
-            $amount_money = $account->amount_money - $consume_money;
+            $amount_money = $account->amount_money - $money;
             // 剩余金额小于等于欠费金额阈值,则退出直播间
             if ($amount_money <= config('livetool.fee')) {
                 $over = true;
@@ -144,7 +184,7 @@ class BalanceServer
             if ($amount_money <= 0) {
                 $owe = true;
             }
-        }
+        // }
         $team = config('livetool.team');
         $tres = DB::table($team['table'])
                 ->where('id', $account->team_id)
@@ -154,11 +194,11 @@ class BalanceServer
                     $team['field']['updated_at'] => $now
                 ]);
         return [
-            'consume_money' => $consume_money,
-            'consume' => $consume,
+            'consume_money' => number_format($money,2),
+            'consume' => number_format($consume,2),
             'price' => $account->live,
-            'consume_z' => $mins,
-            'amount_money' => $amount_money,
+            'consume_z' => number_format($mins,2),
+            'amount_money' => number_format($amount_money,2),
             'amount_time' => $amount_time,
             'over' => $over,
             'owe' => $owe
@@ -204,6 +244,7 @@ class BalanceServer
             $orders_log['field']['from'] => 1,
             $orders_log['field']['consume'] => $money['consume'],
             $orders_log['field']['consume_money'] => $money['consume_money'],
+            // $orders_log['field']['board_money'] => $account->board_money,
             $orders_log['field']['price'] => $money['price'],
             $orders_log['field']['consume_z'] => $money['consume_z'],
             $orders_log['field']['amount_money'] => $money['amount_money'],
