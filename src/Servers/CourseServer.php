@@ -95,6 +95,10 @@ class CourseServer
         }
         $course = config('livetool.course');
         $res = DB::table($course['table'])
+                ->select(
+                    $course['field']['starttime'].' as starttime',
+                    $course['field']['expectendtime'].' as expectendtime'
+                )
                 ->where($course['field']['id'], $room->course_id)
                 ->first();
         return $res ? ['starttime' => $res->starttime, 'expectendtime' => $res->expectendtime]: '';

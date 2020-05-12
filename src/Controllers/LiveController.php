@@ -36,7 +36,7 @@ class LiveController extends Controller
             $platform = $this->platform();
             $rs = new RoomServer();
             // 判断用户是否为讲师
-            $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
+            $isteacher = !$users->id == $course['teacher_id'] ? 1 : 0;
             
             $us = new UsersServer();
             // 获取用户令牌
