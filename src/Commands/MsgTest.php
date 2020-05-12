@@ -5,6 +5,7 @@ namespace Vipbressanon\LiveTool\Commands;
 use Illuminate\Console\Command;
 use Workerman\Worker;
 use Workerman\Lib\Timer;
+use Workerman\Connection\TcpConnection;
 use PHPSocketIO\SocketIO;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use Vipbressanon\LiveTool\Servers\CourseServer;
@@ -56,6 +57,8 @@ class MsgTest extends Command
         // $argv[1] = $this->argument('action'); // start | restart | reload(平滑重启) | stop | status | connetions
         // $argv[2] = $this->option('d') ? '-d' : ''; // 守护进程模式或调试模式启动
         
+        // 设置所有连接的默认应用层发送缓冲区大小
+        TcpConnection::$defaultMaxSendBufferSize = 2 * 1024 * 1024;
         // PHPSocketIO服务
         self::$senderIo = new SocketIO(3120);
         
@@ -124,13 +127,7 @@ class MsgTest extends Command
                             ]
                         );
                     } else {
-                        self::$senderIo->to($socket->room_id)->emit(
-                            'create',
-                            [
-                                'teacher_hash_id' => $socket->hash_id,
-                                'starttime' => $starttime
-                            ]
-                        );
+                        self::$senderIo->to($socket->room_id)->emit('fail');
                     }
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
@@ -261,7 +258,7 @@ class MsgTest extends Command
                             'type' => $request['type'],
                             'status' => $request['status'],
                             'users' => $users,
-                            'index'=>$index
+                            'index' => $index
                         ]
                     );
                 } catch(\Exception $e) {
@@ -320,6 +317,16 @@ class MsgTest extends Command
                 }
             }); 
         });
+        // self::$senderIo->onBufferFull = function($socket)
+        // {
+        //     //暂停发送
+        //     var_dump('暂停发送');
+        // };
+        // self::$senderIo->onBufferDrain = function($socket)
+        // {
+        //     //继续发送
+        //     var_dump('继续发送');
+        // };
         
         // 当self::$senderIo启动后监听一个http端口，通过这个端口可以给任意uid或者所有uid推送数据
         self::$senderIo->on('workerStart', function () {
@@ -452,8 +459,9 @@ class MsgTest extends Command
                     $stucount ++;
                 }
             }
+            Log::info('socketuptop:'.$hash_id, [$stucount, intval($up_top)]);
             // 超出上台人数上限
-            if ($stucount >= $up_top) {
+            if ($stucount >= intval($up_top)) {
                 return [$hash_id => $users[$hash_id]];
             }
             $users[$hash_id]['plat'] = 1;
@@ -498,4 +506,5 @@ class MsgTest extends Command
         ];
         return json_encode($json);
     }
+    
 }
