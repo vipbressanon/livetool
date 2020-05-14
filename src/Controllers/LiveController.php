@@ -14,7 +14,6 @@ use Vipbressanon\LiveTool\Servers\RecordServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
 use Log;
 use Session;
-use Illuminate\Support\Facades\Redis;
 
 class LiveController extends Controller
 {
