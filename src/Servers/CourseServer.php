@@ -33,7 +33,6 @@ class CourseServer
                     $course['table'].'.'.$course['field']['expectstart'].' as expectstart',
                     $course['table'].'.'.$course['field']['expectend'].' as expectend',
                     $course['table'].'.'.$course['field']['starttime'].' as starttime',
-                    $course['table'].'.'.$course['field']['expectendtime'].' as expectendtime',
                     $course['table'].'.'.$course['field']['endtime'].' as endtime',
                     $course['table'].'.'.$course['field']['invite_type'].' as invite_type',
                     $course['table'].'.'.$course['field']['top_usersid'].' as top_usersid',
@@ -57,7 +56,6 @@ class CourseServer
                 'expectstart' => $res->expectstart,
                 'expectend' => $res->expectend,
                 'starttime' => $res->starttime,
-                'expectendtime' => $res->expectendtime,
                 'endtime' => $res->endtime,
                 'invite_type' => $res->invite_type,
                 'top_usersid' => $res->top_usersid,
@@ -96,12 +94,11 @@ class CourseServer
         $course = config('livetool.course');
         $res = DB::table($course['table'])
                 ->select(
-                    $course['field']['starttime'].' as starttime',
-                    $course['field']['expectendtime'].' as expectendtime'
+                    $course['field']['starttime'].' as starttime'
                 )
                 ->where($course['field']['id'], $room->course_id)
                 ->first();
-        return $res ? ['starttime' => $res->starttime, 'expectendtime' => $res->expectendtime]: '';
+        return $res ? $res->starttime : '';
     }
     
     public function share($course_id)
@@ -141,6 +138,6 @@ class CourseServer
                 ->where($team['field']['id'], $team_id)
                 ->select($team['field']['amount_money'].' as amount_money')
                 ->first();
-        return $res->amount_money >= 0 ? 1 : 0;
+        return $res && $res->amount_money >= 0 ? 1 : 0;
     }
 }

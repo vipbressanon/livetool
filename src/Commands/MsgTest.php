@@ -117,13 +117,12 @@ class MsgTest extends Command
                 try {
                     $cs = new CourseServer();
                     $time = $cs->starttime($socket->room_id);
-                    if(count($time) == 2) {
+                    if($time) {
                         self::$senderIo->to($socket->room_id)->emit(
                             'create',
                             [
                                 'teacher_hash_id' => $socket->hash_id,
-                                'starttime' => $time['starttime'],
-                                'expectendtime' => $time['expectendtime']
+                                'starttime' => $time
                             ]
                         );
                     } else {
@@ -459,7 +458,6 @@ class MsgTest extends Command
                     $stucount ++;
                 }
             }
-            Log::info('socketuptop:'.$hash_id, [$stucount, intval($up_top)]);
             // 超出上台人数上限
             if ($stucount >= intval($up_top)) {
                 return [$hash_id => $users[$hash_id]];
