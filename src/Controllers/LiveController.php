@@ -14,6 +14,7 @@ use Vipbressanon\LiveTool\Servers\RecordServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
 use Log;
 use Session;
+use Illuminate\Support\Facades\Redis;
 
 class LiveController extends Controller
 {
@@ -242,8 +243,16 @@ class LiveController extends Controller
     public function getSpeedTest() {
         return view('livetool::speedtest');
     }
-    
-    
+    // 清除直播间数据
+    public function clearRedis(Request $request) {
+        $room_id = $request->input('room_id', '');
+        if ($room_id) {
+            Redis::del($room_id.'users');
+            Redis::del($room_id.'usersocket');
+            Redis::del($room_id.'onoff');
+        }
+    }
+
     private function role($course, $black, $iswhite, $balance,$online_num)
     {
         $data = [201, '无法进入直播间'];
