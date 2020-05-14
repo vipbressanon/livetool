@@ -107,14 +107,13 @@ layui.use(['laypage', 'layer'], function(){
     //     }
     // });
 })
-
+var _this = this;
 //设备检测
 layui.use('form', function(){
     var layer = layui.layer,
     $ = layui.jquery,
     form = layui.form;
     form.render();
-    var _this = this;
     if ($("#status").val() == 0) {
         layer.open({
             type: 2,
@@ -130,6 +129,12 @@ layui.use('form', function(){
     }
     
     $(document).on("click", ".switchbtn", function(){
+        console.log("_this.onoff['roomtype']");
+        console.log(_this.onoff);
+        if (_this.onoff && _this.onoff['roomtype'] == 1) {
+            _this.bmsim.toast("屏幕共享模式下无法进行设备检测", 'error');
+            return ;
+        }
         layer.open({
             type: 2,
             title: '设备检测',

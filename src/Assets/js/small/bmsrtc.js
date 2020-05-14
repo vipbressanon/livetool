@@ -6,6 +6,10 @@ var bmsrtc = function () {
     var studentbtn = function() {
         var _this = this;
         $(document).on("click", ".handUpBtn", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("举手太频繁，请稍后再举", "error");
             } else {
@@ -32,44 +36,36 @@ var bmsrtc = function () {
         var _this = this;
         // 屏幕共享模式
         $(document).on("click", ".roomtype1", function(){
-            if(_this.isenter){
-                $('.roomtype1').addClass("active");
-                $('.roomtype2').removeClass("active");
-                _this.socket.emit('onoff', {
-                    type: "roomtype",
-                    status: 1
-                });
-                if ($(".layui-layer-wrap").length > 0) {
-                    var hashid = $(".layui-layer-wrap").attr("data-hash_id");
-                    _this.socket.emit('im', {
-                        type: "MAX",
-                        hash_id: hashid,
-                        text: 0
-                    });
-                }
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
             }
+            $('.roomtype1').addClass("active");
+            $('.roomtype2').removeClass("active");
+            _this.socket.emit('onoff', {
+                type: "roomtype",
+                status: 1
+            });
         });
         // 白板模式
         $(document).on("click", ".roomtype2", function(){
-            if(_this.isenter){
-                $('.roomtype1').removeClass("active");
-                $('.roomtype2').addClass("active");
-                _this.socket.emit('onoff', {
-                    type: "roomtype",
-                    status: 2
-                });
-                if ($(".layui-layer-wrap").length > 0) {
-                    var hashid = $(".layui-layer-wrap").attr("data-hash_id");
-                    _this.socket.emit('im', {
-                        type: "MAX",
-                        hash_id: hashid,
-                        text: 0
-                    });
-                }
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
             }
+            $('.roomtype1').removeClass("active");
+            $('.roomtype2').addClass("active");
+            _this.socket.emit('onoff', {
+                type: "roomtype",
+                status: 2
+            });
         });
         
         $(document).on("click", ".handUpList .onplat", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             var hash_id = $(this).attr("data-hash_id");
             var nickname = $(this).prev("b").html();
             var platcount = $(".studentHead").length;
@@ -90,6 +86,10 @@ var bmsrtc = function () {
         });
 
         $(document).on("click", ".handUpBtn", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -122,6 +122,10 @@ var bmsrtc = function () {
         
         // 上下台
         $(document).on("click", "#student-list .plat", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -153,7 +157,7 @@ var bmsrtc = function () {
                     _this.bmsajax.operatetype(hash_id, 'speak');
                 } else {
                     var hashid = $(".layui-layer-wrap").attr("data-hash_id");
-                    if ($(".layui-layer-wrap").length > 0 && hash_id == hashid) {
+                    if ($("#maxdiv").length > 0 && hash_id == hashid) {
                         _this.socket.emit('im', {
                             type: "MAX",
                             hash_id: hashid,
@@ -172,6 +176,10 @@ var bmsrtc = function () {
         
         // 花名册点击事件授权白板、取消授权
         $(document).on("click", "#student-list .board", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -200,6 +208,10 @@ var bmsrtc = function () {
         
         // 禁麦/开麦
         $(document).on("click", "#student-list .voice", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -253,6 +265,10 @@ var bmsrtc = function () {
         
         // 踢出
         $(document).on("click", "#student-list .kick", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             var tr = $(this).parents("tr");
             var hash_id = tr.attr("data-hash_id");
             var nickname = tr.find("td:eq(0)").html();
@@ -278,6 +294,10 @@ var bmsrtc = function () {
         
         // 台上连麦，静音
         $(document).on("click", ".teacherHead .icon01", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -285,7 +305,7 @@ var bmsrtc = function () {
                 setTimeout(function() {
                     _this.loading = false;
                 }, 1500);
-                var status = $(this).hasClass("current") ? 1 : 0;
+                var status = $(this).hasClass("current") ? 0 : 1;
                 _this.socket.emit('platbatch', {
                     type: "voice",
                     status: status
@@ -295,6 +315,10 @@ var bmsrtc = function () {
         
         // 台上授权，取消授权白板
         $(document).on("click", ".teacherHead .icon02", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -302,7 +326,7 @@ var bmsrtc = function () {
                 setTimeout(function() {
                     _this.loading = false;
                 }, 1500); 
-                var status = $(this).hasClass("current") ? 1 : 0;
+                var status = $(this).hasClass("current") ? 0 : 1;
                 _this.socket.emit('platbatch', {
                     type: "board",
                     status: status
@@ -312,6 +336,10 @@ var bmsrtc = function () {
         
         // 台上奖励
         $(document).on("click", ".teacherHead .icon03", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -334,9 +362,34 @@ var bmsrtc = function () {
             }
         });
         
+        // 禁止，允许发言
+        $(document).on("click", ".teacherHead .icon04", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
+            if (_this.loading) {
+                _this.bmsim.toast("操作太频繁，请稍后再试", "error");
+            } else {
+                _this.loading = true;
+                setTimeout(function() {
+                    _this.loading = false;
+                }, 1500); 
+                var status = $(this).hasClass("current") ? 0 : 1;
+                _this.socket.emit('onoff', {
+                    type: 'ischat',
+                    status: status
+                });
+            }
+        });
+        
         
         // 禁麦/开麦
         $(document).on("click", ".studentHead .icon01", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -360,6 +413,10 @@ var bmsrtc = function () {
         
         // 授权白板、取消授权
         $(document).on("click", ".studentHead .icon02", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -383,6 +440,10 @@ var bmsrtc = function () {
         
         // 下台
         $(document).on("click", ".studentHead .icon03", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -394,7 +455,7 @@ var bmsrtc = function () {
                 var hash_id = div.attr("data-hash_id");
                 var nickname = div.find(".nickname").html();
                 var hashid = $(".layui-layer-wrap").attr("data-hash_id");
-                if ($(".layui-layer-wrap").length > 0 && hash_id == hashid) {
+                if ($("#maxdiv").length > 0 && hash_id == hashid) {
                     _this.socket.emit('im', {
                         type: "MAX",
                         hash_id: hashid,
@@ -412,6 +473,10 @@ var bmsrtc = function () {
         
         // 点赞2
         $(document).on("click", ".studentHead .icon04", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else {
@@ -435,6 +500,10 @@ var bmsrtc = function () {
                 
         // 最大化
         $(document).on("click", ".headTx .zuidahua", function(){
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
             if (_this.loading) {
                 _this.bmsim.toast("操作太频繁，请稍后再试", "error");
             } else if (_this.onoff['roomtype'] == 1) {
@@ -461,20 +530,31 @@ var bmsrtc = function () {
         
         // 录制 先弹出提示框
         $(document).on("click", ".recordbtn", function(){
-            if ($(this).attr('data-record') == 0 || $(this).attr('data-record') == 3) { 
-                $('.recordBtnBox').show()
-            } else if ($(this).attr('data-record') == 1) {
-                $(this).removeClass('recording');
-                $(this).find('label').removeClass('sideIcon6').addClass('sideIcon5');
-                $(this).find('span').html('课程录制');
-                $(this).attr('data-record', 3);
-                setTimeout(function(){ 
+            if (_this.course.status == 0) {
+                _this.bmsim.toast("暂未开课，不可操作！", "error");
+                return false;
+            }
+            if (_this.recordeloading) {
+                _this.bmsim.toast("操作太频繁，请稍后再试", "error");
+            } else {
+                _this.recordeloading = true;
+                setTimeout(function() {
+                    _this.recordeloading = false;
+                }, 8000);
+
+                if ($(this).attr('data-record') == 0 || $(this).attr('data-record') == 3) { 
+                    $('.recordBtnBox').show()
+                } else if ($(this).attr('data-record') == 1) {
+                    $(this).removeClass('recording');
+                    $(this).find('span').html('课程录制');
+                    $(this).find('label').removeClass('sideIcon6').addClass('sideIcon5');
+
                     $(this).attr('data-record', 3);
-                }, 500);
-                _this.bmsajax.roomrecord(3); 
-                $('.recordBtnBox').hide()
-            } else if ($(this).attr('data-record') == 3) {
-                $('.recordBtnBox').show()
+                    _this.bmsajax.roomrecord(3); 
+                    $('.recordBtnBox').hide()
+                } else if ($(this).attr('data-record') == 3) {
+                    $('.recordBtnBox').show()
+                }
             }
         })
         // 关闭录制
@@ -497,60 +577,73 @@ var bmsrtc = function () {
     
     var maxdiv = function(hash_id){
         var _this = this;
-        var div = $("#users"+hash_id);
-        var nickname = div.find(".nickname").html();
-        var oDiv = div.find('.txImg');
         
-        if ($(".layui-layer").length == 0) {
-            var div = $("<div>");
-            div.attr('id','zuida'+hash_id);
-            div.attr('data-hash_id', hash_id);
-            $("body").append(div);
-            div.append(oDiv);
-            
-            var areaWidth = $('.middle').width()+'px';
-            var areaHeight = $('.middle').height()+'px';
-            var middleTop = $('.middle').offset().top;
-            var middleLeft = $('.middle').offset().left;
-            var closebtn = _this.isteacher ? 1 : 0;
-            
-            var layindex = layer.open({
-                closeBtn: closebtn,
-                zIndex: 95,
-                type: 1,
-                title: nickname,
-                area: [areaWidth, areaHeight],
-                shade: 0,
-                offset: [middleTop, middleLeft],
-                content: $('#zuida'+hash_id),
-                cancel: function(){
-                    var temp_hash_id = $(".layui-layer-wrap").attr("data-hash_id");
-                    var temp_nickname = $(".layui-layer-title").html();
-                    $("#users"+temp_hash_id).prepend($('#zuida'+temp_hash_id).find('.txImg'));
-                    _this.socket.emit('im', {
-                        type: "MAX",
-                        hash_id: temp_hash_id,
-                        nickname: temp_nickname,
-                        text: 0
-                    });
-                    
-                    $(".layui-layer").remove();
-                    $(".layui-layer-move").remove();
-                }
-            });
-        } else {
-            if ($(".layui-layer-wrap").length > 0) {
-               var old_hash_id = $(".layui-layer-wrap").attr("data-hash_id");
-               $("#users"+old_hash_id).prepend($('#zuida'+old_hash_id).find('.txImg'));
-                $(".layui-layer-wrap").remove();
+        if (hash_id == '') {    // 缩小
+            if ($("#maxdiv").length > 0) {
+                var temp_hash_id = $(".layui-layer-wrap").attr("data-hash_id");
+                $("#users"+temp_hash_id).prepend($('#zuida'+temp_hash_id).find('.txImg'));
+                $(".layui-layer").remove();
+                $(".layui-layer-move").remove();
+                layer.close(layer.index);
             }
-            var div = $("<div>");
-            div.attr('id','zuida'+hash_id);
-            div.attr('data-hash_id', hash_id);
-            div.attr('class', 'layui-layer-wrap');
-            div.append(oDiv);
-            $(".layui-layer-content").append(div);
-            $(".layui-layer-title").html(nickname);
+        } else {                // 放大
+            var div = $("#users"+hash_id);
+            var nickname = div.find(".nickname").html();
+            var oDiv = div.find('.txImg');
+            
+            if ($("#maxdiv").length == 0) {
+                var div = $("<div>");
+                div.attr('id','zuida'+hash_id);
+                div.attr('data-hash_id', hash_id);
+                $("body").append(div);
+                div.append(oDiv);
+                
+                var areaWidth = $('.middle').width()+'px';
+                var areaHeight = $('.middle').height()+'px';
+                var middleTop = $('.middle').offset().top;
+                var middleLeft = $('.middle').offset().left;
+                var closebtn = _this.isteacher ? 1 : 0;
+                
+                var layindex = layer.open({
+                    id: 'maxdiv',
+                    closeBtn: closebtn,
+                    zIndex: 95,
+                    type: 1,
+                    move: false,
+                    title: nickname,
+                    area: [areaWidth, areaHeight],
+                    shade: 0,
+                    offset: [middleTop, middleLeft],
+                    content: $('#zuida'+hash_id),
+                    cancel: function(){
+                        var temp_hash_id = $(".layui-layer-wrap").attr("data-hash_id");
+                        var temp_nickname = $(".layui-layer-title").html();
+                        $("#users"+temp_hash_id).prepend($('#zuida'+temp_hash_id).find('.txImg'));
+                        _this.socket.emit('im', {
+                            type: "MAX",
+                            hash_id: temp_hash_id,
+                            nickname: temp_nickname,
+                            text: 0
+                        });
+                        
+                        $(".layui-layer").remove();
+                        $(".layui-layer-move").remove();
+                    }
+                });
+            } else {
+                if ($("#maxdiv").length > 0) {
+                   var old_hash_id = $(".layui-layer-wrap").attr("data-hash_id");
+                   $("#users"+old_hash_id).prepend($('#zuida'+old_hash_id).find('.txImg'));
+                    $(".layui-layer-wrap").remove();
+                }
+                var div = $("<div>");
+                div.attr('id','zuida'+hash_id);
+                div.attr('data-hash_id', hash_id);
+                div.attr('class', 'layui-layer-wrap');
+                div.append(oDiv);
+                $(".layui-layer-content").append(div);
+                $(".layui-layer-title").html(nickname);
+            }
         }
     };
     
@@ -571,9 +664,6 @@ var bmsrtc = function () {
         } else {
             startRTC();
         }
-        if (this.onoff['roomtype'] == 1) {
-            maxdiv(_this.course.teacher_hash_id);
-        }
     };
 
     // TRTC事件
@@ -593,11 +683,10 @@ var bmsrtc = function () {
             const remoteStream = event.stream;
             console.log('remoteStream ID: ' + remoteStream.getId() + ' has been removed');
             // 清除定时器
-            var interva_name = "remoteInterval_"+remoteStream.getUserId(); 
-            clearInterval(this.interva_name);
-            this.interva_name = null;
-            // 设置红色
-            // this.bmsajax.setnetwork(remoteStream.getUserId(), 1);
+            var interva_name = this.volume_interval_map.get(remoteStream.getUserId()); 
+            clearInterval(interva_name);
+            interva_name = null;
+            this.volume_interval_map.delete(remoteStream.getUserId())
             
             // 停止播放并删除相应<video>标签
             remoteStream.stop();
@@ -647,6 +736,7 @@ var bmsrtc = function () {
         this.trtcClient.on('mute-video', event => {
             console.log('mute-video', event)
             const userId = event.userId;
+            $('#'+userId+'video').hide();
             console.log(`${userId}关闭了摄像头`);
         });
 
@@ -659,6 +749,7 @@ var bmsrtc = function () {
         this.trtcClient.on('unmute-video', event => {
             console.log('unmute-video', event)
             const userId = event.userId;
+            $('#'+userId+'video').show();
             console.log(`${userId}打开了摄像头`);
         });
 
@@ -741,8 +832,8 @@ var bmsrtc = function () {
             _this.bmsajax.usersinfo([hash_id]);
         }
         
-        if ($(".layui-layer").length == 0 && _this.onoff['max'] != '' && _this.onoff['max'] == hash_id) {
-            _this.bmsrtc.maxdiv(hash_id);
+        if ($("#maxdiv").length == 0 && _this.onoff['max'] == hash_id) {
+            maxdiv(hash_id);
         }
         // 远端流播放
         remoteplay(remoteStream);
@@ -754,13 +845,12 @@ var bmsrtc = function () {
         // 设置远端流
         let remoteVideoWrapEl = document.getElementById(remoteStream.getUserId()+'video');
         remoteStream.play(remoteVideoWrapEl).then(() => {
-            
             // 设置声音
-            var interva_name = "remoteInterval_"+hash_id; 
-            this.interva_name = setInterval(() => {
+            var interva_name = setInterval(() => {
                 const level = remoteStream.getAudioLevel();
                 _this.bmsajax.setvolume(hash_id, level);
             }, 300);
+            _this.volume_interval_map.set(hash_id, interva_name);
         }).catch((e) => {
             console.log(e);
             const errorCode = e.getCode();
@@ -793,8 +883,7 @@ var bmsrtc = function () {
                         layer.msg("本地没有麦克风，请连接！");
                     }
                     $(".gantanhao").show(); // 设备检测显示感叹号
-                }
-                if (push_video && push_audio) {
+                } else if (push_video && push_audio) {
                     $(".gantanhao").hide();
                 }
                 if (!push_video && !push_audio) {
@@ -899,13 +988,24 @@ var bmsrtc = function () {
                     }).then(() => {
                         console.log("设置本地流----play成功");
                         this.isstart = true;
+                        // var hash_id = _this.localStream.getUserId();
                         // 设置声音
-                        _this.localLevel_time = setInterval(() => {
-                            const level = _this.localStream.getAudioLevel();
-                            _this.bmsajax.setvolume(localStream.getUserId(), level);
-                        }, 50);
+                        if (_this.localStream) {
+                            var interva_name = setInterval(() => {
+                                const level = _this.localStream.getAudioLevel();
+                                _this.bmsajax.setvolume(_this.users.hash_id, level);
+                            }, 300);
+                            _this.volume_interval_map.set(_this.users.hash_id, interva_name);
+                        }
+
                         if (_this.permission[this.users.hash_id]['voice'] == 0) {
                             localStream.muteAudio();
+                        }
+                        console.log("this.camera"+_this.camera);
+                        console.log("type"+type);
+                        if (!_this.camera && type == 1) {
+                            // 禁用摄像头且为白板模式
+                            localStream.muteVideo();
                         }
                     }).catch((e) => {
                         const errorCode = e.getCode();
@@ -915,7 +1015,7 @@ var bmsrtc = function () {
                             localStream.resume()
                         }
                     });
-
+                    
                     localStream.on('player-state-changed', event => {
                         console.log("本地流----播放状态改变："+event.state);
                         // if (event.state === 'PAUSED') {
@@ -1006,49 +1106,66 @@ var bmsrtc = function () {
         });
     }
     
-    var switchrtc = function(camera, mic) {
+    var switchrtc = function(camera, mic) {console.log(camera, mic);
         if (camera == 'no' && mic == 'no') {    // 禁麦禁摄像头
             this.localStream.muteVideo();
             this.localStream.muteAudio();
+            // 教师隐藏流数据 显示禁摄像头背景图
+            $('#localvideo').hide();
         } else if (camera != 'no' && mic == 'no') { // 禁麦开摄像头
             this.localStream.unmuteVideo();
             this.localStream.switchDevice('video', camera).then(() => {
                 this.localStream.muteAudio();
+                // 教师打开流数据 隐藏禁摄像头背景图
+                $('#localvideo').show();
             });
         } else if (camera == 'no' && mic != 'no') { // 开麦禁摄像头
             this.localStream.unmuteAudio();
             this.localStream.switchDevice('audio', mic).then(() => {
                 this.localStream.muteVideo();
+                $('#localvideo').hide();
             });  
         } else {                                    // 开麦开摄像头
-            this.localStream.unmuteVideo();
-            this.localStream.unmuteAudio();
-            this.localStream.switchDevice('video', camera).then(() => {});
-            this.localStream.switchDevice('audio', mic).then(() => {});  
+            if (this.isteacher) {                   // 教师直接操作
+                this.localStream.unmuteVideo();
+                this.localStream.unmuteAudio();
+                $('#localvideo').show();
+                this.localStream.switchDevice('video', camera).then(() => {});
+                this.localStream.switchDevice('audio', mic).then(() => {});
+            } else {                                // 学生先判断本地是否有权限再决定是否开麦或开摄像头
+                this.isspeak?this.localStream.unmuteVideo():this.localStream.muteVideo();
+                this.isvoice?this.localStream.unmuteAudio():this.localStream.muteAudio();
+                this.localStream.switchDevice('video', camera).then(() => {
+                    this.isspeak?this.localStream.unmuteVideo():this.localStream.muteVideo();
+                });
+                this.localStream.switchDevice('audio', mic).then(() => {
+                    this.isvoice?this.localStream.unmuteAudio():this.localStream.muteAudio();
+                });
+            }
         }
         this.checkmic = mic;
         this.checkopenmic = mic;
         this.checkcamera = camera;
+        this.camera = camera != 'no' ? true : false;
         var _this = this;
-        console.log("本地声音："+this.checkmic);
-        if (mic == 'no' && this.mic) {
-            console.log("禁麦");
-            // 通知关麦操作
-            _this.socket.emit('permission', {
-                hash_id: _this.users.hash_id,
-                type: "voice",
-                status: 0,
-                nickname: "自己"
-            });
-        } else if (this.mic == false && mic != 'no') {
-            // 通知开麦操作
-            console.log("开麦");
-            _this.socket.emit('permission', {
-                hash_id: _this.users.hash_id,
-                type: "voice",
-                status: 1,
-                nickname: "自己"
-            });
+        if (this.isteacher) {
+            if (mic == 'no' && this.mic) {
+                // 通知关麦操作
+                _this.socket.emit('permission', {
+                    hash_id: _this.users.hash_id,
+                    type: "voice",
+                    status: 0,
+                    nickname: "自己"
+                });
+            } else if (this.mic == false && mic != 'no') {
+                // 通知开麦操作
+                _this.socket.emit('permission', {
+                    hash_id: _this.users.hash_id,
+                    type: "voice",
+                    status: 1,
+                    nickname: "自己"
+                });
+            }
         }
     };
     

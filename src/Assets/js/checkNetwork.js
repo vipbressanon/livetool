@@ -47,8 +47,8 @@
                 }
             },
             {
-                "url" : "http://liveqn.xueyoubangedu.com/zj_logo.jpg",  //直播logo
-                "size" : 1300,
+                "url" : "https://www.baidu.com/img/baidu_jgylogo3.gif",  //百度logo
+                "size" : 705,
                 "speed" : {
                     "bad" : 400,
                     "medium" : 200

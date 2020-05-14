@@ -93,7 +93,7 @@ var bmsajax = function () {
             if (this.course.status == 1) {
                 str += '<div class="txImg bgimg1">';
             } else {
-                str += '<div class="txImg bgimg2">';
+                str += '<div class="txImg bgimg3">';
             }
             str += '<div '+local+' ></div>';
             str += '</div>';
@@ -123,9 +123,10 @@ var bmsajax = function () {
             str += '</div>';
             if (this.isteacher) {
                 str += '<div class="handle">';
-                str += '<div title="台上静音" class="icon01"></div>';
-                str += '<div title="取消台上授权" class="icon02"></div>';
+                str += '<div title="台上连麦" class="icon01"></div>';
+                str += '<div title="台上授权" class="icon02"></div>';
                 str += '<div title="台上奖励" class="icon03"></div>';
+                str += '<div title="允许全员发言" class="icon04"></div>';
                 str += '<div title="放大窗口" class="zuidahua"></div>';
                 str += '</div>';
             }
@@ -271,7 +272,8 @@ var bmsajax = function () {
             $(".users"+v).remove();
             $("#users"+v).remove();
         });
-        if ($(".layui-layer-wrap").length > 0 && $(".layui-layer-wrap video").length == 0) {
+        
+        if ($("#maxdiv").length > 0 && _this.onoff['max'] == '') {
             $(".layui-layer").remove();
             $(".layui-layer-move").remove();
             layer.close(layer.index);
@@ -282,7 +284,7 @@ var bmsajax = function () {
     var onlinehtml = function(hash_id, arr) {
         var str = "";
         str += "<tr class='users"+hash_id+"' data-hash_id='"+hash_id+"'>";
-        str += "<td>用户</td>";
+        str += "<td width='130'>用户</td>";
         str += "<td><div class='plat "+(arr['plat'] == 1 ? "plat1" : "plat2")+"'></div></td>";
         str += "<td><div class='board "+(arr['board'] == 1 ? "board1" : "board2")+"'></div></td>";
         str += "<td><div class='voice "+(arr['voice'] == 1 ? "voice1" : "voice2")+"'></div></td>";
@@ -296,7 +298,7 @@ var bmsajax = function () {
             str += "<td><div class='platform platform3'></div></td>";
         }
         str += "<td><div class='zan'></div> x <span class='zannum'>0</span></td>";
-        str += "<td><div class='hand hand2'></div></td>";
+        str += "<td width='80'><div class='hand hand2'></div></td>";
         str += "<td><div class='kick'></div></td>";
         str += "</tr>";
         $('#student-list tbody').append(str);
@@ -481,24 +483,21 @@ var bmsajax = function () {
     
     //实时直播时间
     var livetime = function(type = ''){
-        
         var start = '';
         var str = "";
         var date = null;
-        var leftTime = 0;
-        var now = new Date().getTime();
-        
         if (type == 'create') {
+            this.leftTime == null;
             clearTimeout(this.timeadd);
             $(".roomtime").html("开课时间：<b>00:00</b>");
         }
-        
         if (this.course.status == 0) {
-            leftTime = new Date(this.course.expectstart).getTime() - now;
-            if (leftTime > 0 && leftTime <= 300000) {
+            this.leftTime = new Date(this.course.expectstart).getTime() - new Date().getTime();
+            if (this.leftTime > 0 && this.leftTime <= 300000) {
                 $(".roomtime").addClass("span_red");
                 $(".roomtime").next(".span_red").show();
-            } else if (leftTime <= 0) {
+            } else if (this.leftTime <= 0) {
+                this.leftTime == null;
                 clearTimeout(this.timeadd);
                 $(".roomtime").html("距开课：<b>00:00</b>");
                 $(".roomtime").addClass("span_red");
@@ -507,25 +506,32 @@ var bmsajax = function () {
             }
             str += "距开课：";
         } else if (this.course.status == 1) {
-            cuttime = new Date(this.course.expectendtime).getTime() - now;
-            if (cuttime > 600000) {
-                leftTime = now - new Date(this.course.starttime).getTime();
+            if (this.course.expectendtime == undefined || this.course.expectendtime == null) {
+                this.course.expectendtime = new Date(this.course.expectend).getTime() + new Date(this.course.starttime).getTime() - new Date(this.course.expectstart).getTime();
+            }
+            this.rightTime = new Date(this.course.expectendtime).getTime() - new Date().getTime();
+            if (this.rightTime > 600000) {
+                this.leftTime = new Date().getTime() - new Date(this.course.starttime).getTime();
                 str += "开课时间：";
                 $(".roomtime").removeClass("span_red");
                 $(".roomtime").next(".span_red").hide();
-            } else if (cuttime > 0 && cuttime <= 600000) {
-                leftTime = cuttime;
+            } else if (this.rightTime > 0 && this.rightTime <= 600000) {
+                this.leftTime = this.rightTime;
                 str += "剩余时间：";
                 $(".roomtime").addClass("span_orange");
-            } else if (cuttime <= 0) {
-                leftTime = now - new Date(this.course.expectendtime).getTime() + 1000;
+            } else if (this.rightTime <= 0) {
+                this.leftTime = new Date().getTime() - new Date(this.course.expectendtime).getTime() + 1000;
                 str += "拖堂时间：";
                 $(".roomtime").removeClass("span_orange").addClass("span_red");
                 $(".roomtime").next(".span_red").html("（拖堂20分钟自动下课）").show();
             }
+        } else if (this.course.status == 2) {
+            clearTimeout(this.timeadd);
+            $(".roomtime").html("");
+            return;
         }
-        m = Math.floor(leftTime / 1000 / 60);
-        s = Math.floor(leftTime / 1000 % 60);
+        m = Math.floor(this.leftTime / 1000 / 60);
+        s = Math.floor(this.leftTime / 1000 % 60);
         m = m < 10 ? ("0" + m) : m;
         s = s < 10 ? ("0" + s) : s;
         str = str + m + ":"+ s;

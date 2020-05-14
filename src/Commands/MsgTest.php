@@ -183,7 +183,6 @@ class MsgTest extends Command
                     if (array_key_exists($socket->hash_id, $usersocket) && $usersocket[$socket->hash_id] != $socket->id) {
                         return;
                     }
-                    
                     $arr = self::redisGet($socket->room_id.'onoff');
                     if ($socket->hash_id == $arr['onoff']['max']) {
                         $arr['onoff']['max'] = '';
@@ -193,7 +192,6 @@ class MsgTest extends Command
                     self::userlist($socket->room_id, $socket->hash_id, '', '', 'cut');
                     
                     $users = self::redisGet($socket->room_id.'users');
-                    
                     self::$senderIo->to($socket->room_id)->emit(
                         'cutusers',
                         [
@@ -251,6 +249,7 @@ class MsgTest extends Command
                         }
                     }
                     $index++;
+
                     self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
                     self::$senderIo->to($socket->room_id)->emit(
                         'platbatch',

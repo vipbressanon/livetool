@@ -22,6 +22,7 @@ var liveroom = function () {
         this.checkcamera = '';          //摄像头默认值
         this.socket = null;
         this.loading = false;   //加载中
+        this.recordeloading = false;   //加载中
         this.fullscreen = false; //是否全屏
         this.remoteVideos = {}; //设备信息
         this.socketindex = -1;
@@ -33,6 +34,9 @@ var liveroom = function () {
         this.boardscale = 100;
         this.socket_heart = null; // 上次心跳时间
         this.socket_retry = 3; // socket重连次数
+        this.volume_interval_map = new Map(); //定时器 
+        this.leftTime = null;
+        this.rightTime = null;
         
         this.tic = new TIC({});
         this.tic.init(this.users.sdkappid, res => {
@@ -101,7 +105,7 @@ var liveroom = function () {
             console.log(this.users);
             var _this = this;
             this.socket = io(this.socketurl);
-            console.log(this.socket.id);
+            console.log(_this.room.id);
             // 连接并触发登录事件
             this.socket.on('connect', function () {
                 // 登录-》users和plat
@@ -131,9 +135,9 @@ var liveroom = function () {
                         location.replace("/live/login/"+_this.course.hash_id);
                         return;
                     }
-                    _this.bmsajax.addusers();
                     _this.onoff = arr.onoff;
                     console.log(_this.onoff);
+                    _this.bmsajax.addusers();
                     if (_this.users.hash_id == arr.hashid) {
                         _this.bmsim.chatstatus();
                         _this.bmsim.handstatus();
@@ -144,10 +148,11 @@ var liveroom = function () {
             // 人员减少
             this.socket.on('cutusers', function (arr) {
                 console.log("cutusers", arr);
-                // _this.onoff["max"] = '';
                 if (_this.socketindex < arr.index) {
                     _this.socketindex = arr.index;
                     _this.permission = arr.users;
+                    _this.onoff = arr.onoff;
+                    console.log(_this.onoff);
                     _this.bmsajax.cutusers();
                 }
             });
@@ -202,20 +207,15 @@ var liveroom = function () {
                     case 'MAX':        //放大，缩小
                         if (json.text == 1) {
                             _this.onoff['max'] = json.hash_id;
-                            _this.bmsrtc.maxdiv(json.hash_id);
+                            _this.bmsrtc.maxdiv(_this.onoff['max']);
                             if (json.nickname) {
                                 _this.bmsim.toast("讲师放大了 "+json.nickname+" 的画面");
                             }
                         } else {
                             _this.onoff['max'] = '';
-                            if ($(".layui-layer-wrap").length > 0) {
-                                $("#users"+json.hash_id).prepend($('#zuida'+json.hash_id).find('.txImg'));
-                                $(".layui-layer").remove();
-                                $(".layui-layer-move").remove();
-                                layer.close(layer.index);
-                                if (json.nickname) {
-                                    _this.bmsim.toast("讲师缩小了 "+json.nickname+" 的画面");
-                                }
+                            _this.bmsrtc.maxdiv(_this.onoff['max']);
+                            if (json.nickname) {
+                                _this.bmsim.toast("讲师缩小了 "+json.nickname+" 的画面");
                             }
                         }
                         break;
@@ -249,15 +249,17 @@ var liveroom = function () {
                     if (arr.type == 'roomtype') {
                         if (arr.status == 1) {
                             if (_this.isteacher) {
+                                _this.bmsrtc.maxdiv('');
                                 _this.bmsrtc.pushScreen();
                             } else {
-                                _this.bmsrtc.maxdiv(_this.course.teacher_hash_id);
+                                _this.bmsrtc.maxdiv(_this.onoff['max']);
                             }
                             _this.bmsim.toast("讲师切换为屏幕共享模式");
                         } else {
                             if (_this.isteacher) {
                                 _this.bmsrtc.startRTC();
                             }
+                            _this.bmsrtc.maxdiv(_this.onoff['max']);
                             _this.bmsim.toast("讲师切换为白板教学模式");
                         }
                         
@@ -291,10 +293,10 @@ var liveroom = function () {
                             }
                         });
                         if (arr.status == 0) {
-                            $(".teacherHead .icon02").attr("title", "台上授权").addClass("current");
+                            $(".teacherHead .icon02").attr("title", "台上授权").removeClass("current");
                             _this.bmsim.toast('所有上台学员已取消授权');
                         } else {
-                            $(".teacherHead .icon02").attr("title", "取消台上授权").removeClass("current");
+                            $(".teacherHead .icon02").attr("title", "取消台上授权").addClass("current");
                             _this.bmsim.toast('所有上台学员已授权');
                         }
                     } else if (arr.type == 'voice') {
@@ -304,10 +306,10 @@ var liveroom = function () {
                             }
                         });
                         if (arr.status == 0) {
-                            $(".teacherHead .icon01").attr("title", "台上连麦").addClass("current");
+                            $(".teacherHead .icon01").attr("title", "台上连麦").removeClass("current");
                             _this.bmsim.toast('所有上台学员已静音');
                         } else {
-                            $(".teacherHead .icon01").attr("title", "台上静音").removeClass("current");
+                            $(".teacherHead .icon01").attr("title", "台上静音").addClass("current");
                             _this.bmsim.toast('所有上台学员已连麦');
                         }
                     }
@@ -323,12 +325,10 @@ var liveroom = function () {
                 _this.bmsajax.livetime('create');
                 _this.bmsim.toast('开始上课啦！');
                 _this.course.teacher_hash_id = arr.teacher_hash_id;
-                if (_this.isteacher) {
-                    _this.bmsrtc.teacherbtn();
-                } else {
+                if (!_this.isteacher) {
                     _this.bmstic.enter();
                 }
-                $(".headTx .txImg").addClass('bgimg1').removeClass('bgimg2');
+                $(".headTx .txImg").addClass('bgimg1').removeClass('bgimg2').removeClass('bgimg3');
             });
             // 下课
             this.socket.on('over', function () {
@@ -339,13 +339,6 @@ var liveroom = function () {
                 // 下课对应样式变更 
                 $('.middle').prepend('<div class="status"><a class="tag end" href="javascript:;">已下课</a></div>');
                 $('#startbtn').remove();
-            });
-            // 超时自动下课
-            this.socket.on('classover', function () {
-                if (_this.isteacher) {
-                    console.log("自动下课了");
-                    _this.bmsajax.roomend();
-                }
             });
             // 最后5分钟提醒
             this.socket.on('downtips', function () {
@@ -427,6 +420,7 @@ var liveroom = function () {
             $(".fullBtn").html('全屏<br>显示');
             $(".fullBtn_a").html('最大化');
             if (_this.isenter) {
+                // _this.teduBoard.addVideoFile('http://1257355334.vod2.myqcloud.com/ce9faee8vodcq1257355334/27033b935285890801964548705/f0.mp4');
                 if (_this.fileload) {
                     _this.bmsim.toast('文件正在加载，请稍后');
                     // $('.layui-progress').show();
@@ -451,6 +445,11 @@ var liveroom = function () {
         $(document).on("click", ".closebtn", function(){
             $('.dialog_online_people').hide();
         });
+        if (this.isteacher) {
+            this.bmsrtc.teacherbtn();
+        } else {
+            this.bmsrtc.studentbtn();
+        }
         window.onbeforeunload = () => {
             return '';
         }

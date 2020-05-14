@@ -129,7 +129,7 @@
     <input type="hidden" id="isteacher" value="{{$tea}}" />
 </body>
 </html>
-<script src="/vendor/livetool/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
 <script src="/vendor/livetool/js/check.js"></script>
 <script src="/vendor/livetool/js/adapter-latest.js"></script>
 <script src="https://sqimg.qq.com/expert_qq/webrtc/3.4.2/WebRTCAPI.min.js"></script>
@@ -140,7 +140,7 @@ layui.use(['layer','jquery','form'], function(){
         $ = layui.jquery,
         form = layui.form;
     form.render();
-    $('.keepBtn').on('click', function(){console.log(parent.localStream);
+    $('.keepBtn').on('click', function(){
         if (parent.localStream) {
             parent.bmsrtc.switchrtc($("#videoSource").val(), $("#audioSource").val());
         }
