@@ -45,7 +45,6 @@ class LiveController extends Controller
             // 获取房间用户信息
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
             
-            
             // 用户黑名单,被讲师踢出的将不能再次进入
             $black = $rs->black($room['id'], $info['id']);
             // 获取课程分享信息

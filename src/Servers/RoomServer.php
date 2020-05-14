@@ -79,13 +79,11 @@ class RoomServer
         $now = date('Y-m-d H:i:s');
         $course = config('livetool.course');
         $detail = DB::table($course['table'])->where($course['field']['id'], $course_id)->first();
-        $expectendtime = date('Y-m-d H:i:s', time() + strtotime($detail->expectend) - strtotime($detail->expectstart));
         DB::table($course['table'])
             ->where($course['field']['id'], $course_id)
             ->update([
                 $course['field']['starttime'] => $now,
                 $course['field']['endtime'] => null,
-                $course['field']['expectendtime'] => $expectendtime,
                 $course['field']['status'] => 1,
                 $course['field']['updated_at'] => $now
             ]);
