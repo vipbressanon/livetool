@@ -146,7 +146,7 @@ class ApiServer
         } else {
             Log::error($this->api['url'].'/api/record/start: '.$res->meta->msg);
         }
-        return $data;
+        return $res;
     }
     
     // 录制暂停

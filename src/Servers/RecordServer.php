@@ -17,17 +17,20 @@ class RecordServer
     public function hander($room_id, $status)
     {
         $room = Room::find($room_id);
-        $oldstatus = $room->roomrecord;
-        $room->roomrecord = $status;
-        $room->save();
+        
         if (($oldstatus == 0 || $oldstatus == 3) && $room->roomrecord == 1) {
             $api = new ApiServer();
-            $api->recordstart($room_id);
+            $re = $api->recordstart($room_id);
         } else{
             $api = new ApiServer();
-            $api->recordend($room_id);
+            $re = $api->recordend($room_id);
         }
-
+        if($re->meta->code == 200){
+            $oldstatus = $room->roomrecord;
+            $room->roomrecord = $status;
+            $room->save();
+        }
+        return $re;
         // elseif ($oldstatus == 1 && $room->roomrecord == 2) {
         //     $api = new ApiServer();
         //     $api->recordpause($room_id);
