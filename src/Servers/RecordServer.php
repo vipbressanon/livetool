@@ -19,15 +19,19 @@ class RecordServer
         $room = Room::find($room_id);
         $oldstatus = $room->roomrecord;
         $room->roomrecord = $status;
-        $room->save();
         if (($oldstatus == 0 || $oldstatus == 3) && $room->roomrecord == 1) {
             $api = new ApiServer();
-            $api->recordstart($room_id);
+            $re = $api->recordstart($room_id);
         } else{
             $api = new ApiServer();
-            $api->recordend($room_id);
+            $re = $api->recordend($room_id);
         }
+        Log::info("RecordServer hander re",['re'=>$re]);
+        if($re->meta->code == 200){
 
+            $room->save();
+        }
+        return $re;
         // elseif ($oldstatus == 1 && $room->roomrecord == 2) {
         //     $api = new ApiServer();
         //     $api->recordpause($room_id);

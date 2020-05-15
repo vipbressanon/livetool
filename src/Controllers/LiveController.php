@@ -214,7 +214,7 @@ class LiveController extends Controller
                 ->with('tea', $tea);
     }
     
-    // 录制开始
+     // 录制开始
     public function postRecord(Request $request)
     {
         Log::info("录制事件 request",array('re' => $request->all()));
@@ -222,7 +222,11 @@ class LiveController extends Controller
         $status = $request->input('status');
         $rs = new RecordServer();
         $res = $rs->hander($room_id, $status);
-        return response()->json(['error'=>'']);
+        if($res->meta->code == 200){
+          return response()->json(['error'=>'']);  
+        }
+        return response()->json(['error'=>$res->meta->msg]);
+        
     }
 
     // 录制回调
