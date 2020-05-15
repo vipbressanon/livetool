@@ -505,7 +505,7 @@ class MsgTest extends Command
         return json_encode($json);
     }
     public static function redisSet($key, $arr = [], $time = 9000) {
-        var_dump($key);
+        //var_dump($key);
         Redis::setex($key, $time, serialize($arr));
     }
     public static function redisGet($key) {
