@@ -25,6 +25,7 @@ class RecordServer
             $api = new ApiServer();
             $re = $api->recordend($room_id);
         }
+        Log::info("RecordServer hander re",['re'=>$re]);
         if($re->meta->code == 200){
             
             $room->roomrecord = $status;
