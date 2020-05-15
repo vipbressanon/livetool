@@ -5,7 +5,7 @@ use DB;
 use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomBlack;
 use Vipbressanon\LiveTool\Servers\ApiServer;
-use App\Common\SendRequest;
+use Illuminate\Support\Facades\Redis;
 use Log;
 
 class RoomServer
@@ -15,7 +15,7 @@ class RoomServer
     {
     }
 
-    public function detail($course_id, $teacher_id,$users_hash_id=0,$isteacher=0)
+    public function detail($course_id, $teacher_id, $isteacher)
     {
         $res = Room::select('id', 'hash_id', 'course_id', 'roomtype', 'roomchat', 'roomspeak', 'roomhand', 'roomrecord')
                 ->where('course_id', $course_id)
@@ -38,28 +38,16 @@ class RoomServer
             $res->hash_id = $data ? $data->hash_id : '';
             $res->save();
         }
-        $request = new SendRequest();
-        $url = 'http://47.94.254.25:3121'.'/?type=userlist&room_id='.$res->id;
-        $re = $request->sendRequest($url,[],[],'GET');  
-        $re = json_decode(json_encode($re),true); 
-        Log::info("RoomServer online_num re",$re); 
         $online_num = 0;
-        if(!$isteacher){
-            $white_3 = DB::table('course_word_white')
-                ->where('type','=',3)
-                ->where('course_id','=',$course_id)
-                ->count();
-            if($re['meta']['code'] == '200'){
-                foreach ($re['data'] as $k => $v) {
-                    if($k == $users_hash_id) continue;
+        
+        if (!$isteacher) {
+            $users = unserialize(Redis::get($res->id.'users'));
+            if ($users) {
+                foreach ($users['users'] as $v) {
                     if(!$v['isteacher']) $online_num++;
                 }
-            }else{
-                $online_num = $white_3-1;
             }
         }
-        Log::info("online_num".$online_num.'||users_hash_id'.$users_hash_id);
-        
         
         return [
             'id' => $res->id,

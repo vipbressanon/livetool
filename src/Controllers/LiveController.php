@@ -41,7 +41,7 @@ class LiveController extends Controller
             // 获取用户令牌
             $info = $us->sig($users->hash_id, $users->id, $course['team_id']);
             // 获取房间信息
-            $room = $rs->detail($course['id'], $course['teacher_id'],$info['hash_id'],$isteacher);
+            $room = $rs->detail($course['id'], $course['teacher_id'], $isteacher);
             // 获取房间用户信息
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
             
@@ -256,7 +256,7 @@ class LiveController extends Controller
         }
     }
 
-    private function role($course, $black, $iswhite, $balance,$online_num)
+    private function role($course, $black, $iswhite, $balance, $online_num)
     {
         $data = [201, '无法进入直播间'];
     	if (!$iswhite && $course['invite_type'] == 0) {
@@ -268,7 +268,7 @@ class LiveController extends Controller
         if(!$iswhite && $course['invite_type'] == 2){
             return [ 201 ,'不再白名单内，无法进入'];
         }   
-        if($online_num >= $course['up_top']+$course['down_top']){
+        if($online_num >= $course['up_top'] + $course['down_top']){
             return [ 201 ,'房间人数已满，无法进入'];
         }
         if ($course['status'] == 0) {
