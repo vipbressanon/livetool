@@ -107,11 +107,14 @@ class MsgTest extends Command
                             'hashid' => $socket->hash_id
                         ]
                     );
-                } catch(\Exception $e) {
+                                    } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
             });
             
+            // 返回服务器时间
+            $socket->emit('servertime', ['time' => time()]);
+
             // 讲师创建房间后邀请所有人进入
             $socket->on('create', function () use ($socket) {
                 try {
