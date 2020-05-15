@@ -203,7 +203,7 @@ class ApiServer
         } else {
             Log::error($this->api['url'].'/api/record/end: '.$res->meta->msg);
         }
-        return $data;
+        return $res;
     }
     
     private function accesstoken()
