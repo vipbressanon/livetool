@@ -17,7 +17,7 @@ class RecordServer
     public function hander($room_id, $status)
     {
         $room = Room::find($room_id);
-        
+        $oldstatus = $room->roomrecord;
         if (($oldstatus == 0 || $oldstatus == 3) && $room->roomrecord == 1) {
             $api = new ApiServer();
             $re = $api->recordstart($room_id);
@@ -26,7 +26,7 @@ class RecordServer
             $re = $api->recordend($room_id);
         }
         if($re->meta->code == 200){
-            $oldstatus = $room->roomrecord;
+            
             $room->roomrecord = $status;
             $room->save();
         }
