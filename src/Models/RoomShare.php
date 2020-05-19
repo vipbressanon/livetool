@@ -8,4 +8,5 @@ class RoomShare extends Model
     public $timestamps = true;
 
     protected $table = 'room_share';
+
 }
