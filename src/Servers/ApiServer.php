@@ -188,13 +188,13 @@ class ApiServer
     }
     
     // 录制结束
-    public function recordend($room_id)
+    public function recordend($room_id,$share=array())
     {
         $data = false;
         $accesstoken = $this->accesstoken();
         $res = $this->sendRequest(
             $this->api['url'].'/api/record/end',
-            ['room_id' => $room_id],
+            ['room_id' => $room_id,'share'=>$share],
             ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
             'POST'
         );
