@@ -3,6 +3,7 @@ namespace Vipbressanon\LiveTool\Servers;
 
 use DB;
 use Vipbressanon\LiveTool\Models\Room;
+use Vipbressanon\LiveTool\Models\RoomShare;
 use Vipbressanon\LiveTool\Models\RoomBlack;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use Illuminate\Support\Facades\Redis;
