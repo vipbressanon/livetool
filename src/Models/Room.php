@@ -11,6 +11,6 @@ class Room extends Model
 
     public function share(){
 
-    	return $this->hasMany('Vipbressanon\LiveTool\Models\CourseShare', 'room_id', 'id');
+    	return $this->hasMany('Vipbressanon\LiveTool\Models\RoomShare', 'room_id', 'id');
     }
 }

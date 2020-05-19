@@ -2,11 +2,11 @@
 
 use Illuminate\Database\Eloquent\Model;
 
-class CourseShare extends Model
+class RoomShare extends Model
 {
 
     public $timestamps = true;
 
-    protected $table = 'course_share';
+    protected $table = 'room_share';
     
 }
