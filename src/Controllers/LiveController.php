@@ -252,13 +252,14 @@ class LiveController extends Controller
         $hash_id = $request->input('hash_id', '');
         if ($room_id && $hash_id) {
             if (Redis::exists($room_id.'users')) {
-                $users = unserialize(Redis::get($room_id.'users'));
+                $arr = unserialize(Redis::get($room_id.'users'));
+                $users = array_key_exists('users', $arr) ? $arr['users'] : [];
                 if (array_key_exists($hash_id, $users)) {
-                    unset($users[$hash_id]);
-                    if (count($users) == 0) {
+                    unset($arr['users'][$hash_id]);
+                    if (count($arr['users']) == 0) {
                         Redis::del($room_id.'users');
                     } else {
-                        Redis::setex($room_id.'users', 9000, serialize($users));
+                        Redis::setex($room_id.'users', 9000, serialize($arr));
                     }
                 }
             }
@@ -273,7 +274,8 @@ class LiveController extends Controller
                     }
                 }
             }
-            if (!Redis::exists($room_id.'users') || (Redis::exists($room_id.'users') && count(unserialize(Redis::get($room_id.'users'))) == 0)) {
+            $us = Redis::exists($room_id.'users') ? unserialize(Redis::get($room_id.'users')) : [];
+            if (!Redis::exists($room_id.'users') || (Redis::exists($room_id.'users') && (!array_key_exists('users', $us) || count($us['users']) == 0))) {
                 Redis::del($room_id.'onoff');
             }
         }
