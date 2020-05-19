@@ -273,7 +273,7 @@ class LiveController extends Controller
                     }
                 }
             }
-            if (!Redis::exists($room_id.'users') || (Redis::exists($room_id.'users') && count(unserialize(Redis::get($room_id.'users'))) == 0) {
+            if (!Redis::exists($room_id.'users') || (Redis::exists($room_id.'users') && count(unserialize(Redis::get($room_id.'users'))) == 0)) {
                 Redis::del($room_id.'onoff');
             }
         }
