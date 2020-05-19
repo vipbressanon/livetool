@@ -107,6 +107,7 @@ class MsgTest extends Command
                             'hashid' => $socket->hash_id
                         ]
                     );
+                    $socket->emit('servertime', ['time'=>time()]);
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                 }
@@ -504,7 +505,7 @@ class MsgTest extends Command
         return json_encode($json);
     }
     public static function redisSet($key, $arr = [], $time = 9000) {
-        var_dump($key);
+        //var_dump($key);
         Redis::setex($key, $time, serialize($arr));
     }
     public static function redisGet($key) {

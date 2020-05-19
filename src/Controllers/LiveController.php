@@ -41,7 +41,7 @@ class LiveController extends Controller
             // 获取用户令牌
             $info = $us->sig($users->hash_id, $users->id, $course['team_id']);
             // 获取房间信息
-            $room = $rs->detail($course['id'], $course['teacher_id'],$info['hash_id'],$isteacher);
+            $room = $rs->detail($course['id'], $course['teacher_id'], $isteacher);
             // 获取房间用户信息
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
             
@@ -249,14 +249,39 @@ class LiveController extends Controller
     // 清除直播间数据
     public function clearRedis(Request $request) {
         $room_id = $request->input('room_id', '');
-        if ($room_id) {
-            Redis::del($room_id.'users');
-            Redis::del($room_id.'usersocket');
-            Redis::del($room_id.'onoff');
+        $hash_id = $request->input('hash_id', '');
+        if ($room_id && $hash_id) {
+            if (Redis::exists($room_id.'users')) {
+                $arr = unserialize(Redis::get($room_id.'users'));
+                $users = array_key_exists('users', $arr) ? $arr['users'] : [];
+                if (array_key_exists($hash_id, $users)) {
+                    unset($arr['users'][$hash_id]);
+                    if (count($arr['users']) == 0) {
+                        Redis::del($room_id.'users');
+                    } else {
+                        Redis::setex($room_id.'users', 9000, serialize($arr));
+                    }
+                }
+            }
+            if (Redis::exists($room_id.'usersocket')){
+                $usersocket = unserialize(Redis::get($room_id.'usersocket'));
+                if (array_key_exists($hash_id, $usersocket)) {
+                    unset($usersocket[$hash_id]);
+                    if (count($usersocket) == 0) {
+                        Redis::del($room_id.'usersocket');
+                    } else {
+                        Redis::setex($room_id.'usersocket', 9000, serialize($usersocket));
+                    }
+                }
+            }
+            $us = Redis::exists($room_id.'users') ? unserialize(Redis::get($room_id.'users')) : [];
+            if (!Redis::exists($room_id.'users') || (Redis::exists($room_id.'users') && (!array_key_exists('users', $us) || count($us['users']) == 0))) {
+                Redis::del($room_id.'onoff');
+            }
         }
     }
 
-    private function role($course, $black, $iswhite, $balance,$online_num)
+    private function role($course, $black, $iswhite, $balance, $online_num)
     {
         $data = [201, '无法进入直播间'];
     	if (!$iswhite && $course['invite_type'] == 0) {
@@ -268,7 +293,7 @@ class LiveController extends Controller
         if(!$iswhite && $course['invite_type'] == 2){
             return [ 201 ,'不再白名单内，无法进入'];
         }   
-        if($online_num >= $course['up_top']+$course['down_top']){
+        if($online_num >= $course['up_top'] + $course['down_top']){
             return [ 201 ,'房间人数已满，无法进入'];
         }
         if ($course['status'] == 0) {
