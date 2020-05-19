@@ -124,8 +124,10 @@ class RoomServer
             $res = RoomShare::where('room_id', $room_id)
                     ->whereNull('endtime')
                     ->first();
-            $res->endtime = time();
-            $res->save();
+            if ($res) {
+                $res->endtime = time();
+                $res->save();
+            }
         }
     }
     
