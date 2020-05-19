@@ -111,11 +111,21 @@ class RoomServer
         return true;
     }
     
+    // 1屏幕分享模式，2白板模式
     public function type($room_id, $type)
     {
-        $res = Room::find($room_id);
-        $res->roomtype = $type;
-        $res->save();
+        if ($type == 1) {
+            $res = new RoomShare();
+            $res->room_id = $room_id;
+            $res->starttime = time();
+            $res->save();
+        } else if ($type == 2) {
+            $res = RoomShare::where('room_id', $room_id)
+                    ->whereNull('endtime')
+                    ->first();
+            $res->endtime = time();
+            $res->save();
+        }
     }
     
     public function chat($room_id, $chat)

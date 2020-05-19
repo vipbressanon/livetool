@@ -160,6 +160,9 @@ class MsgTest extends Command
                     $balance = new BalanceServer();
                     // 10秒以后执行一次结算,定时器只执行一次
                     //Timer::add(10, [$balance, 'handle'], [$socket->room_id], false);
+                    // 记录屏幕共享结束时间
+                    $rs = new RoomServer();
+                    $rs->type($socket->room_id, 2);
                     self::$senderIo->to($socket->room_id)->emit('over');
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
@@ -186,7 +189,12 @@ class MsgTest extends Command
                     $arr = self::redisGet($socket->room_id.'onoff');
                     if ($socket->hash_id == $arr['onoff']['max']) {
                         $arr['onoff']['max'] = '';
-                        $arr['onoff']['roomtype'] = $socket->isteacher ? 2 : $arr['onoff']['roomtype'];
+                        if ($socket->isteacher) {
+                            $arr['onoff']['roomtype'] = 2;
+                            // 记录屏幕共享结束时间
+                            $rs = new RoomServer();
+                            $rs->type($socket->room_id, 2);
+                        }
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     }
                     self::userlist($socket->room_id, $socket->hash_id, '', '', 'cut');
