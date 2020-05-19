@@ -249,10 +249,35 @@ class LiveController extends Controller
     // 清除直播间数据
     public function clearRedis(Request $request) {
         $room_id = $request->input('room_id', '');
-        if ($room_id) {
-            Redis::del($room_id.'users');
-            Redis::del($room_id.'usersocket');
-            Redis::del($room_id.'onoff');
+        $hash_id = $request->input('hash_id', '');
+        if ($room_id && $hash_id) {
+            if (Redis::exists($room_id.'users')) {
+                $arr = unserialize(Redis::get($room_id.'users'));
+                $users = array_key_exists('users', $arr) ? $arr['users'] : [];
+                if (array_key_exists($hash_id, $users)) {
+                    unset($arr['users'][$hash_id]);
+                    if (count($arr['users']) == 0) {
+                        Redis::del($room_id.'users');
+                    } else {
+                        Redis::setex($room_id.'users', 9000, serialize($arr));
+                    }
+                }
+            }
+            if (Redis::exists($room_id.'usersocket')){
+                $usersocket = unserialize(Redis::get($room_id.'usersocket'));
+                if (array_key_exists($hash_id, $usersocket)) {
+                    unset($usersocket[$hash_id]);
+                    if (count($usersocket) == 0) {
+                        Redis::del($room_id.'usersocket');
+                    } else {
+                        Redis::setex($room_id.'usersocket', 9000, serialize($usersocket));
+                    }
+                }
+            }
+            $us = Redis::exists($room_id.'users') ? unserialize(Redis::get($room_id.'users')) : [];
+            if (!Redis::exists($room_id.'users') || (Redis::exists($room_id.'users') && (!array_key_exists('users', $us) || count($us['users']) == 0))) {
+                Redis::del($room_id.'onoff');
+            }
         }
     }
 
