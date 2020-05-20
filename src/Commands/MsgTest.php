@@ -28,8 +28,8 @@ class MsgTest extends Command
     private static $senderIo = null;
     // 是否老师（1,0），上下台（1,0），白板授权（1,0），开麦闭麦（1,0），摄像头（1,0），来源（0-6）
     // 来源:0是pc端，1是h5手机端，2是h5平板端 3是android 4是android平板 5是ios 6是ios的平板
-    private static $teainit = ['isteacher'=>1, 'plat'=>1, 'board'=>1, 'voice'=>1, 'camera'=>1, 'platform'=>0, 'nickname' => '', 'zan' => 0];
-    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0];
+    private static $teainit = ['isteacher'=>1, 'plat'=>1, 'board'=>1, 'voice'=>1, 'camera'=>1, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
+    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
     // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；
     private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>''];
     public function __construct()
@@ -81,6 +81,7 @@ class MsgTest extends Command
                     $socket->zan = isset($request['zan'])?$request['zan']:0;
                     $socket->nickname = isset($request['nickname'])?$request['nickname']:'';
                     $socket->platform = isset($request['platform']) ? $request['platform'] : 0;
+                    $socket->imgurl = isset($request['imgurl']) ? $request['imgurl'] : '';
                     // 在线人员处理
                     self::userlist($socket, 'add');
                     // 上台人员处理
@@ -419,6 +420,7 @@ class MsgTest extends Command
         $platform = $socket->platform;
         $zan = $socket->zan;
         $nickname = $socket->nickname;
+        $imgurl = $socket->imgurl;
         // 变量初始值
         $users = [];
         $index = 0;
@@ -435,6 +437,7 @@ class MsgTest extends Command
             $users[$hash_id]['nickname'] = $nickname;
             $users[$hash_id]['zan'] = $zan;
             $users[$hash_id]['platform'] = $platform;
+            $users[$hash_id]['imgurl'] = $imgurl;
         } elseif ($type == 'cut') {     // 人员减少
             if (array_key_exists($hash_id, $users)) {
                 unset($users[$hash_id]);
