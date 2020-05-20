@@ -36,7 +36,7 @@ class UsersServer
             $res->overtime = $sig ? $sig->overtime : null;
             $res->save();
         }
-        $users_form = config('livetool.users_form');
+        $users_form = config('livetool.usersinfo');
         $users_form = DB::table($users_form['table'])
                 ->select('nickname')
                 ->where($users_form['field']['room_id'], $room_id)
