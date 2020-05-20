@@ -28,8 +28,8 @@ class MsgTest extends Command
     private static $senderIo = null;
     // 是否老师（1,0），上下台（1,0），白板授权（1,0），开麦闭麦（1,0），摄像头（1,0），来源（0-6）
     // 来源:0是pc端，1是h5手机端，2是h5平板端 3是android 4是android平板 5是ios 6是ios的平板
-    private static $teainit = ['isteacher'=>1, 'plat'=>1, 'board'=>1, 'voice'=>1, 'camera'=>1, 'platform'=>0];
-    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0];
+    private static $teainit = ['isteacher'=>1, 'plat'=>1, 'board'=>1, 'voice'=>1, 'camera'=>1, 'platform'=>0, 'nickname' => '', 'zan' => 0];
+    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0];
     // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；
     private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>''];
     public function __construct()
@@ -78,9 +78,11 @@ class MsgTest extends Command
                     $socket->room_id = $request['room_id'];
                     $socket->hash_id = $request['hash_id'];
                     $socket->isteacher = $request['isteacher'];
+                    $socket->zan = isset($request['zan'])?$request['zan']:0;
+                    $socket->nickname = isset($request['nickname'])?$request['nickname']:'';
                     $socket->platform = isset($request['platform']) ? $request['platform'] : 0;
                     // 在线人员处理
-                    self::userlist($socket->room_id, $socket->hash_id, $socket->isteacher, $socket->platform, 'add');
+                    self::userlist($socket, 'add');
                     // 上台人员处理
                     self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
                     // 更新维护 usersocket数组  用于限制单设备登录
@@ -201,7 +203,7 @@ class MsgTest extends Command
                         }
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     }
-                    self::userlist($socket->room_id, $socket->hash_id, '', '', 'cut');
+                    self::userlist($socket, 'cut');
                     
                     $users = self::redisGet($socket->room_id.'users');
                     self::$senderIo->to($socket->room_id)->emit(
@@ -409,8 +411,14 @@ class MsgTest extends Command
     }
     
     // 在线人员
-    public static function userlist($room_id, $hash_id, $isteacher, $platform, $type)
+    public static function userlist($socket, $type)
     {
+        $room_id = $socket->room_id;
+        $hash_id = $socket->hash_id;
+        $isteacher = $socket->isteacher;
+        $platform = $socket->platform;
+        $zan = $socket->zan;
+        $nickname = $socket->nickname;
         // 变量初始值
         $users = [];
         $index = 0;
@@ -424,6 +432,8 @@ class MsgTest extends Command
             if (!array_key_exists($hash_id, $users)) {
                 $users[$hash_id] = $isteacher ? self::$teainit : self::$stuinit;
             }
+            $users[$hash_id]['nickname'] = $nickname;
+            $users[$hash_id]['zan'] = $zan;
             $users[$hash_id]['platform'] = $platform;
         } elseif ($type == 'cut') {     // 人员减少
             if (array_key_exists($hash_id, $users)) {
