@@ -14,14 +14,14 @@ class UsersServer
     {
     }
 
-    public function sig($hash_id, $users_id, $team_id)
+    public function sig($users, $room_id)
     {
         $now = date('Y-m-d H:i:s');
-        $res = RoomSig::where('users_id', $users_id)->first();
+        $res = RoomSig::where('users_id', $users->id)->first();
         if (!$res) {
             $res = new RoomSig();
             $res->sdkappid = '';
-            $res->users_id = $users_id;
+            $res->users_id = $users->id;
             $res->hash_id = '';
             $res->usersig = '';
             $res->overtime = null;
@@ -29,27 +29,25 @@ class UsersServer
         }
         if ($res->usersig == '' || $res->overtime < $now) {
             $api = new ApiServer();
-            $sig = $api->userssig($users_id);
+            $sig = $api->userssig($users->id);
             $res->sdkappid = $sig ? $sig->sdkappid : '';
             $res->hash_id = $sig ? $sig->hash_id : '';
             $res->usersig = $sig ? $sig->usersig : '';
             $res->overtime = $sig ? $sig->overtime : null;
             $res->save();
         }
-        $users_from = config('livetool.users_from');
-        $info = DB::table($users_from['table'])
-            ->select(
-                $users_from['field']['nickname'].' as nickname'
-            )
-            ->where($users_from['field']['users_id'], $users_id)
-            ->whereNull($users_from['field']['deleted_at'])
-            ->where($users_from['field']['display'], 2)
-            ->where($users_from['field']['team_id'], $team_id)
-            ->first();
-        $nickname = $info ? $info->nickname : '';
+        $course_users = config('livetool.course_users');
+        $course_users = DB::table($course_users['table'])
+                ->select('zan')
+                ->where($course_users['field']['room_id'], $room_id)
+                ->where($course_users['field']['users_id'], $users->id)
+                ->first();
+        $zan = $course_users ? $course_users->zan : 0;
         return [
-            'id' => $users_id,
-            'nickname' => $nickname,
+            'id' => $users->id,
+            'nickname' => $users->nickname,
+            'imgurl' => $users->imgurl,
+            'zan' => $zan,
             'sdkappid' => $res->sdkappid,
             'hash_id' => $res->hash_id,
             'usersig' => $res->usersig
