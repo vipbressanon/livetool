@@ -37,11 +37,11 @@ class LiveController extends Controller
             $rs = new RoomServer();
             // 判断用户是否为讲师
             $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
-            $us = new UsersServer();
-            // 获取用户令牌
-            $info = $us->sig($users->hash_id, $users->id, $course['team_id']);
             // 获取房间信息
             $room = $rs->detail($course['id'], $course['teacher_id'], $isteacher);
+            $us = new UsersServer();
+            // 获取用户令牌
+            $info = $us->sig($users, $room['id']);
             // 获取房间用户信息
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
             
