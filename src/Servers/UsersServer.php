@@ -36,6 +36,12 @@ class UsersServer
             $res->overtime = $sig ? $sig->overtime : null;
             $res->save();
         }
+        $users_form = config('livetool.users_form');
+        $users_form = DB::table($users_form['table'])
+                ->select('nickname')
+                ->where($course_users['field']['room_id'], $room_id)
+                ->where($course_users['field']['users_id'], $users->id)
+                ->first();
         $course_users = config('livetool.course_users');
         $course_users = DB::table($course_users['table'])
                 ->select('zan')
@@ -43,9 +49,10 @@ class UsersServer
                 ->where($course_users['field']['users_id'], $users->id)
                 ->first();
         $zan = $course_users ? $course_users->zan : 0;
+        $nickname = $users_form ? $users_form->nickname : '';
         return [
             'id' => $users->id,
-            'nickname' => $users->nickname,
+            'nickname' => $nickname,
             'imgurl' => $users->imgurl,
             'zan' => $zan,
             'sdkappid' => $res->sdkappid,
