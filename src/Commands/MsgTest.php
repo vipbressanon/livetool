@@ -112,6 +112,7 @@ class MsgTest extends Command
                     $socket->emit('servertime', ['time'=>time()]);
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             });
             
@@ -133,6 +134,7 @@ class MsgTest extends Command
                     }
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             });
             
@@ -151,12 +153,16 @@ class MsgTest extends Command
                     // }
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             });
             
             // 下课
             $socket->on('over', function () use ($socket) {
                 try {
+                    // 记录屏幕共享结束时间
+                    // $rs = new RoomServer();
+                    // $rs->type($socket->room_id, 2);
                     $record = new RecordServer();
                     $record->hander($socket->room_id, 3);
                     $balance = new BalanceServer();
@@ -165,6 +171,7 @@ class MsgTest extends Command
                     self::$senderIo->to($socket->room_id)->emit('over');
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             });
             // 离开页面,退出房间
@@ -188,7 +195,12 @@ class MsgTest extends Command
                     $arr = self::redisGet($socket->room_id.'onoff');
                     if ($socket->hash_id == $arr['onoff']['max']) {
                         $arr['onoff']['max'] = '';
-                        $arr['onoff']['roomtype'] = $socket->isteacher ? 2 : $arr['onoff']['roomtype'];
+                        if ($socket->isteacher) {
+                            $arr['onoff']['roomtype'] = 2;
+                            // 记录屏幕共享结束时间
+                            // $rs = new RoomServer();
+                            // $rs->type($socket->room_id, 2);
+                        }
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     }
                     self::userlist($socket, 'cut');
@@ -205,6 +217,7 @@ class MsgTest extends Command
                     );
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             });
             
@@ -229,6 +242,7 @@ class MsgTest extends Command
                     );
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             });
             
@@ -264,6 +278,7 @@ class MsgTest extends Command
                     );
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             });
             
@@ -297,6 +312,7 @@ class MsgTest extends Command
                     );
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             }); 
             
@@ -315,6 +331,7 @@ class MsgTest extends Command
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             }); 
         });
@@ -383,6 +400,7 @@ class MsgTest extends Command
                     return $httpConnection->send(json_encode(['error'=>'没有匹配的发送类型']));
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
                 }
             };
             // 执行监听
