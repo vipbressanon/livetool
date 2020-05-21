@@ -16,7 +16,7 @@ use Vipbressanon\LiveTool\Servers\BalanceServer;
 use Log;
 use Illuminate\Support\Facades\Redis;
 
-class MsgTest extends Command
+class MsgPush extends Command
 {
     protected $signature = 'wk 
     {action=start : start | restart | reload(平滑重启) | stop | status | connetions}
