@@ -443,9 +443,10 @@ class MsgTest extends Command
             if (array_key_exists($hash_id, $users)) {
                 unset($users[$hash_id]);
             }
-            // 用户为空 清除redis
+            // 用户数组为空 清除redis
             if (count($users) == 0) {
                 Redis::del($room_id.'users');
+                Redis::del($room_id.'onoff');
                 return ;
             }
         }
