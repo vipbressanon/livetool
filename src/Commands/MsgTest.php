@@ -205,17 +205,18 @@ class MsgTest extends Command
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     }
                     self::userlist($socket, 'cut');
-                    
-                    $users = self::redisGet($socket->room_id.'users');
-                    self::$senderIo->to($socket->room_id)->emit(
-                        'cutusers',
-                        [
-                            'users' => $users['users'],
-                            'index' => $users['index'],
-                            'onoff' => $arr['onoff']
-                        ]
-                        
-                    );
+                    if (Redis::exists($socket->room_id.'users')) {
+                        $users = self::redisGet($socket->room_id.'users');
+                        self::$senderIo->to($socket->room_id)->emit(
+                            'cutusers',
+                            [
+                                'users' => $users['users'],
+                                'index' => $users['index'],
+                                'onoff' => $arr['onoff']
+                            ]
+                            
+                        );
+                    }
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
@@ -441,6 +442,12 @@ class MsgTest extends Command
         } elseif ($type == 'cut') {     // 人员减少
             if (array_key_exists($hash_id, $users)) {
                 unset($users[$hash_id]);
+            }
+            // 用户数组为空 清除redis
+            if (count($users) == 0) {
+                Redis::del($room_id.'users');
+                Redis::del($room_id.'onoff');
+                return ;
             }
         }
         $index++;
