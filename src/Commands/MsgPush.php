@@ -16,9 +16,9 @@ use Vipbressanon\LiveTool\Servers\BalanceServer;
 use Log;
 use Illuminate\Support\Facades\Redis;
 
-class MsgPush extends Command
+class MsgTest extends Command
 {
-    protected $signature = 'wk 
+    protected $signature = 'wktest 
     {action=start : start | restart | reload(平滑重启) | stop | status | connetions}
     {--d : deamon or debug}';
     
@@ -60,7 +60,7 @@ class MsgPush extends Command
         // 设置所有连接的默认应用层发送缓冲区大小
         TcpConnection::$defaultMaxSendBufferSize = 2 * 1024 * 1024;
         // PHPSocketIO服务
-        self::$senderIo = new SocketIO(2120);
+        self::$senderIo = new SocketIO(3120);
         
         // 客户端发起连接事件时，设置连接socket的各种事件回调
         self::$senderIo->on('connection', function ($socket) {
@@ -329,6 +329,30 @@ class MsgPush extends Command
                         $arr = self::redisGet($socket->room_id.'onoff');
                         $arr['onoff']['max'] = $request['text'] == 1 ? $request['hash_id'] : '';
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                    } else if ($request['type'] == 'PLATZAN') {
+                        if (Redis::exists($socket->room_id.'users')) {
+                            $usersarr = self::redisGet($socket->room_id.'users');
+                            $users = $usersarr['users'];
+                            $index = $usersarr['index'];
+                            $filtered = collect($users)->map(function ($item) {
+                                if ($item['isteacher'] == 0 && $item['plat'] == 1) {
+                                    $item['zan']++;
+                                }
+                                return $item;
+                            });
+                            $users = $filtered->all();
+                            self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+                        }
+                    } else if ($request['type'] == 'ZAN') {
+                        if (Redis::exists($socket->room_id.'users')) {
+                            $usersarr = self::redisGet($socket->room_id.'users');
+                            $users = $usersarr['users'];
+                            $index = $usersarr['index'];
+                            if (array_key_exists($request['hash_id'], $users)) {
+                                $users[$request['hash_id']]['zan']++;
+                            }
+                            self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+                        }
                     }
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
                 } catch(\Exception $e) {
@@ -351,7 +375,7 @@ class MsgPush extends Command
         // 当self::$senderIo启动后监听一个http端口，通过这个端口可以给任意uid或者所有uid推送数据
         self::$senderIo->on('workerStart', function () {
             // 监听一个http端口
-            $innerHttpWorker = new Worker('http://0.0.0.0:2121');
+            $innerHttpWorker = new Worker('http://0.0.0.0:3121');
             // 当http客户端发来数据时触发
             $innerHttpWorker->onMessage = function ($httpConnection, $data) {
                 try {
