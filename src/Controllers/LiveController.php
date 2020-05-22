@@ -40,10 +40,10 @@ class LiveController extends Controller
             // 获取房间信息
             $room = $rs->detail($course['id'], $course['teacher_id'], $isteacher);
             $us = new UsersServer();
-            // 获取用户令牌
-            $info = $us->sig($users, $room['id']);
             // 获取房间用户信息
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
+            // 获取用户令牌
+            $info = $us->sig($users, $room['id']);
             
             // 用户黑名单,被讲师踢出的将不能再次进入
             $black = $rs->black($room['id'], $info['id']);

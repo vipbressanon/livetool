@@ -329,6 +329,30 @@ class MsgPush extends Command
                         $arr = self::redisGet($socket->room_id.'onoff');
                         $arr['onoff']['max'] = $request['text'] == 1 ? $request['hash_id'] : '';
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                    } else if ($request['type'] == 'PLATZAN') {
+                        if (Redis::exists($socket->room_id.'users')) {
+                            $usersarr = self::redisGet($socket->room_id.'users');
+                            $users = $usersarr['users'];
+                            $index = $usersarr['index'];
+                            $filtered = collect($users)->map(function ($item) {
+                                if ($item['isteacher'] == 0 && $item['plat'] == 1) {
+                                    $item['zan']++;
+                                }
+                                return $item;
+                            });
+                            $users = $filtered->all();
+                            self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+                        }
+                    } else if ($request['type'] == 'ZAN') {
+                        if (Redis::exists($socket->room_id.'users')) {
+                            $usersarr = self::redisGet($socket->room_id.'users');
+                            $users = $usersarr['users'];
+                            $index = $usersarr['index'];
+                            if (array_key_exists($request['hash_id'], $users)) {
+                                $users[$request['hash_id']]['zan']++;
+                            }
+                            self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+                        }
                     }
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
                 } catch(\Exception $e) {
