@@ -38,17 +38,11 @@ class UsersServer
         }
         $users_form = config('livetool.usersinfo');
         $users_form = DB::table($users_form['table'])
-                ->select('nickname')
+                ->select('nickname', 'zan')
                 ->where($users_form['field']['room_id'], $room_id)
                 ->where($users_form['field']['users_id'], $users->id)
                 ->first();
-        $course_users = config('livetool.course_users');
-        $course_users = DB::table($course_users['table'])
-                ->select('zan')
-                ->where($course_users['field']['room_id'], $room_id)
-                ->where($course_users['field']['users_id'], $users->id)
-                ->first();
-        $zan = $course_users ? $course_users->zan : 0;
+        $zan = $users_form ? $users_form->zan : 0;
         $nickname = $users_form ? $users_form->nickname : '';
         return [
             'id' => $users->id,
