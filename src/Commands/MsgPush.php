@@ -16,9 +16,9 @@ use Vipbressanon\LiveTool\Servers\BalanceServer;
 use Log;
 use Illuminate\Support\Facades\Redis;
 
-class MsgTest extends Command
+class MsgPush extends Command
 {
-    protected $signature = 'wktest 
+    protected $signature = 'wk 
     {action=start : start | restart | reload(平滑重启) | stop | status | connetions}
     {--d : deamon or debug}';
     
@@ -60,7 +60,7 @@ class MsgTest extends Command
         // 设置所有连接的默认应用层发送缓冲区大小
         TcpConnection::$defaultMaxSendBufferSize = 2 * 1024 * 1024;
         // PHPSocketIO服务
-        self::$senderIo = new SocketIO(3120);
+        self::$senderIo = new SocketIO(2120);
         
         // 客户端发起连接事件时，设置连接socket的各种事件回调
         self::$senderIo->on('connection', function ($socket) {
@@ -375,7 +375,7 @@ class MsgTest extends Command
         // 当self::$senderIo启动后监听一个http端口，通过这个端口可以给任意uid或者所有uid推送数据
         self::$senderIo->on('workerStart', function () {
             // 监听一个http端口
-            $innerHttpWorker = new Worker('http://0.0.0.0:3121');
+            $innerHttpWorker = new Worker('http://0.0.0.0:2121');
             // 当http客户端发来数据时触发
             $innerHttpWorker->onMessage = function ($httpConnection, $data) {
                 try {
