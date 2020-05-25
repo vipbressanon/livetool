@@ -48,7 +48,7 @@ var bmsajax = function () {
         var _this = this;
         $.ajax({
             type: "get",
-            url: "/course/startjob/" + id + "/" + type,
+            url: "/center/course/startjob/" + id + "/" + type,
             dataType: 'json',
             success: function(json){
             }
