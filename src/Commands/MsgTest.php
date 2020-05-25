@@ -379,10 +379,11 @@ class MsgTest extends Command
             // 当http客户端发来数据时触发
             $innerHttpWorker->onMessage = function ($httpConnection, $data) {
                 try {
-                    $type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
-                    $content = isset($_REQUEST['content']) ? $_REQUEST['content'] : '';
+                    $type = !empty($data->get('type')) ? $data->get('type') : '';
+                    $content = !empty($data->get('content')) ? $data->get('content') : '';
                     $content = $content ? json_decode($content, true) : '';
-                    $room_id = isset($_REQUEST['room_id']) ? $_REQUEST['room_id'] : '';
+                    $room_id = !empty($data->get('room_id')) ? $data->get('room_id') : '';
+                    Log::info('socket-data:', [$content,$room_id ,$type]);
                     // 推送数据的url格式 type=publish&to=uid&content=xxxx
                     if ($room_id == '' && $type != 'classover') {
                         return $httpConnection->send(json_encode(['error'=>'暂不支持全局消息']));
