@@ -53,7 +53,12 @@
                     <span class="checkNet">您当前网络状态：<b class="netStatus">--</b></span>
                     <span>当前网速：<b class="netSpeed">0K/S</b></span>
                     @endif
-                   
+                    @if($course['isrecord']==1)
+                    <a class='span_red span_record' data-record="1" href="javascript:;" style="display:block">
+                        <img src="/vendor/livetool/images/img_record.png" alt="">
+                        录制中
+                    </a>
+                    @endif
                     <a id="startbtn" class="startBtn @if($course['status'] != 0) hide @endif" href="javascript:;">开始上课</a>
                     <a id="endbtn" class="overBtn @if($course['status'] != 1) hide @endif" href="javascript:;">下课</a>
                 </div>
@@ -106,7 +111,7 @@
                                 <i class="gantanhao">!</i>
                             </div>
                         </li>
-                        <li>
+                        <!-- <li>
                             @if($room['roomrecord']==1)
                             <div class="blackCircle recordbtn recording" data-record="1">
                                 <label class="sidePic sideIcon6"></label>
@@ -118,7 +123,7 @@
                                 <span class="sideName">课程录制</span>
                             </div>
                             @endif
-                        </li>
+                        </li> -->
                     </ul>
                 </div>
                 

@@ -94,6 +94,7 @@ class RecordServer
         
         // 处理时长
         $file_duration_str =  $this->dataformat($file_duration);
+        Log::info("file_duration_str".$file_duration_str."insertData->",$input);
         $course_record = config('livetool.course_record');
         DB::table($course_record['table'])->insert([
                 $course_record['field']['room_id'] => $room_id,

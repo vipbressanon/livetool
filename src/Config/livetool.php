@@ -4,8 +4,8 @@ return [
     'domainurl' => 'https://zjclass.xueyoubangedu.com',     // 网站地址
     'socketurl' => env('SOCKETURL'),                        // socket地址
     'loginurl' => '/live/login',                            // 登录地址
-    'fileurl' => '/course/file/save',                       // 课件上传地址
-    'fileurl_delete' => '/course/file/delete',              // 课件删除地址
+    'fileurl' => '/center/course/file/save',                       // 课件上传地址
+    'fileurl_delete' => '/center/course/file/delete',              // 课件删除地址
     'intervaltime' => 600,                                  // 结算的间隔时间,单位秒
     'fee' => -200,                                          // 欠费达到指定金额,停止直播,单位元
     'fate' =>   0.0067 ,                                     //收费标准 （流/分钟）
