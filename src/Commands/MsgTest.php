@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Workerman\Worker;
 use Workerman\Lib\Timer;
 use Workerman\Connection\TcpConnection;
+use Workerman\Protocols\Http\Request;
 use PHPSocketIO\SocketIO;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use Vipbressanon\LiveTool\Servers\CourseServer;
@@ -31,7 +32,7 @@ class MsgTest extends Command
     private static $teainit = ['isteacher'=>1, 'plat'=>1, 'board'=>1, 'voice'=>1, 'camera'=>1, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
     private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
     // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；
-    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>''];
+    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100];
     public function __construct()
     {
         parent::__construct();
@@ -178,6 +179,9 @@ class MsgTest extends Command
             // 离开页面,退出房间
             $socket->on('disconnect', function () use ($socket) {
                 try {
+                    if (empty($socket->hash_id)) {
+                        return;
+                    }
                     $us = new UsersServer();
                     $us->end($socket->room_id, $socket->hash_id);
                     // 如果是教师 走结算
@@ -220,6 +224,8 @@ class MsgTest extends Command
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
+					Log::info('websocket,room_id:'.$socket->room_id);
+					Log::info('websocket,hash_id:'.$socket->hash_id);
                 }
             });
             
@@ -377,13 +383,22 @@ class MsgTest extends Command
             // 监听一个http端口
             $innerHttpWorker = new Worker('http://0.0.0.0:3121');
             // 当http客户端发来数据时触发
-            $innerHttpWorker->onMessage = function ($httpConnection, $data) {
+            $innerHttpWorker->onMessage = function ($httpConnection, $request) {
                 try {
-                    $type = !empty($data->get('type')) ? $data->get('type') : '';
-                    $content = !empty($data->get('content')) ? $data->get('content') : '';
+                    $type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
+                    $content = isset($_REQUEST['content']) ? $_REQUEST['content'] : '';
                     $content = $content ? json_decode($content, true) : '';
-                    $room_id = !empty($data->get('room_id')) ? $data->get('room_id') : '';
-                    Log::info('socket-data:', [$content,$room_id ,$type]);
+                    $room_id = isset($_REQUEST['room_id']) ? $_REQUEST['room_id'] : '';
+                    Log::info('socket-msgtest-data1:', [$content,$room_id ,$type]);
+                    // $type = !empty($request['type']) ? $request['type'] : '';
+                    // $content = !empty($request['content']) ? $request['content'] : '';
+                    // $content = $content ? json_decode($content, true) : '';
+                    // $room_id = !empty($request['room_id']) ? $request['room_id'] : '';
+                    // // $type = !empty($_POST['type']) ? $_POST['type'] : '';
+                    // // $content = !empty($_POST['content']) ? $_POST['type'] : '';
+                    // // $content = $content ? json_decode($content, true) : '';
+                    // // $room_id = !empty($_POST['room_id']) ? $_POST['room_id'] : '';
+                    // Log::info('socket-msgtest-data2:', [$content,$room_id ,$type]);
                     // 推送数据的url格式 type=publish&to=uid&content=xxxx
                     if ($room_id == '' && $type != 'classover') {
                         return $httpConnection->send(json_encode(['error'=>'暂不支持全局消息']));
