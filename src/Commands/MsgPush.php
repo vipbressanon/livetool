@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Workerman\Worker;
 use Workerman\Lib\Timer;
 use Workerman\Connection\TcpConnection;
+use Workerman\Protocols\Http\Request;
 use PHPSocketIO\SocketIO;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use Vipbressanon\LiveTool\Servers\CourseServer;
@@ -178,6 +179,9 @@ class MsgPush extends Command
             // 离开页面,退出房间
             $socket->on('disconnect', function () use ($socket) {
                 try {
+                    if (empty($socket->hash_id)) {
+                        return;
+                    }
                     $us = new UsersServer();
                     $us->end($socket->room_id, $socket->hash_id);
                     // 如果是教师 走结算
@@ -377,13 +381,17 @@ class MsgPush extends Command
             // 监听一个http端口
             $innerHttpWorker = new Worker('http://0.0.0.0:2121');
             // 当http客户端发来数据时触发
-            $innerHttpWorker->onMessage = function ($httpConnection, $data) {
+            $innerHttpWorker->onMessage = function (TcpConnection $httpConnection, Request $request) {
                 try {
-                    $type = !empty($data->get('type')) ? $data->get('type') : '';
-                    $content = !empty($data->get('content')) ? $data->get('content') : '';
+                    // $type = !empty($request->post('type')) ? $request->post('type') : '';
+                    // $content = !empty($request->post('content')) ? $request->post('content') : '';
+                    // $content = $content ? json_decode($content, true) : '';
+                    // $room_id = !empty($request->post('room_id')) ? $request->post('room_id') : '';
+                    $type = !empty($_POST['type']) ? $_POST['type'] : '';
+                    $content = !empty($_POST['content']) ? $_POST['type'] : '';
                     $content = $content ? json_decode($content, true) : '';
-                    $room_id = !empty($data->get('room_id')) ? $data->get('room_id') : '';
-                    Log::info('socket-data:', [$content,$room_id ,$type]);
+                    $room_id = !empty($_POST['room_id']) ? $_POST['room_id'] : '';
+                    Log::info('socket-msgpush-data:', [$content,$room_id ,$type]);
                     // 推送数据的url格式 type=publish&to=uid&content=xxxx
                     if ($room_id == '' && $type != 'classover') {
                         return $httpConnection->send(json_encode(['error'=>'暂不支持全局消息']));
