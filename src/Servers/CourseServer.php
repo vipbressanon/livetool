@@ -17,12 +17,6 @@ class CourseServer
     {
         $course = config('livetool.course');
         $res = DB::table($course['table'])
-                ->leftJoin(
-                    'room_sig',
-                    $course['table'].'.'.$course['field']['teacher_id'],
-                    '=',
-                    'room_sig.users_id'
-                )
                 ->select(
                     $course['table'].'.'.$course['field']['id'].' as id',
                     $course['table'].'.'.$course['field']['hash_id'].' as hash_id',
@@ -40,8 +34,7 @@ class CourseServer
                     $course['table'].'.'.$course['field']['code_url'].' as code_url',
                     $course['table'].'.'.$course['field']['up_top'].' as up_top',
                     $course['table'].'.'.$course['field']['down_top'].' as down_top',
-                    $course['table'].'.'.$course['field']['isrecord'].' as isrecord',
-                    'room_sig.hash_id as teacher_hash_id'
+                    $course['table'].'.'.$course['field']['isrecord'].' as isrecord'
                 )
                 ->where($course['table'].'.'.$course['field']['hash_id'], $hash_id)
                 ->first();
@@ -52,7 +45,6 @@ class CourseServer
                 'title' => $res->title,
                 'type' => $res->type,
                 'teacher_id' => $res->teacher_id,
-                'teacher_hash_id' => $res->teacher_hash_id,
                 'status' => $res->status,
                 'expectstart' => $res->expectstart,
                 'expectend' => $res->expectend,
