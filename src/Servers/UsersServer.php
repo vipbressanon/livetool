@@ -215,6 +215,31 @@ class UsersServer
         return true;
     }
     
+    public function teacher($room_id, $team_id, $teacher_id)
+    {
+        $users_from = config('livetool.users_from');
+        $res = DB::table($users_from['table'])
+                ->leftJoin(
+                    'room_sig',
+                    $users_from['table'].'.'.$users_from['field']['users_id'],
+                    '=',
+                    'room_sig.users_id'
+                )
+                ->select(
+                    $users_from['table'].'.'.$users_from['field']['users_id'].' as id',
+                    $users_from['table'].'.'.$users_from['field']['nickname'].' as nickname',
+                    'room_sig.hash_id'
+                )
+                ->where($users_from['table'].'.'.$users_from['field']['team_id'], $team_id)
+                ->where($users_from['table'].'.'.$users_from['field']['users_id'], $teacher_id)
+                ->first();
+        return [
+            'id' => $res ? $res->id : '',
+            'nickname' => $res ? $res->nickname : '',
+            'hash_id' => $res ? $res->hash_id : ''
+        ];
+    }
+    
     private function hashid($hash_id)
     {
         $res = RoomSig::where('hash_id', $hash_id)->first();

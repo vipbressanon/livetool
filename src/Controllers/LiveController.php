@@ -44,7 +44,8 @@ class LiveController extends Controller
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
             // 获取用户令牌
             $info = $us->sig($users, $room['id']);
-            
+            // 获取讲师信息
+            $teacher = $us->teacher($room['id'], $course['team_id'], $course['teacher_id']);
             // 用户黑名单,被讲师踢出的将不能再次进入
             $black = $rs->black($room['id'], $info['id']);
             // 获取课程分享信息
@@ -76,7 +77,8 @@ class LiveController extends Controller
                     ->with('info', $info)
                     ->with('share', $share)
                     ->with('isteacher', $isteacher)
-                    ->with('role', $role);
+                    ->with('role', $role)
+                    ->with('teacher', $teacher);
         } else {
             abort(404);
         }
