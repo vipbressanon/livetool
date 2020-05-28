@@ -385,20 +385,11 @@ class MsgTest extends Command
             // 当http客户端发来数据时触发
             $innerHttpWorker->onMessage = function ($httpConnection, $request) {
                 try {
-                    $type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
-                    $content = isset($_REQUEST['content']) ? $_REQUEST['content'] : '';
+                    $type = !empty($request->get('type')) ? $request->get('type') : '';
+                    $content = !empty($request->get('content')) ? $request->get('content') : '';
                     $content = $content ? json_decode($content, true) : '';
-                    $room_id = isset($_REQUEST['room_id']) ? $_REQUEST['room_id'] : '';
-                    Log::info('socket-msgtest-data1:', [$content,$room_id ,$type]);
-                    // $type = !empty($request['type']) ? $request['type'] : '';
-                    // $content = !empty($request['content']) ? $request['content'] : '';
-                    // $content = $content ? json_decode($content, true) : '';
-                    // $room_id = !empty($request['room_id']) ? $request['room_id'] : '';
-                    // // $type = !empty($_POST['type']) ? $_POST['type'] : '';
-                    // // $content = !empty($_POST['content']) ? $_POST['type'] : '';
-                    // // $content = $content ? json_decode($content, true) : '';
-                    // // $room_id = !empty($_POST['room_id']) ? $_POST['room_id'] : '';
-                    // Log::info('socket-msgtest-data2:', [$content,$room_id ,$type]);
+                    $room_id = !empty($request->get('room_id')) ? $request->get('room_id') : '';
+                    Log::info('zjclass-push-socket-data2:', [$content,$room_id ,$type]);
                     // 推送数据的url格式 type=publish&to=uid&content=xxxx
                     if ($room_id == '' && $type != 'classover') {
                         return $httpConnection->send(json_encode(['error'=>'暂不支持全局消息']));
