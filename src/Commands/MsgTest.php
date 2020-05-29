@@ -323,7 +323,28 @@ class MsgTest extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             }); 
-            
+            //白板同步数据
+            $socket->on('syncboard', function ($request) use ($socket)  {
+                try {
+                    // $users = [];
+                    // $index = 0;
+                    $data = $request;
+                    // print_r($data);
+                    // Log::info($data);
+                    // 从Redis读取在线人员信息
+                    // if (Redis::exists($socket->room_id.'users')) {
+                    //     $arr = self::redisGet($socket->room_id.'users');
+                    //     $users = $arr['users'];
+                    //     $index = $arr['index'];
+                    // }
+                    
+
+                    self::$senderIo->to($socket->room_id)->emit('syncboard',json_encode($data));
+                } catch(\Exception $e) {
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
+                }
+            });
             
             // 消息转发
             $socket->on('im', function ($request) use ($socket)  {
