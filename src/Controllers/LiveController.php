@@ -23,7 +23,9 @@ class LiveController extends Controller
     {
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
-        
+        $team = Auth::guard('team')->user();
+        $logo_url = isset($team->logo_url)?$team->logo_url:'';
+        $title = isset($team->title)?$team->title:'';
         if (!$users) {
             //Auth::guard($auth)->loginUsingId($request->input('uid'));
             //$users = Auth::guard($auth)->user();
@@ -78,6 +80,8 @@ class LiveController extends Controller
                     ->with('share', $share)
                     ->with('isteacher', $isteacher)
                     ->with('role', $role)
+                    ->with('logo_url', $logo_url)
+                    ->with('title', $title)
                     ->with('teacher', $teacher);
         } else {
             abort(404);

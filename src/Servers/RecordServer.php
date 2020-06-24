@@ -49,7 +49,10 @@ class RecordServer
     // 录制结算
     public function balance($input)
     {
-        Log::info("录制回调");
+        Log::info("录制回调input",$input);
+        if(!isset($input['room_id']) || !isset($input['video_size']) || !isset($input['finish_reason'])){
+            return false;
+        }
         $room_id = $input["room_id"]?:"";
         $filesize = $input["video_size"]?:"";
         $finish_reason = $input['finish_reason']?:"";
