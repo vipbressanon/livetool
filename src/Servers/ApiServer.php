@@ -4,6 +4,7 @@ namespace Vipbressanon\LiveTool\Servers;
 use DB;
 use Cache;
 use Log;
+use Auth;
 
 class ApiServer
 {
@@ -133,11 +134,12 @@ class ApiServer
     public function recordstart($room_id)
     {
         $data = false;
+        $team = Auth::guard('team')->user();
         $accesstoken = $this->accesstoken();
         $backurl =  env('APP_URL')=="http://localhost/" ? "https://zjclass.xueyoubangedu.com/" : env('APP_URL');
         $res = $this->sendRequest(
             $this->api['url'].'/api/record/start',
-            ['room_id' => $room_id, 'callbackurl'=>$backurl.'livetool/record/callback'],
+            ['room_id' => $room_id, 'callbackurl'=>$backurl.'livetool/record/callback','logo_url'=>$team->logo_url],
             ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
             'POST'
         );
