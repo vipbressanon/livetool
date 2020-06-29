@@ -139,7 +139,7 @@ class ApiServer
         $backurl =  env('APP_URL')=="http://localhost/" ? "https://zjclass.xueyoubangedu.com/" : env('APP_URL');
         $res = $this->sendRequest(
             $this->api['url'].'/api/record/start',
-            ['room_id' => $room_id, 'callbackurl'=>$backurl.'livetool/record/callback','logo_url'=>$team->logo_url],
+            ['room_id' => $room_id, 'callbackurl'=>$backurl.'livetool/record/callback','logo_id'=>$team->logo_id],
             ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
             'POST'
         );
