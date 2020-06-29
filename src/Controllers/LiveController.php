@@ -24,9 +24,6 @@ class LiveController extends Controller
         $from = $request->input('frompage', '');
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
-        $team = Auth::guard('team')->user();
-        $logo_url = isset($team->logo_url)?$team->logo_url:'';
-        $title = isset($team->title)?$team->title:'';
         if (!$users) {
             //Auth::guard($auth)->loginUsingId($request->input('uid'));
             //$users = Auth::guard($auth)->user();
@@ -77,6 +74,11 @@ class LiveController extends Controller
             } elseif ($course['type'] == 3) {
                 $viewtype = 'livetool::public';
             }
+            //查询团队logo信息
+            $team = $rs->getTeam($course['team_id']);
+            $logo_url = isset($team->logo_url)?$team->logo_url:'';
+            $title = isset($team->title)?$team->title:'';
+
             $view = $isteacher ? $viewtype.'.teacher' : $viewtype.'.student';
             return view($view)
                     ->with('platform', $platform)

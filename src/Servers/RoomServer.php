@@ -3,6 +3,7 @@ namespace Vipbressanon\LiveTool\Servers;
 
 use DB;
 use Vipbressanon\LiveTool\Models\Room;
+use Vipbressanon\LiveTool\Models\Team;
 use Vipbressanon\LiveTool\Models\RoomShare;
 use Vipbressanon\LiveTool\Models\RoomBlack;
 use Vipbressanon\LiveTool\Servers\ApiServer;
@@ -158,5 +159,10 @@ class RoomServer
             ->where('users_id', $users_id)
             ->first();
         return $res ? true : false;
+    }
+    public function getTeam($team_id)
+    {
+        $res = Team::find($team_id);
+        return $res;
     }
 }
