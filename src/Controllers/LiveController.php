@@ -21,6 +21,7 @@ class LiveController extends Controller
     // 进入直播间
     public function getRoom(Request $request, $hash_id = '')
     {
+        $from = $request->input('frompage', '');
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
         $team = Auth::guard('team')->user();
@@ -56,8 +57,13 @@ class LiveController extends Controller
             $iswhite = $cs->iswhite($course['id'], $users->id);
             // 判断课程所属团队余额是否大于等于0
             $balance = $cs->balance($course['team_id']);
+            // 判断是否是学管监课进入 $islistener
+            $islistener = false;
+            if ($from == 'monitor') {
+                $islistener = $us->islistener($room['id'], $course['team_id'], $users->id);
+            }
             // 判断是否有权限进入
-            $role = $this->role($course, $black, $iswhite, $balance,$room['online_num']);
+            $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $islistener);
             if ($role[0] == 203) {
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);
@@ -71,6 +77,7 @@ class LiveController extends Controller
             } elseif ($course['type'] == 3) {
                 $viewtype = 'livetool::public';
             }
+            Log::info('测试：', [$islistener]);
             $view = $isteacher ? $viewtype.'.teacher' : $viewtype.'.student';
             return view($view)
                     ->with('platform', $platform)
@@ -80,6 +87,7 @@ class LiveController extends Controller
                     ->with('share', $share)
                     ->with('isteacher', $isteacher)
                     ->with('role', $role)
+                    ->with('islistener', $islistener)
                     ->with('logo_url', $logo_url)
                     ->with('title', $title)
                     ->with('teacher', $teacher);
@@ -287,20 +295,22 @@ class LiveController extends Controller
         }
     }
 
-    private function role($course, $black, $iswhite, $balance, $online_num)
+    private function role($course, $black, $iswhite, $balance, $online_num, $islistener = false)
     {
         $data = [201, '无法进入直播间'];
-    	if (!$iswhite && $course['invite_type'] == 0) {
-    		return [201, '无法进入直播间'];
-    	}
-    	if (!$iswhite && $course['invite_type'] == 1) {
-    		return [203, '请输入口令'];
-    	}		
-        if(!$iswhite && $course['invite_type'] == 2){
-            return [ 201 ,'不再白名单内，无法进入'];
-        }   
-        if($online_num >= $course['up_top'] + $course['down_top']){
-            return [ 201 ,'房间人数已满，无法进入'];
+        if (!$islistener) {
+        	if (!$iswhite && $course['invite_type'] == 0) {
+        		return [201, '无法进入直播间'];
+        	}
+        	if (!$iswhite && $course['invite_type'] == 1) {
+        		return [203, '请输入口令'];
+        	}		
+            if(!$iswhite && $course['invite_type'] == 2){
+                return [ 201 ,'不再白名单内，无法进入'];
+            }   
+            if($online_num >= $course['up_top'] + $course['down_top']){
+                return [ 201 ,'房间人数已满，无法进入'];
+            }
         }
         if ($course['status'] == 0) {
             if ($balance) {
@@ -311,7 +321,7 @@ class LiveController extends Controller
         } elseif ($course['status'] == 1) {
             if (!$balance) {
                 $data = [204, '讲师账户余额不足'];
-            } elseif ($black) {
+            } elseif ($black && !$islistener) {
                 $data = [201, '被讲师踢出'];
             } else {
                 $data = [200, '正常进入'];
