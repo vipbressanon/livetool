@@ -77,7 +77,6 @@ class LiveController extends Controller
             } elseif ($course['type'] == 3) {
                 $viewtype = 'livetool::public';
             }
-            Log::info('测试：', [$islistener]);
             $view = $isteacher ? $viewtype.'.teacher' : $viewtype.'.student';
             return view($view)
                     ->with('platform', $platform)
