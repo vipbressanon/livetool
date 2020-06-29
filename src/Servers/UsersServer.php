@@ -90,7 +90,7 @@ class UsersServer
         }
     }
     
-    public function start($room_id, $hash_id)
+    public function start($room_id, $hash_id, $platform = 0)
     {
         $room = Room::find($room_id);
         if (!$room) {
@@ -110,6 +110,7 @@ class UsersServer
             $users_log['field']['starttime'] => $now,
             $users_log['field']['balancetime'] => null,
             $users_log['field']['endtime'] => null,
+            $users_log['field']['platform'] => $platform,
             $users_log['field']['total'] => 0,
             $users_log['field']['status'] => 0,
             $users_log['field']['created_at'] => $now,
@@ -240,6 +241,17 @@ class UsersServer
         ];
     }
     
+    public function islistener($room_id, $team_id, $users_id)
+    {
+        $users_from = config('livetool.users_from');
+        $res = DB::table($users_from['table'])
+                ->select($users_from['field']['type'])
+                ->where($users_from['field']['team_id'], $team_id)
+                ->where($users_from['field']['users_id'], $users_id)
+                ->first();
+        $islistener = ($res && $res->type == 1) ? true : false;
+        return $islistener;
+    }    
     private function hashid($hash_id)
     {
         $res = RoomSig::where('hash_id', $hash_id)->first();

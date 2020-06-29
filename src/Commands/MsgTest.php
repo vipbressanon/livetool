@@ -83,10 +83,13 @@ class MsgTest extends Command
                     $socket->nickname = isset($request['nickname'])?$request['nickname']:'';
                     $socket->platform = isset($request['platform']) ? $request['platform'] : 0;
                     $socket->imgurl = isset($request['imgurl']) ? $request['imgurl'] : '';
-                    // 在线人员处理
-                    self::userlist($socket, 'add');
-                    // 上台人员处理
-                    self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                    $socket->islistener = isset($request['islistener']) ? $request['islistener'] : false;
+                    if (!$socket->islistener) {
+                        // 在线人员处理
+                        self::userlist($socket, 'add');
+                        // 上台人员处理
+                        self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                    }
                     // 更新维护 usersocket数组  用于限制单设备登录
                     $usersocket = Redis::exists($socket->room_id.'usersocket')?self::redisGet($socket->room_id.'usersocket'):[];
                     $usersocket[$socket->hash_id] = $socket->id;
@@ -145,7 +148,7 @@ class MsgTest extends Command
             $socket->on('enter', function () use ($socket) {
                 try {
                     $us = new UsersServer();
-                    $us->start($socket->room_id, $socket->hash_id);
+                    $us->start($socket->room_id, $socket->hash_id, $socket->platform);
                     
                     // if ($socket->isteacher) {
                     //     $interval = config('livetool.intervaltime');
