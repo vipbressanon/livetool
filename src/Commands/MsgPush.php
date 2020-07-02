@@ -32,7 +32,7 @@ class MsgPush extends Command
     private static $teainit = ['isteacher'=>1, 'plat'=>1, 'board'=>1, 'voice'=>1, 'camera'=>1, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
     private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
     // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；
-    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>''];
+    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100];
     public function __construct()
     {
         parent::__construct();
@@ -89,9 +89,6 @@ class MsgPush extends Command
                         self::userlist($socket, 'add');
                         // 上台人员处理
                         self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
-                    } else {
-                        // 在线人员处理  index+1
-                        self::userlist($socket, 'listener');
                     }
                     // 更新维护 usersocket数组  用于限制单设备登录
                     $usersocket = Redis::exists($socket->room_id.'usersocket')?self::redisGet($socket->room_id.'usersocket'):[];
