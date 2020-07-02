@@ -230,8 +230,6 @@ class MsgTest extends Command
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
-					Log::info('websocket,room_id:'.$socket->room_id);
-					Log::info('websocket,hash_id:'.$socket->hash_id);
                 }
             });
             
