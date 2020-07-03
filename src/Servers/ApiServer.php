@@ -134,7 +134,10 @@ class ApiServer
     public function recordstart($room_id)
     {
         $data = false;
-        $team = Auth::guard('team')->user();
+        $team = DB::table('team')
+        ->leftjoin('course','course.team_id','=','team.id')
+        ->leftjoin('room','room.course_id','=','course.id')
+        ->select('team.logo_id')->where('room.id',$room_id)->first();
         $accesstoken = $this->accesstoken();
         $backurl =  env('APP_URL')=="http://localhost/" ? "https://zjclass.xueyoubangedu.com/" : env('APP_URL');
         $res = $this->sendRequest(
