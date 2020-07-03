@@ -89,6 +89,9 @@ class MsgTest extends Command
                         self::userlist($socket, 'add');
                         // 上台人员处理
                         self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                    } else {
+                        // 在线人员处理  index+1
+                        self::userlist($socket, 'listener');
                     }
                     // 更新维护 usersocket数组  用于限制单设备登录
                     $usersocket = Redis::exists($socket->room_id.'usersocket')?self::redisGet($socket->room_id.'usersocket'):[];
@@ -227,8 +230,6 @@ class MsgTest extends Command
                 } catch(\Exception $e) {
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
-					Log::info('websocket,room_id:'.$socket->room_id);
-					Log::info('websocket,hash_id:'.$socket->hash_id);
                 }
             });
             
