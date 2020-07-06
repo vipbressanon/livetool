@@ -60,6 +60,7 @@ class RecordServer
         $status = 2; // 状态失败 （升级以后点击上传改变状态扣费）
         if ($room_id) {
             $room = Room::find($room_id);
+            if(!$room) return false;
             $course_id = $room->course_id;
             Log::info("course_id".$course_id);
             // 获取团队账户余额
