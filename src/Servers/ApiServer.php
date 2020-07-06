@@ -139,7 +139,7 @@ class ApiServer
         ->leftjoin('room','room.course_id','=','course.id')
         ->select('team.logo_id')->where('room.id',$room_id)->first();
         $accesstoken = $this->accesstoken();
-        $backurl =  env('APP_URL')=="http://localhost/" ? "https://zjclass.xueyoubangedu.com/" : env('APP_URL');
+        $backurl =  env('APP_URL')=="http://localhost/" ? "https://zjtest.xueyoubangedu.com/" : env('APP_URL');
         $res = $this->sendRequest(
             $this->api['url'].'/api/record/start',
             ['room_id' => $room_id, 'callbackurl'=>$backurl.'livetool/record/callback','logo_id'=>$team->logo_id],
