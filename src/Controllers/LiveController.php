@@ -90,6 +90,7 @@ class LiveController extends Controller
                     ->with('isteacher', $isteacher)
                     ->with('role', $role)
                     ->with('islistener', $islistener)
+                    ->with('isadmin', $isadmin)
                     ->with('logo_url', $logo_url)
                     ->with('title', $title)
                     ->with('teacher', $teacher);
