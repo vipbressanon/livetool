@@ -24,9 +24,7 @@ class LiveController extends Controller
         $from = $request->input('frompage', '');
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
-        Log::info('users', [$users]);
         if (!$users) {
-            Log::info('if', [$users]);
             //Auth::guard($auth)->loginUsingId($request->input('uid'));
             //$users = Auth::guard($auth)->user();
             $url = config('livetool.loginurl');
