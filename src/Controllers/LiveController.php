@@ -24,7 +24,9 @@ class LiveController extends Controller
         $from = $request->input('frompage', '');
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
+        Log::info('users', [$users]);
         if (!$users) {
+            Log::info('if', [$users]);
             //Auth::guard($auth)->loginUsingId($request->input('uid'));
             //$users = Auth::guard($auth)->user();
             $url = config('livetool.loginurl');
@@ -57,11 +59,12 @@ class LiveController extends Controller
             // 判断是否是学管监课进入 $islistener
             $islistener = false;
             if ($from == 'monitor') {
-                $islistener = $us->islistener($room['id'], $course['team_id'], $users->id);
+                $islistener = $us->islistener($course['team_id'], $users->id);
             }
+            $isadmin = $us->isadmin($course['team_id'], $users->id);
             // 判断是否有权限进入
             $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $islistener);
-            if ($role[0] == 203) {
+            if ($role[0] == 203 && !$isadmin) {
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);
             }
