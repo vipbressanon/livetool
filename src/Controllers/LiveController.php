@@ -61,7 +61,7 @@ class LiveController extends Controller
             }
             $isadmin = $us->isadmin($course['team_id'], $users->id);
             // 判断是否有权限进入
-            $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $islistener);
+            $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $islistener, $isadmin);
             if ($role[0] == 203 && !$isadmin) {
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);
@@ -90,7 +90,6 @@ class LiveController extends Controller
                     ->with('isteacher', $isteacher)
                     ->with('role', $role)
                     ->with('islistener', $islistener)
-                    ->with('isadmin', $isadmin)
                     ->with('logo_url', $logo_url)
                     ->with('title', $title)
                     ->with('teacher', $teacher);
@@ -298,17 +297,17 @@ class LiveController extends Controller
         }
     }
 
-    private function role($course, $black, $iswhite, $balance, $online_num, $islistener = false)
+    private function role($course, $black, $iswhite, $balance, $online_num, $islistener = false, $isadmin = false)
     {
         $data = [201, '无法进入直播间'];
         if (!$islistener) {
-        	if (!$iswhite && $course['invite_type'] == 0) {
+        	if (!$iswhite && !$isadmin && $course['invite_type'] == 0) {
         		return [201, '无法进入直播间'];
         	}
-        	if (!$iswhite && $course['invite_type'] == 1) {
+        	if (!$iswhite && !$isadmin && $course['invite_type'] == 1) {
         		return [203, '请输入口令'];
         	}		
-            if(!$iswhite && $course['invite_type'] == 2){
+            if(!$iswhite && !$isadmin && $course['invite_type'] == 2){
                 return [ 201 ,'不再白名单内，无法进入'];
             }   
             if($online_num >= $course['up_top'] + $course['down_top']){
