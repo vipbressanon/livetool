@@ -92,6 +92,9 @@ class MsgTest extends Command
                     } else {
                         // 在线人员处理  index+1
                         self::userlist($socket, 'listener');
+                        $userlistener = Redis::exists($socket->room_id.'listener')?self::redisGet($socket->room_id.'listener'):[];
+                        $userlistener[$socket->hash_id] = $socket->id;
+                        self::redisSet($socket->room_id.'listener', $userlistener);
                     }
                     // 更新维护 usersocket数组  用于限制单设备登录
                     $usersocket = Redis::exists($socket->room_id.'usersocket')?self::redisGet($socket->room_id.'usersocket'):[];
@@ -201,7 +204,13 @@ class MsgTest extends Command
                     // 多地登陆，前者被下线 不走用户退出全网通知
                     $usersocket = self::redisGet($socket->room_id.'usersocket')?:[];
                     if (array_key_exists($socket->hash_id, $usersocket) && $usersocket[$socket->hash_id] != $socket->id) {
-                        return;
+                        $userlistener = self::redisGet($socket->room_id.'listener')?:[];
+                        if (array_key_exists($socket->hash_id, $userlistener)) {
+                            unset($userlistener[$socket->hash_id]);
+                            self::redisSet($socket->room_id.'listener', $userlistener);
+                        } else {
+                            return;
+                        }
                     }
                     $arr = self::redisGet($socket->room_id.'onoff');
                     if ($socket->hash_id == $arr['onoff']['max']) {
