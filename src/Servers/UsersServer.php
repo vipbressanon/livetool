@@ -249,7 +249,7 @@ class UsersServer
                 ->where($users_from['field']['team_id'], $team_id)
                 ->where($users_from['field']['users_id'], $users_id)
                 ->first();
-        $islistener = ($res && $res->type == 1) ? true : false;
+        $islistener = ($res && ($res->type == 1 || $res->type == 0)) ? true : false;
         return $islistener;
     }
     // 是否是管理员教师/超管
