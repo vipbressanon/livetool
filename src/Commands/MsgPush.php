@@ -565,11 +565,13 @@ class MsgPush extends Command
             $arr = self::redisGet($room_id.'users');
             $users = $arr['users'];
             $index = $arr['index'];
+            if (array_key_exists($hash_id, $users)) {
+                $users[$hash_id]['plat'] = 0;
+                $users[$hash_id]['board'] = 0;
+                $users[$hash_id]['voice'] = 0;
+                $users[$hash_id]['camera'] = 0;
+            }
         }
-        $users[$hash_id]['plat'] = 0;
-        $users[$hash_id]['board'] = 0;
-        $users[$hash_id]['voice'] = 0;
-        $users[$hash_id]['camera'] = 0;
         $index++;
         self::redisSet($room_id.'users', ['users'=>$users, 'index'=>$index]);
         return [$hash_id => $users[$hash_id]];
