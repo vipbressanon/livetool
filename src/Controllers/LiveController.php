@@ -223,12 +223,48 @@ class LiveController extends Controller
     // 设备选择，检测
     public function getCheck(Request $request)
     {
+
         $type = $request->input('type', 1);
         $tea = $request->input('tea', 0);
+        $stream = $request->input('stream', []);
+        // $stream = utf8_encode($stream);
+        
+        $stream = $this->str_change($stream);
         return view('livetool::check')
                 ->with('type', $type)
+                ->with('stream', $stream)
                 ->with('tea', $tea);
     }
+
+    private function str_change($data) {
+        $str=str_replace('[','',$data);
+        $str=str_replace(']','',$str);
+        $str=stripslashes($str);
+        $upimg=explode('},',$str);
+        $upimg=str_replace('}','',$upimg);
+        $arr=[];
+        foreach ($upimg as $k=>$v){
+            $new=$v.'}';
+            array_push($arr,$this->object_to_array(json_decode($new)));
+        }
+        return $arr;
+    }
+
+    private function object_to_array($obj) {
+        $obj = (array)$obj;
+        foreach ($obj as $k => $v) {
+            if (gettype($v) == 'resource') {
+                return;
+            }
+     
+            if (gettype($v) == 'object' || gettype($v) == 'array') {
+                $obj[$k] = (array)$this->object_to_array($v);
+            }
+        }
+     
+        return $obj;
+    }
+
     
      // 录制开始
     public function postRecord(Request $request)
