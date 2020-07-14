@@ -240,8 +240,8 @@ class UsersServer
             'hash_id' => $res ? $res->hash_id : ''
         ];
     }
-    
-    public function islistener($room_id, $team_id, $users_id)
+    // 是否监课教师身份进入
+    public function islistener($team_id, $users_id)
     {
         $users_from = config('livetool.users_from');
         $res = DB::table($users_from['table'])
@@ -249,9 +249,21 @@ class UsersServer
                 ->where($users_from['field']['team_id'], $team_id)
                 ->where($users_from['field']['users_id'], $users_id)
                 ->first();
-        $islistener = ($res && $res->type == 1) ? true : false;
+        $islistener = ($res && ($res->type == 1 || $res->type == 0)) ? true : false;
         return $islistener;
-    }    
+    }
+    // 是否是管理员教师/超管
+    public function isadmin($team_id, $users_id)
+    {
+        $users_from = config('livetool.users_from');
+        $res = DB::table($users_from['table'])
+                ->select($users_from['field']['type'])
+                ->where($users_from['field']['team_id'], $team_id)
+                ->where($users_from['field']['users_id'], $users_id)
+                ->first();
+        $isadmin = ($res && ($res->type == 1 || $res->type == 0)) ? true : false;
+        return $isadmin;
+    }  
     private function hashid($hash_id)
     {
         $res = RoomSig::where('hash_id', $hash_id)->first();
