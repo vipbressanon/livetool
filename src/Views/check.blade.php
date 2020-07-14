@@ -130,7 +130,7 @@
 </body>
 </html>
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-<script src="/vendor/livetool/js/check.js"></script>
+<script src="/vendor/livetool/js/check111.js"></script>
 <script src="/vendor/livetool/js/adapter-latest.js"></script>
 <script src="https://sqimg.qq.com/expert_qq/webrtc/3.4.2/WebRTCAPI.min.js"></script>
 <script src="/vendor/livetool/layui/layui.js"></script>
