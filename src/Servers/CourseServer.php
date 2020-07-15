@@ -124,7 +124,20 @@ class CourseServer
                 ->first();
         return $res ? 1 : 0;
     }
-    
+    // 后台快捷登录用户 进入直播间 添加白名单记录
+    public function addwhite($course, $users_id, $isteacher)
+    {
+        $white = $course['invite_type'] == 1 ? config('livetool.course_word_white') : config('livetool.course_white_list');
+        $type = $isteacher ? 2 : 3;
+        $now = date('Y-m-d H:i:s');
+        $res = DB::table($white['table'])->insert([
+            $white['field']['course_id'] => $course['id'],
+            $white['field']['users_id'] => $users_id,
+            $white['field']['type'] => $type,
+            $white['field']['created_at'] => $now,
+            $white['field']['updated_at'] => $now
+        ]);
+    }    
     public function balance($team_id)
     {
         $team = config('livetool.team');
