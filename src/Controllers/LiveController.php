@@ -52,6 +52,8 @@ class LiveController extends Controller
             $share = $cs->share($course['id']);
             // 判断用户是否在白名单内
             $iswhite = $cs->iswhite($course['id'], $users->id);
+            //是否被禁用
+            $isDisplay = $cs->isDisplay($course['team_id'], $users->id);
             // 判断课程所属团队余额是否大于等于0
             $balance = $cs->balance($course['team_id']);
             // 判断是否是学管监课进入 $islistener
@@ -61,7 +63,7 @@ class LiveController extends Controller
             }
             $isadmin = $us->isadmin($course['team_id'], $users->id);
             // 判断是否有权限进入
-            $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $islistener, $isadmin);
+            $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $isDisplay, $islistener, $isadmin);
             if ($role[0] == 203 && !$isadmin) {
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);
@@ -333,7 +335,7 @@ class LiveController extends Controller
         }
     }
 
-    private function role($course, $black, $iswhite, $balance, $online_num, $islistener = false, $isadmin = false)
+    private function role($course, $black, $iswhite, $balance, $online_num, $isDisplay, $islistener = false, $isadmin = false)
     {
         $data = [201, '无法进入直播间'];
         if (!$islistener) {
@@ -366,6 +368,9 @@ class LiveController extends Controller
             }
         } elseif ($course['status'] == 2) {
             $data = [201, '已下课'];
+        }
+        if($isDisplay == 1){
+            $data = [213, '账号已被禁用，不能进入'];
         }
         return $data;
     }
