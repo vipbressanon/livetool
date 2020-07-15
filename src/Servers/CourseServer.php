@@ -147,4 +147,21 @@ class CourseServer
                 ->first();
         return $res && $res->amount_money >= 0 ? 1 : 0;
     }
+
+     public function isDisplay($team_id, $users_id){
+        $user_from = config('livetool.users_from');
+        $from = DB::table($user_from['table'])
+            ->where([
+                $user_from['field']['team_id']   =>  $team_id,
+                $user_from['field']['users_id']  =>  $users_id
+            ])->first();
+        if($from){
+
+            return  $from->display;
+
+        }else{
+            
+            return  0;
+        }
+    }
 }
