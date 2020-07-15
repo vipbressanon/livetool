@@ -306,6 +306,9 @@ class MsgTest extends Command
             // 房间开关设置
             $socket->on('onoff', function ($request) use ($socket)  {
                 try {
+                    if (!is_array($request)) {
+                        $request = json_decode($request, true);
+                    }
                     $index = 0;
                     if (Redis::exists($socket->room_id.'onoff')) {
                         $onoff = self::redisGet($socket->room_id.'onoff');
