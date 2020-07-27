@@ -121,7 +121,7 @@ class ApiServer
             ['room_id' => $room_id, 'users_id' => $users_id, 'endtime' => $time],
             ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
             'POST'
-        );
+        );Log::info('124行', [$res]);
         if ($res->meta->code == 200) {
             $data = true;
         } else {

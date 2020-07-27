@@ -65,7 +65,6 @@ class LiveController extends Controller
             if (!$iswhite && $isadmin) {
                 // 口令课程 后台登录后一键进入 默认填充白名单数据
                 $cs->addwhite($course, $users->id, $isteacher);
-                Log::info(222222);
             }
             // 判断是否有权限进入
             $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $isDisplay, $islistener, $isadmin);

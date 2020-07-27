@@ -321,7 +321,7 @@ class MsgTest extends Command
                         $arr[$request['type']] = $request['status'];
                     }
                     if ($request['type'] == 'roomtype') {
-                        $arr['max'] = $request['status'] == 1 ? $socket->hash_id : '';
+                        $arr['max'] = $request['status'] == 1 ? $socket->hash_id.'screen' : '';
                     }
                     $index++;
                     self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr, 'index'=>$index]);
@@ -426,7 +426,6 @@ class MsgTest extends Command
                     $content = !empty($request->get('content')) ? $request->get('content') : '';
                     $content = $content ? json_decode($content, true) : '';
                     $room_id = !empty($request->get('room_id')) ? $request->get('room_id') : '';
-                    Log::info('zjclass-push-socket-data2:', [$content,$room_id ,$type]);
                     // 推送数据的url格式 type=publish&to=uid&content=xxxx
                     if ($room_id == '' && $type != 'classover') {
                         return $httpConnection->send(json_encode(['error'=>'暂不支持全局消息']));
