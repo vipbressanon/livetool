@@ -92,6 +92,7 @@ class UsersServer
     
     public function start($room_id, $hash_id, $platform = 0)
     {
+        Log::info("start room_id".$room_id.'|hash_id'.$hash_id.'|platform'.$platform);
         $room = Room::find($room_id);
         if (!$room) {
             return false;
@@ -123,6 +124,7 @@ class UsersServer
     
     public function end($room_id, $hash_id)
     {
+        Log::info("end room_id".$room_id.'|hash_id'.$hash_id);
         $now = date('Y-m-d H:i:s');
         $users_log = config('livetool.course_users_log');
         $users_id = $this->hashid($hash_id);
