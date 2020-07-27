@@ -24,6 +24,7 @@ class UsersServer
             $res->users_id = $users->id;
             $res->hash_id = '';
             $res->usersig = '';
+            $res->screensig = '';
             $res->overtime = null;
             $res->save();
         }
@@ -33,6 +34,7 @@ class UsersServer
             $res->sdkappid = $sig ? $sig->sdkappid : '';
             $res->hash_id = $sig ? $sig->hash_id : '';
             $res->usersig = $sig ? $sig->usersig : '';
+            $res->screensig = $sig ? $sig->screensig : '';
             $res->overtime = $sig ? $sig->overtime : null;
             $res->save();
         }
@@ -51,7 +53,8 @@ class UsersServer
             'zan' => $zan,
             'sdkappid' => $res->sdkappid,
             'hash_id' => $res->hash_id,
-            'usersig' => $res->usersig
+            'usersig' => $res->usersig,
+            'screensig' => $res->screensig
         ];
     }
     
