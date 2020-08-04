@@ -252,7 +252,7 @@ class UsersServer
                 ->where($users_from['field']['team_id'], $team_id)
                 ->where($users_from['field']['users_id'], $users_id)
                 ->first();
-        $islistener = ($res && ($res->type == 1 || $res->type == 0)) ? true : false;
+        $islistener = ($res && in_array($res->type, [0, 1, 4, 5, 6, 7, 8])) ? true : false;
         return $islistener;
     }
     // 是否是管理员教师/超管
@@ -264,7 +264,7 @@ class UsersServer
                 ->where($users_from['field']['team_id'], $team_id)
                 ->where($users_from['field']['users_id'], $users_id)
                 ->first();
-        $isadmin = ($res && ($res->type == 1 || $res->type == 0)) ? true : false;
+        $isadmin = ($res && in_array($res->type, [0, 1, 4, 5, 6, 7, 8])) ? true : false;
         return $isadmin;
     }  
     private function hashid($hash_id)
