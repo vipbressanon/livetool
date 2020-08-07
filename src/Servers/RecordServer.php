@@ -75,8 +75,8 @@ class RecordServer
                 $status = 1; // 状态成功
                 // 扣费
                 $amount_space = $account->amount_space + $filesize_m;
-                $this->team($account, $amount_space, $now);
-                $this->orders($account, $filesize_m, $now);
+                // $this->team($account, $amount_space, $now);
+                // $this->orders($account, $filesize_m, $now);
                 $this->ordersspacelog($account, $amount_space, $filesize_m, $record->id, $now);
             } 
             // 更新状态
