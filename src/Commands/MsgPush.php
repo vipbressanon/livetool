@@ -154,7 +154,7 @@ class MsgPush extends Command
             $socket->on('enter', function () use ($socket) {
                 try {
                     $us = new UsersServer();
-                    $us->start($socket->room_id, $socket->hash_id, $socket->platform);
+                    $us->start($socket->room_id, $socket->hash_id, $socket->platform, $socket->islistener);
                     
                     // if ($socket->isteacher) {
                     //     $interval = config('livetool.intervaltime');
