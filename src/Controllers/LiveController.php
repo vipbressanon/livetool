@@ -62,10 +62,10 @@ class LiveController extends Controller
                 $islistener = $us->islistener($course['team_id'], $users->id);
             }
             $isadmin = $us->isadmin($course['team_id'], $users->id);
-            if (!$iswhite && $isadmin) {
-                // 口令课程 后台登录后一键进入 默认填充白名单数据
-                $cs->addwhite($course, $users->id, $isteacher);
-            }
+            // if (!$iswhite && $isadmin) {
+            //     // 口令课程 后台登录后一键进入 默认填充白名单数据
+            //     $cs->addwhite($course, $users->id, $isteacher);
+            // }
             // 判断是否有权限进入
             $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $isDisplay, $islistener, $isadmin);
             if ($role[0] == 203 && !$isadmin) {

@@ -138,6 +138,7 @@ class CourseServer
             $white['field']['updated_at'] => $now
         ]);
     }    
+
     public function balance($team_id)
     {
         $team = config('livetool.team');
