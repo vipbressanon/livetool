@@ -7,7 +7,6 @@ use Vipbressanon\LiveTool\Models\Team;
 use Vipbressanon\LiveTool\Models\RoomShare;
 use Vipbressanon\LiveTool\Models\RoomBlack;
 use Vipbressanon\LiveTool\Servers\ApiServer;
-use Illuminate\Support\Facades\Redis;
 use Log;
 
 class RoomServer
@@ -17,7 +16,7 @@ class RoomServer
     {
     }
 
-    public function detail($course_id, $teacher_id, $isteacher)
+    public function detail($course_id, $teacher_id)
     {
         $res = Room::select('id', 'hash_id', 'course_id', 'roomtype', 'roomchat', 'roomspeak', 'roomhand', 'roomrecord')
                 ->where('course_id', $course_id)
@@ -40,16 +39,6 @@ class RoomServer
             $res->hash_id = $data ? $data->hash_id : '';
             $res->save();
         }
-        $online_num = 0;
-        
-        if (!$isteacher) {
-            $users = unserialize(Redis::get($res->id.'users'));
-            if ($users) {
-                foreach ($users['users'] as $v) {
-                    if(!$v['isteacher']) $online_num++;
-                }
-            }
-        }
         
         return [
             'id' => $res->id,
@@ -59,8 +48,7 @@ class RoomServer
             'roomchat' => $res->roomchat,
             'roomspeak' => $res->roomspeak,
             'roomhand' => $res->roomhand,
-            'roomrecord' => $res->roomrecord,
-            'online_num' =>  $online_num
+            'roomrecord' => $res->roomrecord
         ];
     }
     

@@ -38,12 +38,12 @@ class LiveController extends Controller
             // 判断用户是否为讲师
             $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
             // 获取房间信息
-            $room = $rs->detail($course['id'], $course['teacher_id'], $isteacher);
+            $room = $rs->detail($course['id'], $course['teacher_id']);
             $us = new UsersServer();
             // 获取房间用户信息
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
             // 获取用户令牌
-            $info = $us->sig($users, $room['id']);
+            $info = $us->sig($users, $room['id'], $isteacher);
             // 获取讲师信息
             $teacher = $us->teacher($room['id'], $course['team_id'], $course['teacher_id']);
             // 用户黑名单,被讲师踢出的将不能再次进入
@@ -67,7 +67,7 @@ class LiveController extends Controller
             //     $cs->addwhite($course, $users->id, $isteacher);
             // }
             // 判断是否有权限进入
-            $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $isDisplay, $islistener, $isadmin);
+            $role = $this->role($course, $black, $iswhite, $balance, $info['online_num'], $isDisplay, $islistener, $isadmin);
             if ($role[0] == 203 && !$isadmin) {
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);
@@ -284,7 +284,6 @@ class LiveController extends Controller
           return response()->json(['error'=>'']);  
         }
         return response()->json(['error'=>$res->meta->msg]);
-        
     }
 
     // 录制回调

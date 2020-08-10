@@ -6,6 +6,7 @@ use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomSig;
 use Vipbressanon\LiveTool\Models\RoomBlack;
 use Vipbressanon\LiveTool\Servers\ApiServer;
+use Illuminate\Support\Facades\Redis;
 use Log;
 class UsersServer
 {
@@ -14,7 +15,7 @@ class UsersServer
     {
     }
 
-    public function sig($users, $room_id)
+    public function sig($users, $room_id, $isteacher)
     {
         $now = date('Y-m-d H:i:s');
         $res = RoomSig::where('users_id', $users->id)->first();
@@ -46,6 +47,15 @@ class UsersServer
                 ->first();
         $zan = $users_form ? $users_form->zan : 0;
         $nickname = $users_form ? $users_form->nickname : '';
+        $online_num = 0;
+        if (!$isteacher) {
+            $userslist = unserialize(Redis::get($room_id.'users'));
+            if ($userslist) {
+                foreach ($userslist['users'] as $k =>$v) {
+                    if(!$v['isteacher'] && $k != $res->hash_id) $online_num++;
+                }
+            }
+        }
         return [
             'id' => $users->id,
             'nickname' => $nickname,
@@ -54,7 +64,8 @@ class UsersServer
             'sdkappid' => $res->sdkappid,
             'hash_id' => $res->hash_id,
             'usersig' => $res->usersig,
-            'screensig' => $res->screensig
+            'screensig' => $res->screensig,
+            'online_num' => $online_num
         ];
     }
     
