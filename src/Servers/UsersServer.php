@@ -93,7 +93,7 @@ class UsersServer
         }
     }
     
-    public function start($room_id, $hash_id, $platform = 0)
+    public function start($room_id, $hash_id, $platform = 0, $islistener = false)
     {
         $room = Room::find($room_id);
         if (!$room) {
@@ -115,7 +115,7 @@ class UsersServer
             $users_log['field']['endtime'] => null,
             $users_log['field']['platform'] => $platform,
             $users_log['field']['total'] => 0,
-            $users_log['field']['status'] => 0,
+            $users_log['field']['status'] => $islistener?0:1,
             $users_log['field']['created_at'] => $now,
             $users_log['field']['updated_at'] => $now
         ]);
@@ -136,7 +136,7 @@ class UsersServer
                 ->select($users_log['field']['starttime'].' as starttime', $users_log['field']['id'].' as id')
                 ->where($users_log['field']['room_id'], $room_id)
                 ->where($users_log['field']['users_id'], $users_id)
-                ->where($users_log['field']['status'], 0)
+                ->whereNull($users_log['field']['endtime'])
                 ->orderBy($users_log['field']['created_at'], 'desc')
                 ->first();
         if ($res) {
@@ -146,7 +146,6 @@ class UsersServer
                 ->update([
                     $users_log['field']['endtime'] => $now,
                     $users_log['field']['total'] => $num,
-                    $users_log['field']['status'] => 1,
                     $users_log['field']['updated_at'] => $now
                 ]);
             $api = new ApiServer();
