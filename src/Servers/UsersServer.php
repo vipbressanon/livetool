@@ -106,13 +106,16 @@ class UsersServer
     
     public function start($room_id, $hash_id, $platform = 0, $islistener = false)
     {
+        Log::info("开始上课",[$room_id, $hash_id, $platform, $islistener]);
         $room = Room::find($room_id);
         if (!$room) {
+            Log::info("room不存在",[$room_id, $hash_id, $platform, $islistener]);
             return false;
         }
         $this->end($room_id, $hash_id);
         $users_id = $this->hashid($hash_id);
         if ($users_id == '') {
+            Log::info("user不存在",[$room_id, $hash_id, $platform, $islistener]);
             return false;
         }
         $now = date('Y-m-d H:i:s');
@@ -137,10 +140,12 @@ class UsersServer
     
     public function end($room_id, $hash_id)
     {
+        Log::info("结束上课",[$room_id, $hash_id]);
         $now = date('Y-m-d H:i:s');
         $users_log = config('livetool.course_users_log');
         $users_id = $this->hashid($hash_id);
         if ($users_id == '') {
+            Log::info("user不存在",[$room_id, $hash_id]);
             return false;
         }
         $res = DB::table($users_log['table'])
@@ -188,7 +193,6 @@ class UsersServer
                     ->where($course_users['field']['users_id'], $users_id)
                     ->increment($type);
         }
-        
         return true;
     }
     
