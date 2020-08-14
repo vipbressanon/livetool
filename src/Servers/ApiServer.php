@@ -5,7 +5,7 @@ use DB;
 use Cache;
 use Log;
 use Auth;
-
+use stdClass;
 class ApiServer
 {
     
@@ -122,7 +122,7 @@ class ApiServer
             ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
             'POST'
         );Log::info('124行', [$res]);
-        if ($res->meta->code == 200) {
+        if (isset($res) && $res->meta->code == 200) {
             $data = true;
         } else {
             Log::error($this->api['url'].'/api/users/end: '.$res->meta->msg);
@@ -210,7 +210,54 @@ class ApiServer
         }
         return $res;
     }
-    
+    // 白板-文件开始转码
+    public function setDescribe($file_id, $fileurl, $file_name, $is_static = false)
+    {
+        $result = $this->getDescribe($file_id);
+        Log::info('222', [$result]);
+        if (isset($result) && $result != '' && $result->status == "TranscodeFinished") {
+            $json = [
+                'meta' => [
+                    'code' => 300,
+                    'msg'  => '已经转码完成',
+                ],
+                'data' => $result,
+            ];
+            return json_decode(json_encode($json));
+        }
+        $accesstoken = $this->accesstoken();
+        $res = $this->sendRequest(
+            $this->api['url'].'/api/transcode/setdescribe',
+            ['file_id' => $file_id, 'fileurl' => $fileurl, 'file_name' => $file_name, 'static' => $is_static],
+            ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
+            'POST'
+        );
+        if (!isset($res)) {
+            Log::error($this->api['url'].'/api/transcode/setdescribe: ', [$res]);
+        }
+        Log::info('444', [$res]);
+        return $res;
+    }
+
+    // 白板-文件获取转码结果
+    public function getDescribe($file_id)
+    {
+        $data = '';
+        $accesstoken = $this->accesstoken();
+        $res = $this->sendRequest(
+            $this->api['url'].'/api/transcode/getdescribe',
+            ['file_id' => $file_id],
+            ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
+            'POST'
+        );
+        if (isset($res) && $res->meta->code == 200) {
+            $data = $res->data;
+        } else {
+            Log::error($this->api['url'].'/api/transcode/getdescribe: ', [$res]);
+        }
+        return $data;
+    }
+
     private function accesstoken()
     {
         if (!Cache::has('accesstoken')) {
