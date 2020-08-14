@@ -12,6 +12,8 @@ use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
 use Vipbressanon\LiveTool\Servers\RecordServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
+use Vipbressanon\LiveTool\Servers\ApiServer;
+use Vipbressanon\LiveTool\Servers\TranscodeServer;
 use Log;
 use Session;
 
@@ -289,12 +291,11 @@ class LiveController extends Controller
     // 录制回调
     public function postRecordCallBack(Request $request)
     {
-        
         $rs = new RecordServer();
         $res = $rs->balance($request->all());
         return response()->json(['error'=>'']);
     }
-    
+
     public function getBrowser(Request $request)
     {
         return view('livetool::browser');
@@ -303,6 +304,32 @@ class LiveController extends Controller
     public function getSpeedTest() {
         return view('livetool::speedtest');
     }
+    // 文件转码开始
+    public function setDescribe(Request $request)
+    {
+        $file_id = $request->input('file_id', '');
+        $fileurl = $request->input('fileurl', '');
+        $file_name = $request->input('file_name', '');
+        $is_static = $request->input('is_static', false);
+        $api = new ApiServer();
+        $data = $api->setDescribe($file_id, $fileurl, $file_name, $is_static);
+        if ($data && $data->meta->code != 201) {
+          return response()->json(['error'=>'', 'code' => $data->meta->code, 'data' => $data->data]);  
+        }
+        return response()->json(['error'=>'转码失败，请稍后再试']);
+    }
+
+    // 文件转码结果查询
+    public function getDescribe(Request $request)
+    {
+        $file_id = $request->input('file_id', '');
+        $api = new ApiServer();
+        $data = $api->getDescribe($file_id);
+        if ($data) {
+          return response()->json(['error'=>'', 'data' => $data]);  
+        }
+        return response()->json(['error'=>'文件转码失败，请稍后再试', 'data' => '']);
+    }    
     // 清除直播间数据
     public function clearRedis(Request $request) {
         $room_id = $request->input('room_id', '');
