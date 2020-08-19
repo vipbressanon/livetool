@@ -6,6 +6,7 @@ use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomSig;
 use Vipbressanon\LiveTool\Models\RoomBlack;
 use Vipbressanon\LiveTool\Servers\ApiServer;
+use Illuminate\Support\Facades\Redis;
 use Log;
 class UsersServer
 {
@@ -14,7 +15,7 @@ class UsersServer
     {
     }
 
-    public function sig($users, $room_id)
+    public function sig($users, $room_id, $isteacher)
     {
         $now = date('Y-m-d H:i:s');
         $res = RoomSig::where('users_id', $users->id)->first();
@@ -46,6 +47,15 @@ class UsersServer
                 ->first();
         $zan = $users_form ? $users_form->zan : 0;
         $nickname = $users_form ? $users_form->nickname : '';
+        $online_num = 0;
+        if (!$isteacher) {
+            $userslist = unserialize(Redis::get($room_id.'users'));
+            if ($userslist) {
+                foreach ($userslist['users'] as $k =>$v) {
+                    if(!$v['isteacher'] && $k != $res->hash_id) $online_num++;
+                }
+            }
+        }
         return [
             'id' => $users->id,
             'nickname' => $nickname,
@@ -54,7 +64,8 @@ class UsersServer
             'sdkappid' => $res->sdkappid,
             'hash_id' => $res->hash_id,
             'usersig' => $res->usersig,
-            'screensig' => $res->screensig
+            'screensig' => $res->screensig,
+            'online_num' => $online_num
         ];
     }
     
@@ -93,15 +104,18 @@ class UsersServer
         }
     }
     
-    public function start($room_id, $hash_id, $platform = 0)
+    public function start($room_id, $hash_id, $platform = 0, $islistener = false)
     {
+        Log::info("开始上课",[$room_id, $hash_id, $platform, $islistener]);
         $room = Room::find($room_id);
         if (!$room) {
+            Log::info("room不存在",[$room_id, $hash_id, $platform, $islistener]);
             return false;
         }
         $this->end($room_id, $hash_id);
         $users_id = $this->hashid($hash_id);
         if ($users_id == '') {
+            Log::info("user不存在",[$room_id, $hash_id, $platform, $islistener]);
             return false;
         }
         $now = date('Y-m-d H:i:s');
@@ -115,7 +129,7 @@ class UsersServer
             $users_log['field']['endtime'] => null,
             $users_log['field']['platform'] => $platform,
             $users_log['field']['total'] => 0,
-            $users_log['field']['status'] => 0,
+            $users_log['field']['status'] => $islistener?0:1,
             $users_log['field']['created_at'] => $now,
             $users_log['field']['updated_at'] => $now
         ]);
@@ -126,17 +140,19 @@ class UsersServer
     
     public function end($room_id, $hash_id)
     {
+        Log::info("结束上课",[$room_id, $hash_id]);
         $now = date('Y-m-d H:i:s');
         $users_log = config('livetool.course_users_log');
         $users_id = $this->hashid($hash_id);
         if ($users_id == '') {
+            Log::info("user不存在",[$room_id, $hash_id]);
             return false;
         }
         $res = DB::table($users_log['table'])
                 ->select($users_log['field']['starttime'].' as starttime', $users_log['field']['id'].' as id')
                 ->where($users_log['field']['room_id'], $room_id)
                 ->where($users_log['field']['users_id'], $users_id)
-                ->where($users_log['field']['status'], 0)
+                ->whereNull($users_log['field']['endtime'])
                 ->orderBy($users_log['field']['created_at'], 'desc')
                 ->first();
         if ($res) {
@@ -146,7 +162,6 @@ class UsersServer
                 ->update([
                     $users_log['field']['endtime'] => $now,
                     $users_log['field']['total'] => $num,
-                    $users_log['field']['status'] => 1,
                     $users_log['field']['updated_at'] => $now
                 ]);
             $api = new ApiServer();
@@ -178,7 +193,6 @@ class UsersServer
                     ->where($course_users['field']['users_id'], $users_id)
                     ->increment($type);
         }
-        
         return true;
     }
     
@@ -252,7 +266,7 @@ class UsersServer
                 ->where($users_from['field']['team_id'], $team_id)
                 ->where($users_from['field']['users_id'], $users_id)
                 ->first();
-        $islistener = ($res && ($res->type == 1 || $res->type == 0)) ? true : false;
+        $islistener = ($res && in_array($res->type, [0, 1, 4, 5, 6, 7, 8])) ? true : false;
         return $islistener;
     }
     // 是否是管理员教师/超管
@@ -264,7 +278,7 @@ class UsersServer
                 ->where($users_from['field']['team_id'], $team_id)
                 ->where($users_from['field']['users_id'], $users_id)
                 ->first();
-        $isadmin = ($res && ($res->type == 1 || $res->type == 0)) ? true : false;
+        $isadmin = ($res && in_array($res->type, [0, 1, 4, 5, 6, 7, 8])) ? true : false;
         return $isadmin;
     }  
     private function hashid($hash_id)

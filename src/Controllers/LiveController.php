@@ -12,6 +12,8 @@ use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
 use Vipbressanon\LiveTool\Servers\RecordServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
+use Vipbressanon\LiveTool\Servers\ApiServer;
+use Vipbressanon\LiveTool\Servers\TranscodeServer;
 use Log;
 use Session;
 
@@ -38,12 +40,12 @@ class LiveController extends Controller
             // 判断用户是否为讲师
             $isteacher = $users->id == $course['teacher_id'] ? 1 : 0;
             // 获取房间信息
-            $room = $rs->detail($course['id'], $course['teacher_id'], $isteacher);
+            $room = $rs->detail($course['id'], $course['teacher_id']);
             $us = new UsersServer();
             // 获取房间用户信息
             $us->detail($course['id'], $room['id'], $users->id, $platform, $course['team_id']);
             // 获取用户令牌
-            $info = $us->sig($users, $room['id']);
+            $info = $us->sig($users, $room['id'], $isteacher);
             // 获取讲师信息
             $teacher = $us->teacher($room['id'], $course['team_id'], $course['teacher_id']);
             // 用户黑名单,被讲师踢出的将不能再次进入
@@ -62,12 +64,12 @@ class LiveController extends Controller
                 $islistener = $us->islistener($course['team_id'], $users->id);
             }
             $isadmin = $us->isadmin($course['team_id'], $users->id);
-            if (!$iswhite && $isadmin) {
-                // 口令课程 后台登录后一键进入 默认填充白名单数据
-                $cs->addwhite($course, $users->id, $isteacher);
-            }
+            // if (!$iswhite && $isadmin) {
+            //     // 口令课程 后台登录后一键进入 默认填充白名单数据
+            //     $cs->addwhite($course, $users->id, $isteacher);
+            // }
             // 判断是否有权限进入
-            $role = $this->role($course, $black, $iswhite, $balance, $room['online_num'], $isDisplay, $islistener, $isadmin);
+            $role = $this->role($course, $black, $iswhite, $balance, $info['online_num'], $isDisplay, $islistener, $isadmin);
             if ($role[0] == 203 && !$isadmin) {
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);
@@ -286,18 +288,16 @@ class LiveController extends Controller
           return response()->json(['error'=>'']);  
         }
         return response()->json(['error'=>$res->meta->msg]);
-        
     }
 
     // 录制回调
     public function postRecordCallBack(Request $request)
     {
-        
         $rs = new RecordServer();
         $res = $rs->balance($request->all());
         return response()->json(['error'=>'']);
     }
-    
+
     public function getBrowser(Request $request)
     {
         return view('livetool::browser');
@@ -306,6 +306,32 @@ class LiveController extends Controller
     public function getSpeedTest() {
         return view('livetool::speedtest');
     }
+    // 文件转码开始
+    public function setDescribe(Request $request)
+    {
+        $file_id = $request->input('file_id', '');
+        $fileurl = $request->input('fileurl', '');
+        $file_name = $request->input('file_name', '');
+        $is_static = $request->input('is_static', false);
+        $api = new ApiServer();
+        $data = $api->setDescribe($file_id, $fileurl, $file_name, $is_static);
+        if ($data && $data->meta->code != 201) {
+          return response()->json(['error'=>'', 'code' => $data->meta->code, 'data' => $data->data]);  
+        }
+        return response()->json(['error'=>'转码失败，请稍后再试']);
+    }
+
+    // 文件转码结果查询
+    public function getDescribe(Request $request)
+    {
+        $file_id = $request->input('file_id', '');
+        $api = new ApiServer();
+        $data = $api->getDescribe($file_id);
+        if ($data) {
+          return response()->json(['error'=>'', 'data' => $data]);  
+        }
+        return response()->json(['error'=>'文件转码失败，请稍后再试', 'data' => '']);
+    }    
     // 清除直播间数据
     public function clearRedis(Request $request) {
         $room_id = $request->input('room_id', '');

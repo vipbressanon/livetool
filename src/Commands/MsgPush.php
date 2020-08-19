@@ -83,7 +83,7 @@ class MsgPush extends Command
                     $socket->nickname = isset($request['nickname'])?$request['nickname']:'';
                     $socket->platform = isset($request['platform']) ? $request['platform'] : 0;
                     $socket->imgurl = isset($request['imgurl']) ? $request['imgurl'] : '';
-                    $socket->islistener = isset($request['islistener']) ? $request['islistener'] : false;
+                    $socket->islistener = (isset($request['islistener']) && $request['islistener']) ? $request['islistener'] : false;
                     if (!$socket->islistener) {
                         // 在线人员处理
                         self::userlist($socket, 'add');
@@ -154,7 +154,7 @@ class MsgPush extends Command
             $socket->on('enter', function () use ($socket) {
                 try {
                     $us = new UsersServer();
-                    $us->start($socket->room_id, $socket->hash_id, $socket->platform);
+                    $us->start($socket->room_id, $socket->hash_id, $socket->platform, $socket->islistener);
                     
                     // if ($socket->isteacher) {
                     //     $interval = config('livetool.intervaltime');

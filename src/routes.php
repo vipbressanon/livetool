@@ -19,4 +19,6 @@ Route::group(["middleware" => 'web'], function () {
     Route::post("/livetool/record/callback", "Vipbressanon\LiveTool\Controllers\LiveController@postRecordCallBack");
     Route::get("/livetool/browser", "Vipbressanon\LiveTool\Controllers\LiveController@getBrowser");
     Route::get("/livetool/clearredis", "Vipbressanon\LiveTool\Controllers\LiveController@clearRedis");
+    Route::post("/livetool/setdescribe", "Vipbressanon\LiveTool\Controllers\LiveController@setDescribe");
+    Route::post("/livetool/getdescribe", "Vipbressanon\LiveTool\Controllers\LiveController@getDescribe");
 });
