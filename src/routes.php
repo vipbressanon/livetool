@@ -21,4 +21,5 @@ Route::group(["middleware" => 'web'], function () {
     Route::get("/livetool/clearredis", "Vipbressanon\LiveTool\Controllers\LiveController@clearRedis");
     Route::post("/livetool/setdescribe", "Vipbressanon\LiveTool\Controllers\LiveController@setDescribe");
     Route::post("/livetool/getdescribe", "Vipbressanon\LiveTool\Controllers\LiveController@getDescribe");
+    Route::post("/livetool/saveDevice", "Vipbressanon\LiveTool\Controllers\LiveController@saveDevice");
 });

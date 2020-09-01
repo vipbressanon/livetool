@@ -87,7 +87,8 @@ class LiveController extends Controller
             $team = $rs->getTeam($course['team_id']);
             $logo_url = isset($team->logo_url)?$team->logo_url:'';
             $title = isset($team->title)?$team->title:'';
-
+            // 获取设备检测信息
+            $device = $us->device($users->id);
             $view = $isteacher ? $viewtype.'.teacher' : $viewtype.'.student';
             return view($view)
                     ->with('platform', $platform)
@@ -95,6 +96,7 @@ class LiveController extends Controller
                     ->with('room', $room)
                     ->with('info', $info)
                     ->with('share', $share)
+                    ->with('device', $device)
                     ->with('isteacher', $isteacher)
                     ->with('role', $role)
                     ->with('islistener', $islistener)
@@ -231,13 +233,11 @@ class LiveController extends Controller
     // 设备选择，检测
     public function getCheck(Request $request)
     {
-
         $type = $request->input('type', 1);
         $tea = $request->input('tea', 0);
         $stream = $request->input('stream', []);
         $push_microphoneId = $request->input('push_microphoneId', "default");
         // $stream = utf8_encode($stream);
-        
         $stream = $this->str_change($stream);
         return view('livetool::check')
                 ->with('type', $type)
@@ -275,7 +275,14 @@ class LiveController extends Controller
         return $obj;
     }
 
-    
+    // 保存设备检测数据
+    public function saveDevice(Request $request)
+    {
+        $us = new UsersServer();
+        $info = $us->saveDevice($request);
+        return response()->json($info);
+    }
+
      // 录制开始
     public function postRecord(Request $request)
     {

@@ -214,7 +214,6 @@ class ApiServer
     public function setDescribe($file_id, $fileurl, $file_name, $is_static = false)
     {
         $result = $this->getDescribe($file_id);
-        Log::info('222', [$result]);
         if (isset($result) && $result != '' && $result->status == "TranscodeFinished") {
             $json = [
                 'meta' => [
@@ -235,7 +234,6 @@ class ApiServer
         if (!isset($res)) {
             Log::error($this->api['url'].'/api/transcode/setdescribe: ', [$res]);
         }
-        Log::info('444', [$res]);
         return $res;
     }
 
