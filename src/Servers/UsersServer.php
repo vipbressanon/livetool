@@ -5,6 +5,7 @@ use DB;
 use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomSig;
 use Vipbressanon\LiveTool\Models\RoomBlack;
+use Vipbressanon\LiveTool\Models\Device;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use Illuminate\Support\Facades\Redis;
 use Log;
@@ -257,6 +258,7 @@ class UsersServer
             'hash_id' => $res ? $res->hash_id : ''
         ];
     }
+
     // 是否监课教师身份进入
     public function islistener($team_id, $users_id)
     {
@@ -269,6 +271,7 @@ class UsersServer
         $islistener = ($res && in_array($res->type, [0, 1, 4, 5, 6, 7, 8])) ? true : false;
         return $islistener;
     }
+
     // 是否是管理员教师/超管
     public function isadmin($team_id, $users_id)
     {
@@ -280,11 +283,69 @@ class UsersServer
                 ->first();
         $isadmin = ($res && in_array($res->type, [0, 1, 4, 5, 6, 7, 8])) ? true : false;
         return $isadmin;
-    }  
+    }
+
+    // 设备检测信息
+    public function device($user_id)
+    {
+        $device_info = [
+            'code' => 200,
+            'msg' => '设备正常',
+            'data' => null
+        ];
+        $device = config('livetool.devices');
+        $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+        $res = DB::table($device['table'])
+                ->where($device['field']['user_id'], $user_id)
+                ->where($device['field']['message'], $agent)
+                ->first();
+        if ($res) {
+            if ($res->status != 1) {
+                $device_info['code'] = 202;
+                $device_info['msg'] = '上次设备检测异常';
+            }
+            $device_info['data'] = $res;
+        } else {
+            $device_info['code'] = 201;
+            $device_info['msg'] = '未进行过设备检测';
+        }
+        return $device_info;
+    }
+
+    // 存储设备检测信息
+    public function saveDevice($request)
+    {
+        $back = ['error' => '', 'data' => null];
+        $device = config('livetool.devices');
+        $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
+        $status = $request->input('status', 0);
+        $user_id = $request->input('user_id', '');
+        $audio_input = $request->input('audioinput', 0);
+        $audio_output = $request->input('audiooutput', 0);
+        $videoinput = $request->input('videoinput', 0);
+        if (!$user_id) {
+            $back['error'] = '用户id为空';
+            Log::info('保存设备检测数据异常', [$request]);
+            return $back;
+        }
+        $data = Device::updateOrCreate(
+            [
+                $device['field']['user_id'] => $user_id,
+                $device['field']['message'] => $agent
+            ],
+            [
+                $device['field']['status'] => $status,
+                $device['field']['audio_input'] => $audio_input,
+                $device['field']['audio_output'] => $audio_output,
+                $device['field']['video'] => $videoinput
+            ]
+        );
+        $back['data'] = $data;
+        return $back;
+    }
     private function hashid($hash_id)
     {
         $res = RoomSig::where('hash_id', $hash_id)->first();
         return $res ? $res->users_id : '';
     }
-
 }
