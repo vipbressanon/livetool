@@ -286,7 +286,7 @@ class UsersServer
     }
 
     // 设备检测信息
-    public function device($user_id)
+    public function device($user_id, $course_id)
     {
         $device_info = [
             'code' => 200,
@@ -296,6 +296,7 @@ class UsersServer
         $device = config('livetool.devices');
         $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
         $res = DB::table($device['table'])
+                ->where($device['field']['course_id'], $course_id)
                 ->where($device['field']['user_id'], $user_id)
                 ->where($device['field']['message'], $agent)
                 ->first();
@@ -306,8 +307,24 @@ class UsersServer
             }
             $device_info['data'] = $res;
         } else {
-            $device_info['code'] = 201;
-            $device_info['msg'] = '未进行过设备检测';
+            $last = DB::table($device['table'])
+                ->where($device['field']['user_id'], $user_id)
+                ->where($device['field']['message'], $agent)
+                ->orderBy('updated_at', 'desc')
+                ->first();
+            if ($last) {
+                if ($last->status != 1) {
+                    $device_info['code'] = 202;
+                    $device_info['msg'] = '上次设备检测异常';
+                } else {
+                    $device_info['code'] = 203;
+                    $device_info['msg'] = '上次设备检测正常';
+                }
+                $device_info['data'] = $res;
+            } else {
+                $device_info['code'] = 201;
+                $device_info['msg'] = '未进行过设备检测';
+            }
         }
         return $device_info;
     }
@@ -320,6 +337,7 @@ class UsersServer
         $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
         $status = $request->input('status', 0);
         $user_id = $request->input('user_id', '');
+        $course_id = $request->input('course_id', '');
         $audio_input = $request->input('audioinput', 0);
         $audio_output = $request->input('audiooutput', 0);
         $videoinput = $request->input('videoinput', 0);
@@ -331,7 +349,8 @@ class UsersServer
         $data = Device::updateOrCreate(
             [
                 $device['field']['user_id'] => $user_id,
-                $device['field']['message'] => $agent
+                $device['field']['message'] => $agent,
+                $device['field']['course_id'] => $course_id
             ],
             [
                 $device['field']['status'] => $status,
