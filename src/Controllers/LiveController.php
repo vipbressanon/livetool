@@ -235,13 +235,13 @@ class LiveController extends Controller
     {
         $type = $request->input('type', 1);
         $tea = $request->input('tea', 0);
-        $stream = $request->input('stream', []);
+        // $stream = $request->input('stream', []);
         $push_microphoneId = $request->input('push_microphoneId', "default");
         // $stream = utf8_encode($stream);
-        $stream = $this->str_change($stream);
+        // $stream = $this->str_change($stream);
         return view('livetool::check')
                 ->with('type', $type)
-                ->with('stream', $stream)
+                // ->with('stream', $stream)
                 ->with('push_microphoneId', $push_microphoneId)
                 ->with('tea', $tea);
     }
