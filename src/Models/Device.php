@@ -5,5 +5,5 @@ class Device extends Model
 {
     public $timestamps = true;
     protected $table = 'devices';
-    protected $fillable = ['user_id', 'message', 'status', 'audio_input', 'audio_output', 'video'];
+    protected $fillable = ['user_id', 'message', 'status', 'audio_input', 'audio_output', 'video', 'course_id'];
 }

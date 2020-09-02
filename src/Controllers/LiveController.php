@@ -88,7 +88,7 @@ class LiveController extends Controller
             $logo_url = isset($team->logo_url)?$team->logo_url:'';
             $title = isset($team->title)?$team->title:'';
             // 获取设备检测信息
-            $device = $us->device($users->id);
+            $device = $us->device($users->id, $course['id']);
             $view = $isteacher ? $viewtype.'.teacher' : $viewtype.'.student';
             return view($view)
                     ->with('platform', $platform)
