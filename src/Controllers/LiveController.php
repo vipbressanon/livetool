@@ -137,7 +137,7 @@ class LiveController extends Controller
 		}
         return response()->json(['error'=>'']);
     }
-    
+
     // 上课
     public function postRoomStart(Request $request)
     {
@@ -246,6 +246,14 @@ class LiveController extends Controller
                 ->with('tea', $tea);
     }
 
+    // 重新签名
+    public function resetSign(Request $request)
+    {
+        $us = new UsersServer();
+        $data = $us->resetSign($request);
+        return response()->json(['data' => $data]);
+    }
+    
     private function str_change($data) {
         $str=str_replace('[','',$data);
         $str=str_replace(']','',$str);
