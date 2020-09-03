@@ -362,6 +362,38 @@ class UsersServer
         $back['data'] = $data;
         return $back;
     }
+
+    // 进房签名过期 重新签名
+    public function resetSign($request) {
+        $now = date('Y-m-d H:i:s');
+        $user_id = $request->input('user_id', '');
+
+        $res = RoomSig::where('users_id', $user_id)->first();
+        if (!$res) {
+            $res = new RoomSig();
+            $res->sdkappid = '';
+            $res->users_id = $users->id;
+            $res->hash_id = '';
+            $res->usersig = '';
+            $res->screensig = '';
+            $res->overtime = null;
+            $res->save();
+        }
+        if ($res->usersig == '' || $res->overtime < $now) {
+            $api = new ApiServer();
+            $sig = $api->userssig($user_id);
+            if (!$sig) {
+                return '';
+            }
+            $res->sdkappid = $sig ? $sig->sdkappid : '';
+            $res->hash_id = $sig ? $sig->hash_id : '';
+            $res->usersig = $sig ? $sig->usersig : '';
+            $res->screensig = $sig ? $sig->screensig : '';
+            $res->overtime = $sig ? $sig->overtime : null;
+            $res->save();
+        }
+        return $res;
+    }
     private function hashid($hash_id)
     {
         $res = RoomSig::where('hash_id', $hash_id)->first();
