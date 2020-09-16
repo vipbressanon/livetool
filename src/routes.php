@@ -23,4 +23,6 @@ Route::group(["middleware" => 'web'], function () {
     Route::post("/livetool/getdescribe", "Vipbressanon\LiveTool\Controllers\LiveController@getDescribe");
     Route::post("/livetool/saveDevice", "Vipbressanon\LiveTool\Controllers\LiveController@saveDevice");
     Route::post("/livetool/resetSign", "Vipbressanon\LiveTool\Controllers\LiveController@resetSign");
+
+    Route::get("/livetool/refresh", "Vipbressanon\LiveTool\Controllers\LiveController@getRefresh");
 });

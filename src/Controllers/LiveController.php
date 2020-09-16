@@ -382,6 +382,15 @@ class LiveController extends Controller
         }
     }
 
+    // session刷新
+    public function getRefresh(Request $request)
+    {
+    $auth = config('livetool.auth');
+    return view('livetool::refresh')
+        ->with('auth', $auth);
+    }
+
+
     private function role($course, $black, $iswhite, $balance, $online_num, $isDisplay, $islistener = false, $isadmin = false)
     {
         $data = [201, '无法进入直播间'];
