@@ -153,8 +153,9 @@ class MsgTest extends Command
             // 传参：up_top(上台人数上限), teacher_hash_id(讲师哈希)
             $socket->on('enter', function () use ($socket) {
                 try {
-                    $us = new UsersServer();
-                    $us->start($socket->room_id, $socket->hash_id, $socket->platform, $socket->islistener);
+                    // 已通过腾讯云接口获取数据，该方法启用
+                    // $us = new UsersServer();
+                    // $us->start($socket->room_id, $socket->hash_id, $socket->platform, $socket->islistener);
                     
                     // if ($socket->isteacher) {
                     //     $interval = config('livetool.intervaltime');
@@ -191,8 +192,9 @@ class MsgTest extends Command
                     if (empty($socket->hash_id)) {
                         return;
                     }
-                    $us = new UsersServer();
-                    $us->end($socket->room_id, $socket->hash_id);
+                    // 已通过腾讯云接口获取数据，该方法启用
+                    // $us = new UsersServer();
+                    // $us->end($socket->room_id, $socket->hash_id);
                     // 如果是教师 走结算
                     // if ($socket->isteacher) {
                     //     $balance = new BalanceServer();
