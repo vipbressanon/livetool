@@ -105,6 +105,7 @@ class UsersServer
         }
     }
     
+    // 已通过腾讯云接口获取数据，该方法启用
     public function start($room_id, $hash_id, $platform = 0, $islistener = false)
     {
         Log::info("开始上课",[$room_id, $hash_id, $platform, $islistener]);
@@ -139,6 +140,7 @@ class UsersServer
         return true;
     }
     
+    // 已通过腾讯云接口获取数据，该方法启用
     public function end($room_id, $hash_id)
     {
         Log::info("结束上课",[$room_id, $hash_id]);
