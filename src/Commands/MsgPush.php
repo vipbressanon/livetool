@@ -84,11 +84,14 @@ class MsgPush extends Command
                     $socket->platform = isset($request['platform']) ? $request['platform'] : 0;
                     $socket->imgurl = isset($request['imgurl']) ? $request['imgurl'] : '';
                     $socket->islistener = (isset($request['islistener']) && $request['islistener']) ? $request['islistener'] : false;
+                    $socket->isplat = isset($request['isplat'])?$request['isplat']:1;
                     if (!$socket->islistener) {
                         // 在线人员处理
                         self::userlist($socket, 'add');
-                        // 上台人员处理
-                        self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                        // 如果自动上台，做上台处理，手动上台不处理
+                        if ($socket->isplat) {
+                            self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                        }
                     } else {
                         // 在线人员处理  index+1
                         self::userlist($socket, 'listener');

@@ -34,7 +34,8 @@ class CourseServer
                     $course['table'].'.'.$course['field']['code_url'].' as code_url',
                     $course['table'].'.'.$course['field']['up_top'].' as up_top',
                     $course['table'].'.'.$course['field']['down_top'].' as down_top',
-                    $course['table'].'.'.$course['field']['isrecord'].' as isrecord'
+                    $course['table'].'.'.$course['field']['isrecord'].' as isrecord',
+                    $course['table'].'.'.$course['field']['isplat'].' as isplat'
                 )
                 ->where($course['table'].'.'.$course['field']['hash_id'], $hash_id)
                 ->first();
@@ -56,7 +57,8 @@ class CourseServer
                 'code_url' => $res->code_url,
                 'up_top' => $res->up_top,
                 'down_top' => $res->down_top,
-                'isrecord' => $res->isrecord
+                'isrecord' => $res->isrecord,
+                'isplat' => $res->isplat
             ];
         } else {
             return null;
