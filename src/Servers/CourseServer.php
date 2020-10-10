@@ -151,7 +151,7 @@ class CourseServer
         return $res && $res->amount_money >= 0 ? 1 : 0;
     }
 
-     public function isDisplay($team_id, $users_id){
+    public function isDisplay($team_id, $users_id){
         $user_from = config('livetool.users_from');
         $from = DB::table($user_from['table'])
             ->where([
@@ -165,6 +165,46 @@ class CourseServer
         }else{
             
             return  0;
+        }
+    }
+
+    //白板授权时间
+    //新增用户白板授权记录
+    public function addBoardLog($room_id, $users_hash_id)
+    {
+        //根据room_id 取course_id
+        $room = Room::find($room_id);
+        if (!$room) {
+            Log::info("room不存在",[$room_id, $hash_id, $platform, $islistener]);
+            return false;
+        }
+        //hash 转id
+        $users_id = RoomSig::where('hash_id', $users_hash_id)->pluck('users_id');
+        $course_users_table = config('livetool.course_users');
+        $course_users = DB::table($course_users_table['table'])->where([
+                $course_users_table['field']['course_id'] =>$room->course_id,
+                $course_users_table['field']['users_id']  => $users_id
+            ])->first();
+        if ($course_users) {
+            $board_table = config('livetool.course_users_board');
+            $board = DB::table($board_table['table'])->where([
+                    $board_table['field']['course_users_id'] => $course_users->id,
+                    $board_table['field']['status' ]         => 1,
+                ])->first();
+            if ($board) {
+                $board = DB::table($board_table['table'])->where([
+                    $board_table['field']['course_users_id'] => $course_users->id,
+                    $board_table['field']['status' ]         => 1,
+                ])
+                ->update([
+                    $board_table['field']['total'] => time() - $board->start_time,
+                    $board_table['field']['status'] => 0,
+                    $board_table['field']['end_time'] => time()
+                ]);
+                return true;
+            }
+        } else {
+            return false;
         }
     }
 }

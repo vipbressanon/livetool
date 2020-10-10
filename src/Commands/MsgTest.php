@@ -195,6 +195,9 @@ class MsgTest extends Command
                     if (empty($socket->hash_id)) {
                         return;
                     }
+                    //记录白板授权时长
+                    $course = new CourseServer();
+                    $course->addBoardLog($socket->room_id, $socket->hash_id);
                     // 已通过腾讯云接口获取数据，该方法启用
                     // $us = new UsersServer();
                     // $us->end($socket->room_id, $socket->hash_id);
