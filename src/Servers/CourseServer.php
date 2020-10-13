@@ -97,26 +97,6 @@ class CourseServer
         return $res ? $res->starttime : '';
     }
     
-    public function share($course_id)
-    {
-        $share = config('livetool.share');
-        $res = DB::table($share['table'])
-                ->select(
-                    $share['field']['id'].' as id',
-                    $share['field']['title'].' as title',
-                    $share['field']['invite_type'].' as invite_type',
-                    $share['field']['content'].' as content'
-                )
-                ->where($share['field']['id'], $course_id)
-                ->first();
-        return [
-            'id' => $res->id,
-            'title' => $res->title,
-            'invite_type' => $res->invite_type,
-            'content' => $res->content
-        ];
-    }
-    
     public function iswhite($course_id, $users_id)
     {
         $white = config('livetool.white');

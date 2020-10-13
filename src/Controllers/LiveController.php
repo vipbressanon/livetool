@@ -50,8 +50,6 @@ class LiveController extends Controller
             $teacher = $us->teacher($room['id'], $course['team_id'], $course['teacher_id']);
             // 用户黑名单,被讲师踢出的将不能再次进入
             $black = $rs->black($room['id'], $info['id']);
-            // 获取课程分享信息
-            $share = $cs->share($course['id']);
             // 判断用户是否在白名单内
             $iswhite = $cs->iswhite($course['id'], $users->id);
             //是否被禁用
@@ -95,7 +93,6 @@ class LiveController extends Controller
                     ->with('course', $course)
                     ->with('room', $room)
                     ->with('info', $info)
-                    ->with('share', $share)
                     ->with('device', $device)
                     ->with('isteacher', $isteacher)
                     ->with('role', $role)

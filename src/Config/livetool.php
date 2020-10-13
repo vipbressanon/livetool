@@ -122,15 +122,6 @@ return [
             'deleted_at' => 'deleted_at'
         ]
     ],
-    'share' => [                                            // 课程分享视图
-        'table' => 'view_course_share',                     // 视图名称
-        'field' => [                                        // 字段名
-            'id' => 'id',                                   // 编号
-            'title' => 'title',                             // 课程名称
-            'invite_type' => 'invite_type',                 // 邀请方式
-            'content' => 'content'                          // 口令内容或白名单内容
-        ]
-    ],
     'white' => [                                            // 白名单视图
         'table' => 'view_course_white',                     // 视图名称
         'field' => [                                        // 字段名
