@@ -156,7 +156,7 @@ class MsgTest extends Command
             // 传参：up_top(上台人数上限), teacher_hash_id(讲师哈希)
             $socket->on('enter', function () use ($socket) {
                 try {
-                    // 已通过腾讯云接口获取数据，该方法启用
+                    // 已通过腾讯云接口获取数据，该方法弃用
                     // $us = new UsersServer();
                     // $us->start($socket->room_id, $socket->hash_id, $socket->platform, $socket->islistener);
                     
@@ -195,7 +195,10 @@ class MsgTest extends Command
                     if (empty($socket->hash_id)) {
                         return;
                     }
-                    // 已通过腾讯云接口获取数据，该方法启用
+                    //记录白板授权时长
+                    $course = new CourseServer();
+                    $course->addBoardLog($socket->room_id, $socket->hash_id);
+                    // 已通过腾讯云接口获取数据，该方法弃用
                     // $us = new UsersServer();
                     // $us->end($socket->room_id, $socket->hash_id);
                     // 如果是教师 走结算
