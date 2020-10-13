@@ -27,7 +27,7 @@ class ApiServer
             ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
             'POST'
         );
-        if ($res->meta->code == 200) {
+        if (isset($res) && $res->meta->code == 200) {
             $data = $res->data;
         } else {
             Log::error($this->api['url'].'/api/room/number: '.$res->meta->msg);
