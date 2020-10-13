@@ -16,7 +16,7 @@ class RecordServer
     
     public function hander($room_id, $status)
     {
-        $room = Room::with('share')->find($room_id);
+        $room = Room::find($room_id);
         $oldstatus = $room->roomrecord;
         $room->roomrecord = $status;
         if (($oldstatus == 0 || $oldstatus == 3) && $room->roomrecord == 1) {
@@ -24,8 +24,7 @@ class RecordServer
             $re = $api->recordstart($room_id);
         } else{
             $api = new ApiServer();
-            $share = isset($room->share) ? $room->share:'';
-            $re = $api->recordend($room_id,$share);
+            $re = $api->recordend($room_id);
         }
         Log::info("RecordServer hander re",['re'=>$re]);
         if($re->meta->code == 200){
