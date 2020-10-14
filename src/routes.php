@@ -6,7 +6,6 @@ Route::group(["middleware" => 'web'], function () {
     Route::post("/livetool/errors", "Vipbressanon\LiveTool\Controllers\LiveController@postErrors");
     Route::post("/livetool/room/start", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomStart");
     Route::post("/livetool/room/end", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomEnd");
-    Route::post("/livetool/room/type", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomType");
     Route::post("/livetool/room/chat", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomChat");
     Route::post("/livetool/room/speak", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomSpeak");
     Route::post("/livetool/room/hand", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomHand");

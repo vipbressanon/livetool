@@ -155,16 +155,6 @@ class LiveController extends Controller
         return response()->json(['error'=>'']);
     }
     
-    // 切换直播模式
-    public function postRoomType(Request $request)
-    {
-        $room_id = $request->input('room_id');
-        $roomtype = $request->input('roomtype');
-        $rs = new RoomServer();
-        $rs->type($room_id, $roomtype);
-        return response()->json(['error'=>'']);
-    }
-    
     // 切换聊天讨论
     public function postRoomChat(Request $request)
     {
