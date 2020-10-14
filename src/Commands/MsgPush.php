@@ -175,9 +175,6 @@ class MsgPush extends Command
             // 下课
             $socket->on('over', function () use ($socket) {
                 try {
-                    // 记录屏幕共享结束时间
-                    // $rs = new RoomServer();
-                    // $rs->type($socket->room_id, 2);
                     $record = new RecordServer();
                     $record->hander($socket->room_id, 3);
                     $balance = new BalanceServer();
@@ -225,9 +222,6 @@ class MsgPush extends Command
                         $arr['onoff']['max'] = '';
                         if ($socket->isteacher) {
                             $arr['onoff']['roomtype'] = 2;
-                            // 记录屏幕共享结束时间
-                            // $rs = new RoomServer();
-                            // $rs->type($socket->room_id, 2);
                         }
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     }
