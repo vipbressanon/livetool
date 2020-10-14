@@ -169,12 +169,12 @@ class CourseServer
             $board_table = config('livetool.course_users_board');
             $board = DB::table($board_table['table'])->where([
                     $board_table['field']['course_users_id'] => $course_users->id,
-                    $board_table['field']['status' ]         => 1,
+                    $board_table['field']['status' ]         => 1
                 ])->first();
             if ($board) {
                 $board = DB::table($board_table['table'])->where([
                     $board_table['field']['course_users_id'] => $course_users->id,
-                    $board_table['field']['status' ]         => 1,
+                    $board_table['field']['status' ]         => 1
                 ])
                 ->update([
                     $board_table['field']['total'] => time() - $board->start_time,
