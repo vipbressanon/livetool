@@ -26,15 +26,20 @@ class LiveController extends Controller
         $from = $request->input('frompage', '');
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
-        if (!$users) {
-            //Auth::guard($auth)->loginUsingId($request->input('uid'));
-            //$users = Auth::guard($auth)->user();
-            $url = config('livetool.loginurl');
-            return redirect($url.'/'.$hash_id);
-        }
+        
         $cs = new CourseServer();
         $course = $cs->detail($hash_id);
         if ($course) {
+            $tel = $request->input('tel', '');
+            if (!$users && $tel != '') {
+                $this->autologin($course['id'], $tel);
+                $users = Auth::guard($auth)->user();
+            }
+            if (!$users) {
+                // 当前未登录跳转登录页面
+                $url = config('livetool.loginurl');
+                return redirect($url.'/'.$hash_id);
+            }
             $platform = $this->platform();
             $rs = new RoomServer();
             // 判断用户是否为讲师
@@ -375,6 +380,17 @@ class LiveController extends Controller
     $auth = config('livetool.auth');
     return view('livetool::refresh')
         ->with('auth', $auth);
+    }
+
+    // 传入手机号，并且是白名单课程，允许直接登录进入直播间
+    private function autologin($course_id, $tel)
+    {
+        $us = new UsersServer();
+        $res = $us->autologin($course_id, $tel);
+        if ($res) {
+            $auth = config('livetool.auth');
+            Auth::guard($auth)->loginUsingId($res);
+        }
     }
 
 
