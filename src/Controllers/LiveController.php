@@ -32,7 +32,7 @@ class LiveController extends Controller
         if ($course) {
             $tel = $request->input('tel', '');
             if (!$users && $tel != '') {
-                $this->autologin($course['id'], $tel);
+                $this->autologin($course['id'], $course['team_id'], $tel);
                 $users = Auth::guard($auth)->user();
             }
             if (!$users) {
@@ -383,13 +383,15 @@ class LiveController extends Controller
     }
 
     // 传入手机号，并且是白名单课程，允许直接登录进入直播间
-    private function autologin($course_id, $tel)
+    private function autologin($course_id, $team_id, $tel)
     {
         $us = new UsersServer();
-        $res = $us->autologin($course_id, $tel);
-        if ($res) {
+        $users_id = $us->autologin($course_id, $tel);
+        if ($users_id) {
             $auth = config('livetool.auth');
-            Auth::guard($auth)->loginUsingId($res);
+            $team = config('livetool.auth_team');
+            Auth::guard($auth)->loginUsingId($users_id);
+            Auth::guard($team)->loginUsingId($team_id);
         }
     }
 
