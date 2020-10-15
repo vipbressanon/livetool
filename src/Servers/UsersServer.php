@@ -401,4 +401,23 @@ class UsersServer
         $res = RoomSig::where('hash_id', $hash_id)->first();
         return $res ? $res->users_id : '';
     }
+
+    public function autologin($course_id, $tel)
+    {
+        $users = config('livetool.users');
+        $res = DB::table($users['table'])
+                ->select($users['field']['id'])
+                ->where($users['field']['tel'], $tel)
+                ->first();
+        if ($res) {
+            $course_white_list = config('livetool.course_white_list');
+            $data = DB::table($course_white_list['table'])
+                ->select($course_white_list['field']['users_id'])
+                ->where($course_white_list['field']['course_id'], $course_id)
+                ->where($course_white_list['field']['users_id'], $res->id)
+                ->first();
+            return $data ? $data->users_id : null;
+        }
+        return null;
+    }
 }
