@@ -549,7 +549,7 @@ class MsgPush extends Command
                 }
             }
             // 超出上台人数上限
-            if ($stucount >= intval($up_top)) {
+            if ($stucount > intval($up_top)) {
                 $users[$hash_id]['plat'] = 0;
                 $users[$hash_id]['camera'] = 0;
                 $users[$hash_id]['board'] = 0;
