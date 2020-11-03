@@ -548,13 +548,18 @@ class MsgPush extends Command
                     $stucount ++;
                 }
             }
+            // 缓存中是否存有该人员数据
+            if (Redis::exists($room_id.$hash_id)) {
+                $temp = self::redisGet($room_id.$hash_id);
+                if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
+                    $users[$hash_id]['plat'] = 0;
+                    $users[$hash_id]['camera'] = 0;
+                    $users[$hash_id]['board'] = 0;
+                    $users[$hash_id]['voice'] = 0;
+                }
+            }
             // 超出上台人数上限
-            if ($stucount > intval($up_top)) {
-                $users[$hash_id]['plat'] = 0;
-                $users[$hash_id]['camera'] = 0;
-                $users[$hash_id]['board'] = 0;
-                $users[$hash_id]['voice'] = 0;
-            } else {
+            if ($stucount < intval($up_top)) {
                 $users[$hash_id]['plat'] = 1;
                 $users[$hash_id]['camera'] = 1;
             }
