@@ -175,9 +175,6 @@ class MsgTest extends Command
             // 下课
             $socket->on('over', function () use ($socket) {
                 try {
-                    // 记录屏幕共享结束时间
-                    // $rs = new RoomServer();
-                    // $rs->type($socket->room_id, 2);
                     $record = new RecordServer();
                     $record->hander($socket->room_id, 3);
                     $balance = new BalanceServer();
@@ -225,9 +222,6 @@ class MsgTest extends Command
                         $arr['onoff']['max'] = '';
                         if ($socket->isteacher) {
                             $arr['onoff']['roomtype'] = 2;
-                            // 记录屏幕共享结束时间
-                            // $rs = new RoomServer();
-                            // $rs->type($socket->room_id, 2);
                         }
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     }
@@ -347,28 +341,6 @@ class MsgTest extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             }); 
-            //白板同步数据
-            $socket->on('syncboard', function ($request) use ($socket)  {
-                try {
-                    // $users = [];
-                    // $index = 0;
-                    $data = $request;
-                    // print_r($data);
-                    // Log::info($data);
-                    // 从Redis读取在线人员信息
-                    // if (Redis::exists($socket->room_id.'users')) {
-                    //     $arr = self::redisGet($socket->room_id.'users');
-                    //     $users = $arr['users'];
-                    //     $index = $arr['index'];
-                    // }
-                    
-
-                    self::$senderIo->to($socket->room_id)->emit('syncboard',json_encode($data));
-                } catch(\Exception $e) {
-                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
-                    Log::info('websocket:', $e->getTrace());
-                }
-            });
             
             // 消息转发
             $socket->on('im', function ($request) use ($socket)  {
@@ -507,7 +479,10 @@ class MsgTest extends Command
             $index = $arr['index'];
         }
         if ($type == 'add') {           // 人员增加
-            if (!array_key_exists($hash_id, $users)) {
+            
+            if (Redis::exists($room_id.$hash_id)) {     // 缓存中是否存有该人员数据
+                $users[$hash_id] = self::redisGet($room_id.$hash_id);
+            } elseif (!array_key_exists($hash_id, $users)) {    // 初始化数据
                 $users[$hash_id] = $isteacher ? self::$teainit : self::$stuinit;
             }
             $users[$hash_id]['nickname'] = $nickname;
@@ -515,6 +490,8 @@ class MsgTest extends Command
             $users[$hash_id]['platform'] = $platform;
             $users[$hash_id]['imgurl'] = $imgurl;
         } elseif ($type == 'cut') {     // 人员减少
+            
+            self::redisSet($room_id.$hash_id, $users[$hash_id]);
             if (array_key_exists($hash_id, $users)) {
                 unset($users[$hash_id]);
             }
@@ -573,10 +550,14 @@ class MsgTest extends Command
             }
             // 超出上台人数上限
             if ($stucount >= intval($up_top)) {
-                return [$hash_id => $users[$hash_id]];
+                $users[$hash_id]['plat'] = 0;
+                $users[$hash_id]['camera'] = 0;
+                $users[$hash_id]['board'] = 0;
+                $users[$hash_id]['voice'] = 0;
+            } else {
+                $users[$hash_id]['plat'] = 1;
+                $users[$hash_id]['camera'] = 1;
             }
-            $users[$hash_id]['plat'] = 1;
-            $users[$hash_id]['camera'] = 1;
         }
         
         $index++;
