@@ -88,9 +88,11 @@ class MsgPush extends Command
                     if (!$socket->islistener) {
                         // 在线人员处理
                         self::userlist($socket, 'add');
-                        // 如果自动上台，做上台处理，手动上台不处理
+                        // 如果自动上台，做上台处理，否则做手动上台处理
                         if ($socket->isplat) {
                             self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                        } else {
+                            self::handplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
                         }
                     } else {
                         // 在线人员处理  index+1
@@ -529,7 +531,7 @@ class MsgPush extends Command
         return [$hash_id => $users[$hash_id]];
     }
 
-    // 上台处理
+    // 自动上台处理
     public static function addplat($room_id, $hash_id, $isteacher, $up_top)
     {
         // 变量初始值
@@ -562,6 +564,42 @@ class MsgPush extends Command
             if ($stucount < intval($up_top)) {
                 $users[$hash_id]['plat'] = 1;
                 $users[$hash_id]['camera'] = 1;
+            }
+        }
+        
+        $index++;
+        self::redisSet($room_id.'users', ['users'=>$users, 'index'=>$index]);
+        return [$hash_id => $users[$hash_id]];
+    }
+
+    // 手动上台处理，主要检查保留权限人员再进来时是否超过上台人数上限
+    public static function handplat($room_id, $hash_id, $isteacher, $up_top)
+    {
+        // 变量初始值
+        $users = [];
+        $index = 0;
+        $stucount = 0;
+        // 从Redis读取在线人员信息
+        if (Redis::exists($room_id.'users')) {
+            $arr = self::redisGet($room_id.'users');
+            $users = $arr['users'];
+            $index = $arr['index'];
+        }
+        if (!$isteacher) {
+            foreach ($users as $v) {
+                if ($v['isteacher'] == 0 && $v['plat'] == 1) {
+                    $stucount ++;
+                }
+            }
+            // 缓存中是否存有该人员数据
+            if (Redis::exists($room_id.$hash_id)) {
+                $temp = self::redisGet($room_id.$hash_id);
+                if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
+                    $users[$hash_id]['plat'] = 0;
+                    $users[$hash_id]['camera'] = 0;
+                    $users[$hash_id]['board'] = 0;
+                    $users[$hash_id]['voice'] = 0;
+                }
             }
         }
         
