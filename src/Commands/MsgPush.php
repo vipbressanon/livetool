@@ -493,8 +493,8 @@ class MsgPush extends Command
             $users[$hash_id]['imgurl'] = $imgurl;
         } elseif ($type == 'cut') {     // 人员减少
 
-            self::redisSet($room_id.$hash_id, $users[$hash_id]);
             if (array_key_exists($hash_id, $users)) {
+                self::redisSet($room_id.$hash_id, $users[$hash_id]);
                 unset($users[$hash_id]);
             }
             // 用户数组为空 清除redis

@@ -407,7 +407,7 @@ class LiveController extends Controller
         		return [203, '请输入口令'];
         	}		
             if(!$iswhite && !$isadmin && $course['invite_type'] == 2){
-                return [ 201 ,'不再白名单内，无法进入'];
+                return [ 201 ,'不在白名单内，无法进入'];
             }   
             if($online_num >= $course['up_top'] + $course['down_top']){
                 return [ 201 ,'房间人数已满，无法进入'];
