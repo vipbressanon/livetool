@@ -14,6 +14,7 @@ use Vipbressanon\LiveTool\Servers\RecordServer;
 use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
+use Vipbressanon\LiveTool\Servers\LogsServer;
 use Log;
 use Illuminate\Support\Facades\Redis;
 
@@ -74,6 +75,8 @@ class MsgPush extends Command
                     }
                     // 已经登录过了
                     if (isset($socket->hash_id)) return;
+                    // socket日志
+                    self::logs($socket, ['type' => 'connection']);
                     // 用户数据
                     $socket->join($request['room_id']);
                     $socket->room_id = $request['room_id'];
@@ -90,9 +93,9 @@ class MsgPush extends Command
                         self::userlist($socket, 'add');
                         // 如果自动上台，做上台处理，否则做手动上台处理
                         if ($socket->isplat) {
-                            self::addplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                            self::addplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
                         } else {
-                            self::handplat($socket->room_id, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                            self::handplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
                         }
                     } else {
                         // 在线人员处理  index+1
@@ -112,6 +115,7 @@ class MsgPush extends Command
                     } else {
                         $onoff = self::$onoffinit;
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$onoff, 'index'=>0]);
+                        self::logs($socket, ['type' => 'roominit']);
                     }
                     $users = self::redisGet($socket->room_id.'users');
                     
@@ -127,6 +131,7 @@ class MsgPush extends Command
                     );
                     $socket->emit('servertime', ['time'=>time()]);
                 } catch(\Exception $e) {
+                    self::errors('[login] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -148,7 +153,9 @@ class MsgPush extends Command
                     } else {
                         self::$senderIo->to($socket->room_id)->emit('fail');
                     }
+                    self::logs($socket, ['type' => 'create']);
                 } catch(\Exception $e) {
+                    self::errors('[create] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -168,7 +175,9 @@ class MsgPush extends Command
                     //     // 每隔一段时间执行一次结算
                     //     $socket->timer_id = Timer::add($interval, [$balance, 'handle'], [$socket->room_id], true);
                     // }
+                    self::logs($socket, ['type' => 'enter']);
                 } catch(\Exception $e) {
+                    self::errors('[enter] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -178,12 +187,14 @@ class MsgPush extends Command
             $socket->on('over', function () use ($socket) {
                 try {
                     $record = new RecordServer();
-                    $record->hander($socket->room_id, 3);
+                    $record->handle($socket->room_id, 3);
                     $balance = new BalanceServer();
                     // 10秒以后执行一次结算,定时器只执行一次
                     //Timer::add(10, [$balance, 'handle'], [$socket->room_id], false);
                     self::$senderIo->to($socket->room_id)->emit('over');
+                    self::logs($socket, ['type' => 'over']);
                 } catch(\Exception $e) {
+                    self::errors('[over] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -216,6 +227,7 @@ class MsgPush extends Command
                             unset($userlistener[$socket->hash_id]);
                             self::redisSet($socket->room_id.'listener', $userlistener);
                         } else {
+                            self::logs($socket, ['type' => 'relogin']);
                             return;
                         }
                     }
@@ -226,6 +238,10 @@ class MsgPush extends Command
                             $arr['onoff']['roomtype'] = 2;
                         }
                         self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                        self::logs($socket, [
+                            'type' => 'roomtype',
+                            'status' => 2
+                        ]);
                     }
                     self::userlist($socket, 'cut');
                     if (Redis::exists($socket->room_id.'users')) {
@@ -240,7 +256,9 @@ class MsgPush extends Command
                             
                         );
                     }
+                    self::logs($socket, ['type' => 'disconnect']);
                 } catch(\Exception $e) {
+                    self::errors('[disconnect] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -250,11 +268,11 @@ class MsgPush extends Command
             $socket->on('permission', function ($request) use ($socket)  {
                 try {
                     if ($request['type'] == 'plat' && $request['status'] == 1) {
-                        $res = self::addplat($socket->room_id, $request['hash_id'], 0, $request['up_top']);
+                        $res = self::addplat($socket, $request['hash_id'], 0, $request['up_top']);
                     } elseif ($request['type'] == 'plat' && $request['status'] == 0) {
-                        $res = self::cutplat($socket->room_id, $request['hash_id']);
+                        $res = self::cutplat($socket, $request['hash_id']);
                     } else {
-                        $res = self::permission($socket->room_id, $request['hash_id'], $request['type'], $request['status']);
+                        $res = self::permission($socket, $request['hash_id'], $request['type'], $request['status']);
                     }
                     $nickname = isset($request['nickname']) ? $request['nickname'] : '';
                     self::$senderIo->to($socket->room_id)->emit(
@@ -266,6 +284,7 @@ class MsgPush extends Command
                         ]
                     );
                 } catch(\Exception $e) {
+                    self::errors('[permission] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -301,7 +320,12 @@ class MsgPush extends Command
                             'index' => $index
                         ]
                     );
+                    self::logs($socket, [
+                        'type' => 'plat'.$request['type'],
+                        'status' => $request['status']
+                    ]);
                 } catch(\Exception $e) {
+                    self::errors('[platbatch] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -338,7 +362,12 @@ class MsgPush extends Command
                             'index' => $index
                         ]
                     );
+                    self::logs($socket, [
+                        'type' => $request['type'],
+                        'status' => $request['status']
+                    ]);
                 } catch(\Exception $e) {
+                    self::errors('[onoff] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -380,11 +409,35 @@ class MsgPush extends Command
                         }
                     }
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
+                    self::logs($socket, [
+                        'type' => $request['type'],
+                        'hash_id' => isset($request['hash_id']) ? $request['hash_id'] : '',
+                        'text' => isset($request['text']) ? $request['text'] : '',
+                        'status' => isset($request['status']) ? $request['status'] : ''
+                    ]);
                 } catch(\Exception $e) {
+                    self::errors('[im] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
-            }); 
+            });
+
+            $socket->on('device', function ($request) use ($socket)  {
+                try {
+                    if ($request['type'] == 'switch') {
+
+                    }
+                    self::logs($socket, [
+                        'type' => $request['type'],
+                        'camera' => $request['camera'],
+                        'mic' => $request['mic']
+                    ]);
+                } catch(\Exception $e) {
+                    self::errors('[device] '.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
+                }
+            });
         });
         // self::$senderIo->onBufferFull = function($socket)
         // {
@@ -402,7 +455,7 @@ class MsgPush extends Command
             // 监听一个http端口
             $innerHttpWorker = new Worker('http://0.0.0.0:2121');
             // 当http客户端发来数据时触发
-            $innerHttpWorker->onMessage = function (TcpConnection $httpConnection, Request $request) {
+            $innerHttpWorker->onMessage = function ($httpConnection, $request) {
                 try {
                     $type = !empty($request->get('type')) ? $request->get('type') : '';
                     $content = !empty($request->get('content')) ? $request->get('content') : '';
@@ -422,7 +475,7 @@ class MsgPush extends Command
                                 if ($room_id) {                     // 开课 存在roomid 做房间相关处理
                                     // 关闭录制
                                     $record = new RecordServer();
-                                    $record->hander($room_id, 3);
+                                    $record->handle($room_id, 3);
                                     // 结算
                                     $balance = new BalanceServer();
                                     // 10秒以后执行一次结算,定时器只执行一次
@@ -430,10 +483,12 @@ class MsgPush extends Command
                                     self::$senderIo->to($room_id)->emit('over');
                                 }
                             }
+                            self::logs($socket, ['type' => 'classover']);
                             return $httpConnection->send($this->output());
                             break;
                         case 'downtips':
                             self::$senderIo->to($room_id)->emit($type);
+                            self::logs($socket, ['type' => 'downtips']);
                             return $httpConnection->send($this->output());
                             break;
                         case 'userlist':
@@ -450,6 +505,7 @@ class MsgPush extends Command
                     }
                     return $httpConnection->send(json_encode(['error'=>'没有匹配的发送类型']));
                 } catch(\Exception $e) {
+                    self::errors('[workerStart] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -483,8 +539,10 @@ class MsgPush extends Command
         if ($type == 'add') {           // 人员增加
             
             if (Redis::exists($room_id.$hash_id)) {     // 缓存中是否存有该人员数据
+                self::logs($socket, ['type' => 'useradd']);
                 $users[$hash_id] = self::redisGet($room_id.$hash_id);
             } elseif (!array_key_exists($hash_id, $users)) {    // 初始化数据
+                self::logs($socket, ['type' => 'userinit']);
                 $users[$hash_id] = $isteacher ? self::$teainit : self::$stuinit;
             }
             $users[$hash_id]['nickname'] = $nickname;
@@ -492,8 +550,9 @@ class MsgPush extends Command
             $users[$hash_id]['platform'] = $platform;
             $users[$hash_id]['imgurl'] = $imgurl;
         } elseif ($type == 'cut') {     // 人员减少
-
+            
             if (array_key_exists($hash_id, $users)) {
+                self::logs($socket, ['type' => 'userdel']);
                 self::redisSet($room_id.$hash_id, $users[$hash_id]);
                 unset($users[$hash_id]);
             }
@@ -509,14 +568,14 @@ class MsgPush extends Command
     }
     
     // 权限处理
-    public static function permission($room_id, $hash_id, $type, $status)
+    public static function permission($socket, $hash_id, $type, $status)
     {
         // 变量初始值
         $users = [];
         $index = 0;
         // 从Redis读取在线人员信息
-        if (Redis::exists($room_id.'users')) {
-            $arr = self::redisGet($room_id.'users');
+        if (Redis::exists($socket->room_id.'users')) {
+            $arr = self::redisGet($socket->room_id.'users');
             $users = $arr['users'];
             $index = $arr['index'];
         }
@@ -527,20 +586,25 @@ class MsgPush extends Command
             $users[$hash_id][$type] = $status;
         }
         $index++;
-        self::redisSet($room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::logs($socket, [
+            'type' => $type,
+            'hash_id' => $hash_id,
+            'status' => $status
+        ]);
         return [$hash_id => $users[$hash_id]];
     }
 
     // 自动上台处理
-    public static function addplat($room_id, $hash_id, $isteacher, $up_top)
+    public static function addplat($socket, $hash_id, $isteacher, $up_top)
     {
         // 变量初始值
         $users = [];
         $index = 0;
         $stucount = 0;
         // 从Redis读取在线人员信息
-        if (Redis::exists($room_id.'users')) {
-            $arr = self::redisGet($room_id.'users');
+        if (Redis::exists($socket->room_id.'users')) {
+            $arr = self::redisGet($socket->room_id.'users');
             $users = $arr['users'];
             $index = $arr['index'];
         }
@@ -551,37 +615,47 @@ class MsgPush extends Command
                 }
             }
             // 缓存中是否存有该人员数据
-            if (Redis::exists($room_id.$hash_id)) {
-                $temp = self::redisGet($room_id.$hash_id);
+            if (Redis::exists($socket->room_id.$hash_id)) {
+                $temp = self::redisGet($socket->room_id.$hash_id);
                 if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
+                    self::logs($socket, [
+                        'type' => 'exceed',
+                        'hash_id' => $hash_id,
+                        'status' => 0
+                    ]);
                     $users[$hash_id]['plat'] = 0;
                     $users[$hash_id]['camera'] = 0;
                     $users[$hash_id]['board'] = 0;
                     $users[$hash_id]['voice'] = 0;
                 }
             }
-            // 超出上台人数上限
-            if ($stucount < intval($up_top)) {
+            // 未超出上台人数上限
+            if ($users[$hash_id]['plat'] == 0 && $stucount < intval($up_top)) {
+                self::logs($socket, [
+                    'type' => 'plat',
+                    'hash_id' => $hash_id,
+                    'status' => 1
+                ]);
                 $users[$hash_id]['plat'] = 1;
                 $users[$hash_id]['camera'] = 1;
             }
         }
         
         $index++;
-        self::redisSet($room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
         return [$hash_id => $users[$hash_id]];
     }
 
     // 手动上台处理，主要检查保留权限人员再进来时是否超过上台人数上限
-    public static function handplat($room_id, $hash_id, $isteacher, $up_top)
+    public static function handplat($socket, $hash_id, $isteacher, $up_top)
     {
         // 变量初始值
         $users = [];
         $index = 0;
         $stucount = 0;
         // 从Redis读取在线人员信息
-        if (Redis::exists($room_id.'users')) {
-            $arr = self::redisGet($room_id.'users');
+        if (Redis::exists($socket->room_id.'users')) {
+            $arr = self::redisGet($socket->room_id.'users');
             $users = $arr['users'];
             $index = $arr['index'];
         }
@@ -592,9 +666,14 @@ class MsgPush extends Command
                 }
             }
             // 缓存中是否存有该人员数据
-            if (Redis::exists($room_id.$hash_id)) {
-                $temp = self::redisGet($room_id.$hash_id);
+            if (Redis::exists($socket->room_id.$hash_id)) {
+                $temp = self::redisGet($socket->room_id.$hash_id);
                 if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
+                    self::logs($socket, [
+                        'type' => 'exceed',
+                        'hash_id' => $hash_id,
+                        'status' => 0
+                    ]);
                     $users[$hash_id]['plat'] = 0;
                     $users[$hash_id]['camera'] = 0;
                     $users[$hash_id]['board'] = 0;
@@ -604,20 +683,20 @@ class MsgPush extends Command
         }
         
         $index++;
-        self::redisSet($room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
         return [$hash_id => $users[$hash_id]];
     }
     
     // 下台处理
-    public static function cutplat($room_id, $hash_id)
+    public static function cutplat($socket, $hash_id)
     {
         // 变量初始值
         $users = [];
         $index = 0;
         $stucount = 0;
         // 从Redis读取在线人员信息
-        if (Redis::exists($room_id.'users')) {
-            $arr = self::redisGet($room_id.'users');
+        if (Redis::exists($socket->room_id.'users')) {
+            $arr = self::redisGet($socket->room_id.'users');
             $users = $arr['users'];
             $index = $arr['index'];
             if (array_key_exists($hash_id, $users)) {
@@ -628,7 +707,12 @@ class MsgPush extends Command
             }
         }
         $index++;
-        self::redisSet($room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::logs($socket, [
+            'type' => 'plat',
+            'hash_id' => $hash_id,
+            'status' => 0
+        ]);
         return [$hash_id => $users[$hash_id]];
     }
     
@@ -643,11 +727,27 @@ class MsgPush extends Command
         ];
         return json_encode($json);
     }
-    public static function redisSet($key, $arr = [], $time = 9000) {
+
+    public static function logs($socket, $arr)
+    {
+        $res = new LogsServer();
+        $res->handle($socket, $arr);
+    }
+
+    public static function errors($msg)
+    {
+        $res = new LogsServer();
+        $res->errors($msg);
+    }
+
+    public static function redisSet($key, $arr = [], $time = 9000)
+    {
         //var_dump($key);
         Redis::setex($key, $time, serialize($arr));
     }
-    public static function redisGet($key) {
+
+    public static function redisGet($key)
+    {
         return unserialize(Redis::get($key));
     }
 }

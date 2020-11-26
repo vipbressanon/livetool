@@ -14,7 +14,7 @@ class RecordServer
     {
     }
     
-    public function hander($room_id, $status)
+    public function handle($room_id, $status)
     {
         $room = Room::find($room_id);
         $oldstatus = $room->roomrecord;
