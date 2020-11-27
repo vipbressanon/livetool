@@ -131,7 +131,7 @@ class MsgTest extends Command
                     );
                     $socket->emit('servertime', ['time'=>time()]);
                 } catch(\Exception $e) {
-                    self::errors('[login] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[login] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -155,7 +155,7 @@ class MsgTest extends Command
                     }
                     self::logs($socket, ['type' => 'create']);
                 } catch(\Exception $e) {
-                    self::errors('[create] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[create] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -177,7 +177,7 @@ class MsgTest extends Command
                     // }
                     self::logs($socket, ['type' => 'enter']);
                 } catch(\Exception $e) {
-                    self::errors('[enter] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[enter] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -194,7 +194,7 @@ class MsgTest extends Command
                     self::$senderIo->to($socket->room_id)->emit('over');
                     self::logs($socket, ['type' => 'over']);
                 } catch(\Exception $e) {
-                    self::errors('[over] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[over] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -258,7 +258,7 @@ class MsgTest extends Command
                     }
                     self::logs($socket, ['type' => 'disconnect']);
                 } catch(\Exception $e) {
-                    self::errors('[disconnect] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[disconnect] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -284,7 +284,7 @@ class MsgTest extends Command
                         ]
                     );
                 } catch(\Exception $e) {
-                    self::errors('[permission] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[permission] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -325,7 +325,7 @@ class MsgTest extends Command
                         'status' => $request['status']
                     ]);
                 } catch(\Exception $e) {
-                    self::errors('[platbatch] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[platbatch] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -367,7 +367,7 @@ class MsgTest extends Command
                         'status' => $request['status']
                     ]);
                 } catch(\Exception $e) {
-                    self::errors('[onoff] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[onoff] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -412,11 +412,12 @@ class MsgTest extends Command
                     self::logs($socket, [
                         'type' => $request['type'],
                         'hash_id' => isset($request['hash_id']) ? $request['hash_id'] : '',
+                        'nickname' => isset($request['nickname']) ? $request['nickname'] : '',
                         'text' => isset($request['text']) ? $request['text'] : '',
                         'status' => isset($request['status']) ? $request['status'] : ''
                     ]);
                 } catch(\Exception $e) {
-                    self::errors('[im] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[im] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -433,7 +434,7 @@ class MsgTest extends Command
                         'mic' => $request['mic']
                     ]);
                 } catch(\Exception $e) {
-                    self::errors('[device] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[device] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -505,7 +506,7 @@ class MsgTest extends Command
                     }
                     return $httpConnection->send(json_encode(['error'=>'没有匹配的发送类型']));
                 } catch(\Exception $e) {
-                    self::errors('[workerStart] '.$e->getMessage().' line:'.$e->getLine());
+                    self::errors($socket, '[workerStart] '.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
@@ -734,10 +735,10 @@ class MsgTest extends Command
         $res->handle($socket, $arr);
     }
 
-    public static function errors($msg)
+    public static function errors($socket, $msg)
     {
         $res = new LogsServer();
-        $res->errors($msg);
+        $res->errors($socket, $msg);
     }
 
     public static function redisSet($key, $arr = [], $time = 9000)
