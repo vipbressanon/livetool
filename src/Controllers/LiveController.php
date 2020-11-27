@@ -14,6 +14,7 @@ use Vipbressanon\LiveTool\Servers\RecordServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use Vipbressanon\LiveTool\Servers\TranscodeServer;
+use Vipbressanon\LiveTool\Servers\LogsServer;
 use Log;
 use Session;
 
@@ -92,6 +93,9 @@ class LiveController extends Controller
             $title = isset($team->title)?$team->title:'';
             // 获取设备检测信息
             $device = $us->device($users->id, $course['id']);
+            // 获取房间聊天历史记录
+            $logs = new LogsServer();
+            $history = $logs->chathistory($room['id']);
             $view = $isteacher ? $viewtype.'.teacher' : $viewtype.'.student';
             return view($view)
                     ->with('platform', $platform)
@@ -104,7 +108,8 @@ class LiveController extends Controller
                     ->with('islistener', $islistener)
                     ->with('logo_url', $logo_url)
                     ->with('title', $title)
-                    ->with('teacher', $teacher);
+                    ->with('teacher', $teacher)
+                    ->with('history', $history);
         } else {
             abort(404);
         }
