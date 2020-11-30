@@ -484,12 +484,10 @@ class MsgPush extends Command
                                     self::$senderIo->to($room_id)->emit('over');
                                 }
                             }
-                            self::logs($socket, ['type' => 'classover']);
                             return $httpConnection->send($this->output());
                             break;
                         case 'downtips':
                             self::$senderIo->to($room_id)->emit($type);
-                            self::logs($socket, ['type' => 'downtips']);
                             return $httpConnection->send($this->output());
                             break;
                         case 'userlist':
@@ -619,11 +617,6 @@ class MsgPush extends Command
             if (Redis::exists($socket->room_id.$hash_id)) {
                 $temp = self::redisGet($socket->room_id.$hash_id);
                 if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
-                    self::logs($socket, [
-                        'type' => 'exceed',
-                        'hash_id' => $hash_id,
-                        'status' => 0
-                    ]);
                     $users[$hash_id]['plat'] = 0;
                     $users[$hash_id]['camera'] = 0;
                     $users[$hash_id]['board'] = 0;
@@ -632,11 +625,6 @@ class MsgPush extends Command
             }
             // 未超出上台人数上限
             if ($users[$hash_id]['plat'] == 0 && $stucount < intval($up_top)) {
-                self::logs($socket, [
-                    'type' => 'plat',
-                    'hash_id' => $hash_id,
-                    'status' => 1
-                ]);
                 $users[$hash_id]['plat'] = 1;
                 $users[$hash_id]['camera'] = 1;
             }
@@ -644,6 +632,13 @@ class MsgPush extends Command
         
         $index++;
         self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+        if ($users[$hash_id]['plat'] == 1) {
+            self::logs($socket, [
+                'type' => 'plat',
+                'hash_id' => $hash_id,
+                'status' => 1
+            ]);
+        }
         return [$hash_id => $users[$hash_id]];
     }
 
@@ -670,11 +665,6 @@ class MsgPush extends Command
             if (Redis::exists($socket->room_id.$hash_id)) {
                 $temp = self::redisGet($socket->room_id.$hash_id);
                 if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
-                    self::logs($socket, [
-                        'type' => 'exceed',
-                        'hash_id' => $hash_id,
-                        'status' => 0
-                    ]);
                     $users[$hash_id]['plat'] = 0;
                     $users[$hash_id]['camera'] = 0;
                     $users[$hash_id]['board'] = 0;
@@ -685,6 +675,13 @@ class MsgPush extends Command
         
         $index++;
         self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+        if ($users[$hash_id]['plat'] == 0) {
+            self::logs($socket, [
+                'type' => 'plat',
+                'hash_id' => $hash_id,
+                'status' => 0
+            ]);
+        }
         return [$hash_id => $users[$hash_id]];
     }
     
@@ -709,11 +706,13 @@ class MsgPush extends Command
         }
         $index++;
         self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
-        self::logs($socket, [
-            'type' => 'plat',
-            'hash_id' => $hash_id,
-            'status' => 0
-        ]);
+        if ($users[$hash_id]['plat'] == 0) {
+            self::logs($socket, [
+                'type' => 'plat',
+                'hash_id' => $hash_id,
+                'status' => 0
+            ]);
+        }
         return [$hash_id => $users[$hash_id]];
     }
     
