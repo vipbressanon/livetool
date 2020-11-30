@@ -167,7 +167,7 @@ class LogsServer
         } else {
             $this->save($socket->hash_id, $users, $msg);
             // 保存其他人的状态变化
-            if ($socket->hash_id != $arr['hash_id']) {
+            if (isset($arr['hash_id']) && $arr['hash_id'] != '' && $socket->hash_id != $arr['hash_id']) {
                 $this->othersave($socket->room_id, $arr);
             }
         }
@@ -194,55 +194,53 @@ class LogsServer
 
     private function othersave($room_id, $arr)
     {
-        if (isset($arr['hash_id']) && $arr['hash_id'] != '') {
-            $hash_id = $arr['hash_id'];
-            $users = [];
-            if (Redis::exists($room_id.'users')) {
-                $temp = self::redisGet($room_id.'users');
-                $users = isset($temp['users'][$hash_id]) ? $temp['users'][$hash_id] : [];
-            }
-            $msg = '';
-            switch ($arr['type']) {
-                case 'MAX':
-                    if ($arr['text'] == 1) {
-                        $msg = '放大了我的画面';
-                    } else {
-                        $msg = '关闭了放大画面';
-                    }
-                    break;
-                case 'ZAN':
-                    $msg = '奖励了我';
-                    break;
-                case 'board':
-                    if ($arr['status'] == 1) {
-                        $msg = '授权我操作白板';
-                    } else {
-                        $msg = '取消授权我操作白板';
-                    }
-                    break;
-                case 'voice':
-                    if ($arr['status'] == 1) {
-                        $msg = '打开了我的麦克风';
-                    } else {
-                        $msg = '关闭了我的麦克风';
-                    }
-                    break;
-                case 'plat':
-                    if ($arr['status'] == 1) {
-                        $msg = '我上台了';
-                    } else {
-                        $msg = '我下台了';
-                    }
-                    break;
-                case 'KICK':
-                    $msg = '我被踢出了房间';
-                    break;
-                default:
-                    break;
-            }
-            if ($msg) {
-               $this->save($arr['hash_id'], $users, $msg); 
-            }
+        $hash_id = $arr['hash_id'];
+        $users = [];
+        if (Redis::exists($room_id.'users')) {
+            $temp = self::redisGet($room_id.'users');
+            $users = isset($temp['users'][$hash_id]) ? $temp['users'][$hash_id] : [];
+        }
+        $msg = '';
+        switch ($arr['type']) {
+            case 'MAX':
+                if ($arr['text'] == 1) {
+                    $msg = '放大了我的画面';
+                } else {
+                    $msg = '关闭了放大画面';
+                }
+                break;
+            case 'ZAN':
+                $msg = '奖励了我';
+                break;
+            case 'board':
+                if ($arr['status'] == 1) {
+                    $msg = '授权我操作白板';
+                } else {
+                    $msg = '取消授权我操作白板';
+                }
+                break;
+            case 'voice':
+                if ($arr['status'] == 1) {
+                    $msg = '打开了我的麦克风';
+                } else {
+                    $msg = '关闭了我的麦克风';
+                }
+                break;
+            case 'plat':
+                if ($arr['status'] == 1) {
+                    $msg = '我上台了';
+                } else {
+                    $msg = '我下台了';
+                }
+                break;
+            case 'KICK':
+                $msg = '我被踢出了房间';
+                break;
+            default:
+                break;
+        }
+        if ($msg) {
+           $this->save($arr['hash_id'], $users, $msg); 
         }
     }
 
