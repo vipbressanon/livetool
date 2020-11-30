@@ -15,7 +15,7 @@ class LogsServer
     // 房间操作：create(上课), enter(进入), over(下课)
     // 房间参数：roominit(参数初始化), roomtype(模式切换), ischat(聊天), ishand(举手) , MAX(放大), boardscale(白板缩放), 
     // 权限参数：PLATZAN(台上批量点赞), ZAN(点赞), platboard(台上批量白板), platvoice(台上批量麦克风), board(白板), voice(麦克风), plat(上台)
-    // 其他操作：HAND(举手), KICK(被踢), ROTATE(画面翻转), FILE(), TEXT(文本消息)
+    // 其他操作：HAND(举手), KICK(被踢), ROTATE(画面翻转), FILE(), TEXT(文本消息), switch(切换设备)
     public function handle($socket, $arr)
     {
         $room = [];
@@ -131,9 +131,9 @@ class LogsServer
             case 'plat':
                 if ($socket->hash_id == $arr['hash_id']) {
                     if ($arr['status'] == 1) {
-                        $msg = '自己上台了';
+                        $msg = '我上台了';
                     } else {
-                        $msg = '自己下台了';
+                        $msg = '我下台了';
                     }
                 } else {
                     if ($arr['status'] == 1) {
@@ -152,6 +152,9 @@ class LogsServer
             case 'FILE':
                 $msg = '切换了白板tab页';
                 break;
+            case 'switch':
+                $msg = '切换了设备：'.$arr['camera'].'，'.$arr['mic'];
+                break;
             case 'TEXT':
                 $msg = $arr['nickname'].'：'.$arr['text'];
                 break;
@@ -163,6 +166,10 @@ class LogsServer
             $this->chat($socket->room_id, $msg);
         } else {
             $this->save($socket->hash_id, $users, $msg);
+            // 保存其他人的状态变化
+            if ($socket->hash_id != $arr['hash_id']) {
+                $this->othersave($socket->room_id, $arr);
+            }
         }
     }
 
@@ -183,6 +190,60 @@ class LogsServer
         }
         $res[] = ['msg' => $msg, 'users' => $arr, 'time' => $now];
         self::redisSet($hash_id.'roomusers', $res);
+    }
+
+    private function othersave($room_id, $arr)
+    {
+        if (isset($arr['hash_id']) && $arr['hash_id'] != '') {
+            $hash_id = $arr['hash_id'];
+            $users = [];
+            if (Redis::exists($room_id.'users')) {
+                $temp = self::redisGet($room_id.'users');
+                $users = isset($temp['users'][$hash_id]) ? $temp['users'][$hash_id] : [];
+            }
+            $msg = '';
+            switch ($arr['type']) {
+                case 'MAX':
+                    if ($arr['text'] == 1) {
+                        $msg = '放大了我的画面';
+                    } else {
+                        $msg = '关闭了放大画面';
+                    }
+                    break;
+                case 'ZAN':
+                    $msg = '奖励了我';
+                    break;
+                case 'board':
+                    if ($arr['status'] == 1) {
+                        $msg = '授权我操作白板';
+                    } else {
+                        $msg = '取消授权我操作白板';
+                    }
+                    break;
+                case 'voice':
+                    if ($arr['status'] == 1) {
+                        $msg = '打开了我的麦克风';
+                    } else {
+                        $msg = '关闭了我的麦克风';
+                    }
+                    break;
+                case 'plat':
+                    if ($arr['status'] == 1) {
+                        $msg = '我上台了';
+                    } else {
+                        $msg = '我下台了';
+                    }
+                    break;
+                case 'KICK':
+                    $msg = '我被踢出了房间';
+                    break;
+                default:
+                    break;
+            }
+            if ($msg) {
+               $this->save($arr['hash_id'], $users, $msg); 
+            }
+        }
     }
 
     private function chat($room_id, $msg)
