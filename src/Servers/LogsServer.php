@@ -150,7 +150,11 @@ class LogsServer
                 $msg = '将'.$arr['hash_id'].'踢出了房间';
                 break;
             case 'FILE':
-                $msg = '切换了白板tab页';
+                if ($arr['status'] == 1) {
+                    $msg = '打开了白板文件';
+                } else {
+                    $msg = '关闭了白板文件';
+                }
                 break;
             case 'switch':
                 $msg = '切换了设备：'.$arr['camera'].'，'.$arr['mic'];
