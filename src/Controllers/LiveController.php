@@ -295,7 +295,7 @@ class LiveController extends Controller
         $room_id = $request->input('room_id');
         $status = $request->input('status');
         $rs = new RecordServer();
-        $res = $rs->hander($room_id, $status);
+        $res = $rs->handle($room_id, $status);
         if($res->meta->code == 200){
           return response()->json(['error'=>'']);  
         }
