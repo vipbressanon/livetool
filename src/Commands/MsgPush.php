@@ -75,8 +75,6 @@ class MsgPush extends Command
                     }
                     // 已经登录过了
                     if (isset($socket->hash_id)) return;
-                    // socket日志
-                    self::logs($socket, ['type' => 'connection']);
                     // 用户数据
                     $socket->join($request['room_id']);
                     $socket->room_id = $request['room_id'];
@@ -88,6 +86,8 @@ class MsgPush extends Command
                     $socket->imgurl = isset($request['imgurl']) ? $request['imgurl'] : '';
                     $socket->islistener = (isset($request['islistener']) && $request['islistener']) ? $request['islistener'] : false;
                     $socket->isplat = isset($request['isplat'])?$request['isplat']:1;
+                    // socket日志
+                    self::logs($socket, ['type' => 'connection']);
                     if (!$socket->islistener) {
                         // 在线人员处理
                         self::userlist($socket, 'add');

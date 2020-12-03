@@ -169,7 +169,7 @@ class LogsServer
         if ($arr['type'] == 'TEXT') {
             $this->chat($socket->room_id, $msg);
         } else {
-            $this->save($socket->hash_id, $users, $msg);
+            $this->save($socket->room_id, $socket->hash_id, $users, $msg);
             // 保存其他人的状态变化
             if (isset($arr['hash_id']) && $arr['hash_id'] != '' && $socket->hash_id != $arr['hash_id']) {
                 $this->othersave($socket->room_id, $arr);
@@ -177,11 +177,11 @@ class LogsServer
         }
     }
 
-    private function save($hash_id, $users, $msg)
+    private function save($room_id, $hash_id, $users, $msg)
     {
         $now = date('Y-m-d H:i:s');
-        if (Redis::exists($hash_id.'roomusers')) {
-            $res = self::redisGet($hash_id.'roomusers');
+        if (Redis::exists($room_id.'users'.$hash_id)) {
+            $res = self::redisGet($room_id.'users'.$hash_id);
         }
         $arr = [];
         if (count($users) > 0) {
@@ -193,7 +193,7 @@ class LogsServer
             $arr['zan'] = isset($users['zan']) ? $users['zan'] : '';
         }
         $res[] = ['msg' => $msg, 'users' => $arr, 'time' => $now];
-        self::redisSet($hash_id.'roomusers', $res);
+        self::redisSet($room_id.'users'.$hash_id, $res);
     }
 
     private function othersave($room_id, $arr)
@@ -244,7 +244,7 @@ class LogsServer
                 break;
         }
         if ($msg) {
-           $this->save($arr['hash_id'], $users, $msg); 
+           $this->save($room_id, $arr['hash_id'], $users, $msg); 
         }
     }
 
