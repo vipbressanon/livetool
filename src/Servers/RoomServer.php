@@ -68,6 +68,19 @@ class RoomServer
         $api->roomstart($room_id, $now);
         return $now;
     }
+
+    public function status($course_id)
+    {
+        $now = date('Y-m-d H:i:s');
+        $course = config('livetool.course');
+        $res = DB::table($course['table'])
+            ->select($course['field']['status'].' as status')
+            ->where($course['field']['id'], $course_id)
+            ->first();
+        if ($res) {
+            return $res ? $res->status : 0;
+        }
+    }
     
     public function end($course_id, $room_id)
     {
