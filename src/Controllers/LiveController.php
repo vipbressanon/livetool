@@ -154,6 +154,15 @@ class LiveController extends Controller
         $starttime = $rs->start($course_id, $room_id);
         return response()->json(['error'=>'', 'starttime' => $starttime]);
     }
+
+    // 课程状态：0未上课，1已上课，2下课
+    public function postRoomStatus(Request $request)
+    {
+        $course_id = $request->input('course_id');
+        $rs = new RoomServer();
+        $status = $rs->status($course_id);
+        return response()->json(['error'=>'', 'status' => $status]);
+    }
     
     // 下课
     public function postRoomEnd(Request $request)

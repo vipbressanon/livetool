@@ -5,6 +5,7 @@ Route::group(["middleware" => 'web'], function () {
     Route::get("/livetool/room/{hash_id?}", "Vipbressanon\LiveTool\Controllers\LiveController@getRoom");
     Route::post("/livetool/errors", "Vipbressanon\LiveTool\Controllers\LiveController@postErrors");
     Route::post("/livetool/room/start", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomStart");
+    Route::post("/livetool/room/status", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomStatus");
     Route::post("/livetool/room/end", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomEnd");
     Route::post("/livetool/room/chat", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomChat");
     Route::post("/livetool/room/speak", "Vipbressanon\LiveTool\Controllers\LiveController@postRoomSpeak");
