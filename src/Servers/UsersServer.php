@@ -253,6 +253,7 @@ class UsersServer
                 )
                 ->where($users_from['table'].'.'.$users_from['field']['team_id'], $team_id)
                 ->where($users_from['table'].'.'.$users_from['field']['users_id'], $teacher_id)
+                ->whereNull($users_from['table'].'.'.$users_from['field']['deleted_at'])
                 ->first();
         return [
             'id' => $res ? $res->id : '',
@@ -269,6 +270,7 @@ class UsersServer
                 ->select($users_from['field']['type'])
                 ->where($users_from['field']['team_id'], $team_id)
                 ->where($users_from['field']['users_id'], $users_id)
+                ->whereNull($users_from['field']['deleted_at'])
                 ->first();
         $islistener = ($res && in_array($res->type, [0, 1, 4, 5, 6, 7, 8])) ? true : false;
         return $islistener;
@@ -282,6 +284,7 @@ class UsersServer
                 ->select($users_from['field']['type'])
                 ->where($users_from['field']['team_id'], $team_id)
                 ->where($users_from['field']['users_id'], $users_id)
+                ->whereNull($users_from['field']['deleted_at'])
                 ->first();
         $isadmin = ($res && in_array($res->type, [0, 1, 4, 5, 6, 7, 8])) ? true : false;
         return $isadmin;

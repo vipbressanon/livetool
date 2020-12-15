@@ -159,11 +159,14 @@ class CourseServer
             return false;
         }
         //hash 转id
-        $users_id = RoomSig::where('hash_id', $users_hash_id)->pluck('users_id');
+        $roomsig = RoomSig::where('hash_id', $users_hash_id)->select('users_id')->first();
+        if (!$roomsig) {
+            return false;
+        }
         $course_users_table = config('livetool.course_users');
         $course_users = DB::table($course_users_table['table'])->where([
                 $course_users_table['field']['course_id'] =>$room->course_id,
-                $course_users_table['field']['users_id']  => $users_id
+                $course_users_table['field']['users_id']  => $roomsig->users_id
             ])->first();
         if ($course_users) {
             $board_table = config('livetool.course_users_board');
