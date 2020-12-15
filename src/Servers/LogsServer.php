@@ -180,6 +180,7 @@ class LogsServer
     private function save($room_id, $hash_id, $users, $msg)
     {
         $now = date('Y-m-d H:i:s');
+        $res = [];
         if (Redis::exists($room_id.'users'.$hash_id)) {
             $res = self::redisGet($room_id.'users'.$hash_id);
         }
