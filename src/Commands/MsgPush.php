@@ -586,6 +586,10 @@ class MsgPush extends Command
         }
         $index++;
         self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+        // 持久化保留用户状态
+        if (array_key_exists($hash_id, $users)) {
+            self::redisSet($socket->room_id.$hash_id, $users[$hash_id]);
+        }
         self::logs($socket, [
             'type' => $type,
             'hash_id' => $hash_id,
