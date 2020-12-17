@@ -14,8 +14,8 @@ class LogsServer
     // 用户参数：useradd(获取保留参数), userinit(参数初始化), userdel(参数清除)
     // 房间操作：create(上课), enter(进入), over(下课)
     // 房间参数：roominit(参数初始化), roomtype(模式切换), ischat(聊天), ishand(举手) , MAX(放大), boardscale(白板缩放), 
-    // 权限参数：PLATZAN(台上批量点赞), ZAN(点赞), platboard(台上批量白板), platvoice(台上批量麦克风), board(白板), voice(麦克风), plat(上台)
-    // 其他操作：HAND(举手), KICK(被踢), ROTATE(画面翻转), FILE(), TEXT(文本消息), switch(切换设备)
+    // 权限参数：PLATZAN(台上批量点赞), ZAN(点赞), platboard(台上批量白板), platvoice(台上批量麦克风), board(白板), voice(麦克风), camera(摄像头), plat(上台)
+    // 其他操作：HAND(举手), KICK(被踢), ROTATE(画面翻转), FILE(切换文件), TEXT(文本消息), switch(切换设备)
     public function handle($socket, $arr)
     {
         $room = [];
@@ -121,6 +121,13 @@ class LogsServer
                     $msg = '取消授权'.$arr['hash_id'].'操作白板';
                 }
                 break;
+            case 'camera':
+                if ($arr['status'] == 1) {
+                    $msg = '打开'.$arr['hash_id'].'摄像头';
+                } else {
+                    $msg = '关闭'.$arr['hash_id'].'摄像头';
+                }
+                break;    
             case 'voice':
                 if ($arr['status'] == 1) {
                     $msg = '打开'.$arr['hash_id'].'麦克风';
