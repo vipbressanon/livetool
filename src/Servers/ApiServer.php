@@ -10,7 +10,24 @@ class ApiServer
 {
     
     private $api;
-
+    const TRANSCODE_ERROR = [
+        "AuthFailure" => "CAM签名/鉴权错误,请联系客服人员",
+        "FailedOperation.FileDownloadFail" => "文档下载失败，请检查请求参数中URL是否正确",
+        "FailedOperation.FileFormatError" => "文档格式错误，不支持转换只读文档或者已加密的文档",
+        "FailedOperation.FileOpenFail" => "文档打开失败，请检查提交转码的文档是否加密或有其他格式问题",
+        "FailedOperation.FileUploadFail" => "转码后上传结果失败，请稍候重试",
+        "FailedOperation.Transcode" => "转码失败，具体请参考错误描述或联系客服人员",
+        "FailedOperation.TranscodeServerError" => "转码服务出现内部错误，请稍候重试或联系客户人员",
+        "InvalidParameter.BodyParameterTypeUnmatched" => "参数类型不匹配",
+        "InvalidParameter.FileFormatUnsupported" => "文档后缀名对应的格式不支持",
+        "InvalidParameter.TaskNotFound" => "需要查询的任务不存在",
+        "InvalidParameter.TranscodeParameter" => "文档转码参数格式不正确",
+        "InvalidParameter.UrlFormatError" => "文档下载格式错误",
+        "LimitExceeded.TranscodePagesLimitation" => "超过文档最大页数限制，目前不支持超过500页的文件转码",
+        "ResourceUnavailable.NotRegistered" => "未开通互动白板",
+        "ResourceUnavailable.ServiceExpired" => "账户欠费或者互动白板服务已过期",
+        "UnauthorizedOperation.SdkAppId" => "SdkAppId不存在或者SdkAppId与当前腾讯云账号不对应"
+    ];
     public function __construct()
     {
         $this->api = config('livetool.api');
@@ -249,13 +266,23 @@ class ApiServer
             'POST'
         );
         if (isset($res) && $res->meta->code == 200) {
+            if ($res->data->status == 'ERROR') {
+                $res->data->fail_msg = array_key_exists($res->data->fail_code, self::TRANSCODE_ERROR) ? self::TRANSCODE_ERROR[$res->data->fail_code] : '文件转码失败，请稍后重试（1）';
+                if ($res->data->fail_code == 'FailedOperation.Transcode') {
+                    if (strstr($res->data->fail_msg, '-14,')) {
+                        $b = mb_strpos($res->data->fail_msg, 'page [') + mb_strlen('page [');
+                        $e = mb_strpos($res->data->fail_msg, ']') - $b;
+                        $num = mb_substr($res->data->fail_msg, $b, $e);
+                        $res->data->fail_msg.='：第'.$num.'页包含不支持的元素或动效，转码失败';
+                    }
+                }
+            }
             $data = $res->data;
         } else {
             Log::error($this->api['url'].'/api/transcode/getdescribe: ', [$res]);
         }
         return $data;
     }
-
     private function accesstoken()
     {
         if (!Cache::has('accesstoken')) {

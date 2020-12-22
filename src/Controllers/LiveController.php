@@ -336,10 +336,10 @@ class LiveController extends Controller
         $is_static = $request->input('is_static', false);
         $api = new ApiServer();
         $data = $api->setDescribe($file_id, $fileurl, $file_name, $is_static);
-        if ($data && $data->meta->code != 201) {
-          return response()->json(['error'=>'', 'code' => $data->meta->code, 'data' => $data->data]);  
+        if ($data && $data->meta->code) {
+          return response()->json(['error' => ($data->meta->code == 200 || $data->meta->code == 300) ? '' : '转码失败', 'code' => $data->meta->code, 'data' => $data->data]);  
         }
-        return response()->json(['error'=>'转码失败，请稍后再试']);
+        return response()->json(['error'=>'转码失败，请稍后再试', 'data' => '转码失败，请稍后再试']);
     }
 
     // 文件转码结果查询
