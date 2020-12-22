@@ -136,6 +136,25 @@ class MsgPush extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             });
+
+            // 主动获取房间内用户列表
+            $socket->on('userslist', function () use ($socket) {
+                try {
+                    $users = self::redisGet($socket->room_id.'users');
+                    $onoff = self::redisGet($socket->room_id.'onoff');
+                    $socket->emit('userslist', [
+                        'users' => $users['users'],
+                        'index' => $users['index'],
+                        'onoff' => $onoff['onoff'],
+                        'socketid' => $socket->id,
+                        'hashid' => $socket->hash_id
+                    ]);
+                } catch(\Exception $e) {
+                    self::errors($socket, '[userslist] '.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
+                }
+            });
             
             // 讲师创建房间后邀请所有人进入
             $socket->on('create', function () use ($socket) {
