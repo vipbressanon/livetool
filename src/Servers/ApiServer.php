@@ -266,7 +266,7 @@ class ApiServer
             'POST'
         );
         if (isset($res) && $res->meta->code == 200) {
-            if ($res->data->status == 'ERROR') {
+            if ($res->data && $res->data->status == 'ERROR') {
                 $res->data->fail_msg = array_key_exists($res->data->fail_code, self::TRANSCODE_ERROR) ? self::TRANSCODE_ERROR[$res->data->fail_code] : '文件转码失败，请稍后重试（1）';
                 if ($res->data->fail_code == 'FailedOperation.Transcode') {
                     if (strstr($res->data->fail_msg, '-14,')) {
