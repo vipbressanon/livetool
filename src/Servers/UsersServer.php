@@ -30,7 +30,7 @@ class UsersServer
             $res->overtime = null;
             $res->save();
         }
-        if ($res->usersig == '' || $res->overtime < $now) {
+        if ($res->usersig == '' || $res->screensig == '' || $res->overtime < $now) {
             $api = new ApiServer();
             $sig = $api->userssig($users->id);
             $res->sdkappid = $sig ? $sig->sdkappid : '';
