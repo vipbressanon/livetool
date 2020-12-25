@@ -33,7 +33,7 @@ class LiveController extends Controller
         $course = $cs->detail($hash_id);
         if ($course) {
             $tel = $request->input('tel', '');
-            if (!$users && $tel != '') {
+            if ($tel != '') {
                 $this->autologin($course['id'], $course['team_id'], $tel);
                 $users = Auth::guard($auth)->user();
             }
@@ -325,9 +325,6 @@ class LiveController extends Controller
         return view('livetool::browser');
     }
 
-    public function getSpeedTest() {
-        return view('livetool::speedtest');
-    }
     // 文件转码开始
     public function setDescribe(Request $request)
     {
@@ -400,13 +397,16 @@ class LiveController extends Controller
     // 传入手机号，并且是白名单课程，允许直接登录进入直播间
     private function autologin($course_id, $team_id, $tel)
     {
+        $auth = config('livetool.auth');
+        $team = config('livetool.auth_team');
         $us = new UsersServer();
         $users_id = $us->autologin($course_id, $tel);
         if ($users_id) {
-            $auth = config('livetool.auth');
-            $team = config('livetool.auth_team');
             Auth::guard($auth)->loginUsingId($users_id);
             Auth::guard($team)->loginUsingId($team_id);
+        } else {
+            Auth::guard($auth)->logout();
+            Auth::guard($team)->logout();
         }
     }
 
