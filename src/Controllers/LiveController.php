@@ -27,7 +27,8 @@ class LiveController extends Controller
         $from = $request->input('frompage', '');
         $auth = config('livetool.auth');
         $users = Auth::guard($auth)->user();
-        
+        $team = Auth::guard(config('livetool.auth_team'))->user();
+
         $cs = new CourseServer();
         $course = $cs->detail($hash_id);
         if ($course) {
@@ -36,7 +37,7 @@ class LiveController extends Controller
                 $this->autologin($course['id'], $course['team_id'], $tel);
                 $users = Auth::guard($auth)->user();
             }
-            if (!$users) {
+            if (!$users || !$team) {
                 // 当前未登录跳转登录页面
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);

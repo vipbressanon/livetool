@@ -267,14 +267,16 @@ class ApiServer
         );
         if (isset($res) && $res->meta->code == 200) {
             if ($res->data && $res->data->status == 'ERROR') {
-                $res->data->fail_msg = array_key_exists($res->data->fail_code, self::TRANSCODE_ERROR) ? self::TRANSCODE_ERROR[$res->data->fail_code] : '文件转码失败，请稍后重试（1）';
-                if ($res->data->fail_code == 'FailedOperation.Transcode') {
-                    if (strstr($res->data->fail_msg, '-14,')) {
-                        $b = mb_strpos($res->data->fail_msg, 'page [') + mb_strlen('page [');
-                        $e = mb_strpos($res->data->fail_msg, ']') - $b;
-                        $num = mb_substr($res->data->fail_msg, $b, $e);
-                        $res->data->fail_msg.='：第'.$num.'页包含不支持的元素或动效，转码失败';
-                    }
+                $prestr = array_key_exists($res->data->fail_code, self::TRANSCODE_ERROR) ? self::TRANSCODE_ERROR[$res->data->fail_code] : '文件转码失败，请稍后重试（1）';
+                if (strstr($res->data->fail_msg, '-14,')) {
+                    $b = mb_strpos($res->data->fail_msg, 'page [') + mb_strlen('page [');
+                    $e = mb_strpos($res->data->fail_msg, ']') - $b;
+                    $num = mb_substr($res->data->fail_msg, $b, $e);
+                    $res->data->fail_msg = $prestr.'：第'.$num.'页包含不支持的元素或动效，转码失败';
+                } else if (strstr($res->data->fail_msg, '-6,')) {
+                    $res->data->fail_msg = '文件已损坏无法打开，请检查文件';
+                } else {
+                    $res->data->fail_msg = $prestr;
                 }
             }
             $data = $res->data;
