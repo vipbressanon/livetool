@@ -31,9 +31,10 @@ class MsgTest extends Command
     // 是否老师（1,0），上下台（1,0），白板授权（1,0），开麦闭麦（1,0），摄像头（1,0），来源（0-6）
     // 来源:0是pc端，1是h5手机端，2是h5平板端 3是android 4是android平板 5是ios 6是ios的平板
     private static $teainit = ['isteacher'=>1, 'plat'=>1, 'board'=>1, 'voice'=>1, 'camera'=>1, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
-    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
-    // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；
-    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100];
+    // issharing:
+    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => '', 'issharing' => 0];
+    // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；share, 老师获取学生分享屏幕hash_id
+    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100, 'share' => ''];
     public function __construct()
     {
         parent::__construct();
@@ -426,8 +427,26 @@ class MsgTest extends Command
                             }
                             self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
                         }
+                    } else if ($request['type'] == 'SHARE') {
+                        $arr = self::redisGet($socket->room_id . 'onoff');
+                        $arr['onoff']['share'] = $request['text'] == 1 ? $request['hash_id'] . 'screen' : '';
+                        self::redisSet($socket->room_id . 'onoff', ['onoff' => $arr['onoff'], 'index' => $arr['index']]);
+                        $request['share'] = $arr['onoff']['share'];
+
+                        $users = self::redisGet($socket->room_id . 'users');
+                        $request['users'] = $users['users'];
                     }
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
+                    // 如果学生已经同意过就不再显示确认同意页面 直接分享视频
+                    if ($request['type'] == 'SHARE' && $arr['onoff']['share'] && $users['users'][$request['hash_id']]['issharing'] == 1) {
+                        self::$senderIo->to($socket->room_id)->emit(
+                            'permission',
+                            [
+                                'type' => 'issharing',
+                                'users' => $users['users'],
+                            ]
+                        );
+                    }
                     self::logs($socket, [
                         'type' => $request['type'],
                         'hash_id' => isset($request['hash_id']) ? $request['hash_id'] : '',
