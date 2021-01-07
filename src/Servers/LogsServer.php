@@ -169,6 +169,12 @@ class LogsServer
             case 'TEXT':
                 $msg = $arr['nickname'].'：'.$arr['text'];
                 break;
+            case 'speed1':
+                $msg = '开始检测'.$arr['hash_id'].'的网速';
+                break;
+            case 'speed2':
+                $msg = '将检测的网速结果返回';
+                break;
             default:
                 $msg = implode(',', $arr);
                 break;
