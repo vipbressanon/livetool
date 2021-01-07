@@ -15,6 +15,7 @@ use Vipbressanon\LiveTool\Servers\BalanceServer;
 use Vipbressanon\LiveTool\Servers\ApiServer;
 use Vipbressanon\LiveTool\Servers\TranscodeServer;
 use Vipbressanon\LiveTool\Servers\LogsServer;
+use Vipbressanon\LiveTool\Servers\SpeedServer;
 use Log;
 use Session;
 
@@ -26,8 +27,9 @@ class LiveController extends Controller
     {
         $from = $request->input('frompage', '');
         $auth = config('livetool.auth');
+        $auth_team = config('livetool.auth_team');
         $users = Auth::guard($auth)->user();
-        $team = Auth::guard(config('livetool.auth_team'))->user();
+        $team = Auth::guard($auth_team)->user();
 
         $cs = new CourseServer();
         $course = $cs->detail($hash_id);
@@ -36,8 +38,9 @@ class LiveController extends Controller
             if ($tel != '') {
                 $this->autologin($course['id'], $course['team_id'], $tel);
                 $users = Auth::guard($auth)->user();
+                $team = Auth::guard($auth_team)->user();
             }
-            if (!$users || !$team) {
+            if (!$users) {
                 // 当前未登录跳转登录页面
                 $url = config('livetool.loginurl');
                 return redirect($url.'/'.$hash_id);
@@ -242,15 +245,26 @@ class LiveController extends Controller
     {
         $type = $request->input('type', 1);
         $tea = $request->input('tea', 0);
+        $room_id = $request->input('room_id', 0);
+        $hash_id = $request->input('hash_id', '');
         // $stream = $request->input('stream', []);
         $push_microphoneId = $request->input('push_microphoneId', "default");
+        if ($type == 1) {
+            $ss = new SpeedServer();
+            $speed = $ss->detail($room_id, $hash_id);
+        } else {
+            $speed = null;
+        }
         // $stream = utf8_encode($stream);
         // $stream = $this->str_change($stream);
         return view('livetool::check')
+                ->with('speed', $speed)
                 ->with('type', $type)
                 // ->with('stream', $stream)
                 ->with('push_microphoneId', $push_microphoneId)
-                ->with('tea', $tea);
+                ->with('tea', $tea)
+                ->with('room_id', $room_id)
+                ->with('hash_id', $hash_id);
     }
 
     // 重新签名
@@ -389,9 +403,17 @@ class LiveController extends Controller
     // session刷新
     public function getRefresh(Request $request)
     {
-    $auth = config('livetool.auth');
-    return view('livetool::refresh')
-        ->with('auth', $auth);
+        $auth = config('livetool.auth');
+        return view('livetool::refresh')
+            ->with('auth', $auth);
+    }
+
+    // 保存网络测速数据
+    public function postSpeed(Request $request)
+    {
+        $ss = new SpeedServer();
+        $res = $ss->save($request->all());
+        return response()->json(['error'=>'']);
     }
 
     // 传入手机号，并且是白名单课程，允许直接登录进入直播间

@@ -458,6 +458,49 @@ class MsgPush extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             });
+
+            $socket->on('speedtest', function ($request) use ($socket)  {
+                try {
+                    $data = null;
+                    if ($request['type'] == 'speed1') {
+                        // 通知被测人员
+                        self::$senderIo->to($socket->room_id)->emit(
+                            'speedtest',
+                            [
+                                'type' => $request['type'],
+                                'hash_id' => $request['hash_id']
+                            ]
+                        );
+                    } elseif ($request['type'] == 'speed2') {
+                        // 被测人员回传结果，并返回给老师
+                        $data = $request['data'];
+                        self::$senderIo->to($socket->room_id)->emit(
+                            'speedtest',
+                            [
+                                'type' => $request['type'],
+                                'hash_id' => $request['hash_id'],
+                                'data' => $data
+                            ]
+                        );
+                        $option = [
+                            'room_id' => $socket->room_id,
+                            'hash_id' => $request['hash_id'],
+                            'speeddata' => $data
+                        ];
+                        $ss = new SpeedServer();
+                        $ss->save($option);
+                    }
+                    self::logs($socket, [
+                        'type' => $request['type'],
+                        'hash_id' => $request['hash_id'],
+                        'data' => $data
+                    ]);
+                } catch(\Exception $e) {
+                    self::errors($socket, '[speedtest] '.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
+                }
+            });
         });
         // self::$senderIo->onBufferFull = function($socket)
         // {
