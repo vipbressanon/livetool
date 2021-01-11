@@ -433,6 +433,7 @@ class MsgTest extends Command
                         $arr['onoff']['share'] = $request['text'] == 1 ? $request['hash_id'] . 'screen' : '';
                         self::redisSet($socket->room_id . 'onoff', ['onoff' => $arr['onoff'], 'index' => $arr['index']]);
                         $users = self::redisGet($socket->room_id . 'users');
+                        $request['issharing'] = $users['users'][$request['hash_id']]['issharing'];
                         /*$request['share'] = $arr['onoff']['share'];
 
                         $users = self::redisGet($socket->room_id . 'users');
