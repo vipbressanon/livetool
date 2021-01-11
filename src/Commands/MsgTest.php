@@ -444,7 +444,7 @@ class MsgTest extends Command
                             'permission',
                             [
                                 'type' => 'issharing',
-                                'users' => $users['users'],
+                                'users' => $users['users'][$request['hash_id']],
                             ]
                         );
                     }
