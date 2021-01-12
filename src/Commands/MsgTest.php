@@ -264,6 +264,10 @@ class MsgTest extends Command
                             'status' => 2
                         ]);
                     }
+                    if ($socket->hash_id.'screen' == $arr['onoff']['share']) {
+                        $arr['onoff']['share'] = '';
+                        self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                    }
                     self::userlist($socket, 'cut');
                     if (Redis::exists($socket->room_id.'users')) {
                         $users = self::redisGet($socket->room_id.'users');
