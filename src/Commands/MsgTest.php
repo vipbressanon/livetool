@@ -264,6 +264,10 @@ class MsgTest extends Command
                             'status' => 2
                         ]);
                     }
+                    if ($socket->hash_id.'screen' == $arr['onoff']['share']) {
+                        $arr['onoff']['share'] = '';
+                        self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                    }
                     self::userlist($socket, 'cut');
                     if (Redis::exists($socket->room_id.'users')) {
                         $users = self::redisGet($socket->room_id.'users');
@@ -432,10 +436,12 @@ class MsgTest extends Command
                         $arr = self::redisGet($socket->room_id . 'onoff');
                         $arr['onoff']['share'] = $request['text'] == 1 ? $request['hash_id'] . 'screen' : '';
                         self::redisSet($socket->room_id . 'onoff', ['onoff' => $arr['onoff'], 'index' => $arr['index']]);
-                        $request['share'] = $arr['onoff']['share'];
+                        $users = self::redisGet($socket->room_id . 'users');
+                        $request['issharing'] = $users['users'][$request['hash_id']]['issharing'];
+                        /*$request['share'] = $arr['onoff']['share'];
 
                         $users = self::redisGet($socket->room_id . 'users');
-                        $request['users'] = $users['users'];
+                        $request['users'] = $users['users'];*/
                     }
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
                     // 如果学生已经同意过就不再显示确认同意页面 直接分享视频
@@ -444,7 +450,7 @@ class MsgTest extends Command
                             'permission',
                             [
                                 'type' => 'issharing',
-                                'users' => $users['users'],
+                                'users' => [$request['hash_id'] => $users['users'][$request['hash_id']]],
                             ]
                         );
                     }
