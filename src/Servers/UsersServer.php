@@ -47,7 +47,7 @@ class UsersServer
                 ->where($users_form['field']['users_id'], $users->id)
                 ->first();
         $zan = $users_form ? $users_form->zan : 0;
-        $nickname = $users_form ? $users_form->nickname : '';
+        
         $online_num = 0;
         if (!$isteacher) {
             $userslist = unserialize(Redis::get($room_id.'users'));
@@ -59,7 +59,7 @@ class UsersServer
         }
         return [
             'id' => $users->id,
-            'nickname' => $nickname,
+            'nickname' => $users->nickname,
             'imgurl' => $users->imgurl,
             'zan' => $zan,
             'sdkappid' => $res->sdkappid,
