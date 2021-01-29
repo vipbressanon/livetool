@@ -167,7 +167,7 @@ class LogsServer
                 $msg = '切换了设备：'.$arr['camera'].'，'.$arr['mic'];
                 break;
             case 'TEXT':
-                $msg = $arr['nickname'].'：'.$arr['text'];
+                $this->chat($socket->room_id, $arr);
                 break;
             case 'speed1':
                 $msg = '开始检测'.$arr['hash_id'].'的网速';
@@ -179,9 +179,7 @@ class LogsServer
                 $msg = implode(',', $arr);
                 break;
         }
-        if ($arr['type'] == 'TEXT') {
-            $this->chat($socket->room_id, $msg);
-        } else {
+        if ($arr['type'] != 'TEXT') {
             $this->save($socket->room_id, $socket->hash_id, $users, $msg);
             // 保存其他人的状态变化
             if (isset($arr['hash_id']) && $arr['hash_id'] != '' && $socket->hash_id != $arr['hash_id']) {
@@ -262,13 +260,18 @@ class LogsServer
         }
     }
 
-    private function chat($room_id, $msg)
+    private function chat($room_id, $arr)
     {
         $now = date('Y-m-d H:i:s');
         if (Redis::exists($room_id.'roomchat')) {
             $chat = self::redisGet($room_id.'roomchat');
         }
-        $chat[] = ['msg' => $msg, 'time' => $now];
+        $chat[] = [
+            'hash_id' => $arr['hash_id'],
+            'nickname' => $arr['nickname'],
+            'text' => $arr['text'],
+            'time' => $now
+        ];
         self::redisSet($room_id.'roomchat', $chat);
     }
 
