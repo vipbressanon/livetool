@@ -613,7 +613,9 @@ class MsgTest extends Command
         $platform = $socket->platform;
         $zan = $socket->zan;
         $nickname = $socket->nickname;
-        $imgurl = $socket->imgurl;
+        // 截取图片公共域名 只保存真实图片路径 减小返回数据大小
+        $imgarr = explode(".com/", $socket->imgurl);
+        $imgurl = count($imgarr) > 1 ? $imgarr[1]: 'face.png';
         // 变量初始值
         $users = [];
         $index = 0;
