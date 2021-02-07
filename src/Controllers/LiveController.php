@@ -159,6 +159,16 @@ class LiveController extends Controller
         return response()->json(['error'=>'', 'starttime' => $starttime]);
     }
 
+    // 开课失败，重置状态
+    public function postRoomError(Request $request)
+    {
+        $course_id = $request->input('course_id');
+        $room_id = $request->input('room_id');
+        $rs = new RoomServer();
+        $rs->error($course_id, $room_id);
+        return response()->json(['error'=>'']);
+    }
+
     // 课程状态：0未上课，1已上课，2下课
     public function postRoomStatus(Request $request)
     {

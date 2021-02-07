@@ -89,6 +89,25 @@ class ApiServer
         }
         return $data;
     }
+
+    // 开课失败，重置状态
+    public function roomerror($room_id, $time)
+    {
+        $data = false;
+        $accesstoken = $this->accesstoken();
+        $res = $this->sendRequest(
+            $this->api['url'].'/api/room/error',
+            ['room_id' => $room_id, 'starttime' => $time],
+            ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
+            'POST'
+        );
+        if ($res->meta->code == 200) {
+            $data = true;
+        } else {
+            Log::error($this->api['url'].'/api/room/error: '.$res->meta->msg);
+        }
+        return $data;
+    }
     
     // 下课
     public function roomend($room_id, $time)
