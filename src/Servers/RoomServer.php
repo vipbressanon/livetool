@@ -55,7 +55,6 @@ class RoomServer
     {
         $now = date('Y-m-d H:i:s');
         $course = config('livetool.course');
-        $detail = DB::table($course['table'])->where($course['field']['id'], $course_id)->first();
         DB::table($course['table'])
             ->where($course['field']['id'], $course_id)
             ->update([
@@ -67,6 +66,23 @@ class RoomServer
         $api = new ApiServer();
         $api->roomstart($room_id, $now);
         return $now;
+    }
+
+    public function error($course_id, $room_id)
+    {
+        $now = date('Y-m-d H:i:s');
+        $course = config('livetool.course');
+        DB::table($course['table'])
+            ->where($course['field']['id'], $course_id)
+            ->update([
+                $course['field']['starttime'] => null,
+                $course['field']['endtime'] => null,
+                $course['field']['status'] => 0,
+                $course['field']['updated_at'] => $now
+            ]);
+        $api = new ApiServer();
+        $api->roomerror($room_id, $now);
+        return true;
     }
 
     public function status($course_id)
