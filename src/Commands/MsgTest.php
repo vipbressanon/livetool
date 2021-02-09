@@ -90,6 +90,17 @@ class MsgTest extends Command
                     $socket->isplat = isset($request['isplat'])?$request['isplat']:1;
                     // socket日志
                     self::logs($socket, ['type' => 'connection']);
+                    // 判断是否有课程的结束时间，没有去取
+                    if (!Redis::exists($socket->room_id.'room_endtime')) {
+                        $cs = new CourseServer();
+                        $endtime_str = $cs->endtime($socket->room_id);
+                        $room_endtime = $endtime_str ? strtotime($endtime_str) + 1800 : 0;
+
+                        $starttime = strtotime(date("Y-m-d H:i:s"));
+                        $redistime = $room_endtime - $starttime;
+                        $redistime = $redistime > 0 ? $redistime : 9000;
+                        self::redisSet($socket->room_id, $socket->room_id.'room_endtime', $room_endtime, $redistime);
+                    }
                     if (!$socket->islistener) {
                         // 在线人员处理
                         self::userlist($socket, 'add');
@@ -104,19 +115,19 @@ class MsgTest extends Command
                         self::userlist($socket, 'listener');
                         $userlistener = Redis::exists($socket->room_id.'listener')?self::redisGet($socket->room_id.'listener'):[];
                         $userlistener[$socket->hash_id] = $socket->id;
-                        self::redisSet($socket->room_id.'listener', $userlistener);
+                        self::redisSet($socket->room_id, $socket->room_id.'listener', $userlistener);
                     }
                     // 更新维护 usersocket数组  用于限制单设备登录
                     $usersocket = Redis::exists($socket->room_id.'usersocket')?self::redisGet($socket->room_id.'usersocket'):[];
                     $usersocket[$socket->hash_id] = $socket->id;
-                    self::redisSet($socket->room_id.'usersocket', $usersocket);
+                    self::redisSet($socket->room_id, $socket->room_id.'usersocket', $usersocket);
                     // 房间开关初始化
                     if (Redis::exists($socket->room_id.'onoff')) {
                         $arr = self::redisGet($socket->room_id.'onoff');
                         $onoff = $arr['onoff'];
                     } else {
                         $onoff = self::$onoffinit;
-                        self::redisSet($socket->room_id.'onoff', ['onoff'=>$onoff, 'index'=>0]);
+                        self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$onoff, 'index'=>0]);
                         self::logs($socket, ['type' => 'roominit']);
                     }
                     $users = self::redisGet($socket->room_id.'users');
@@ -246,7 +257,7 @@ class MsgTest extends Command
                         $userlistener = self::redisGet($socket->room_id.'listener')?:[];
                         if (array_key_exists($socket->hash_id, $userlistener)) {
                             unset($userlistener[$socket->hash_id]);
-                            self::redisSet($socket->room_id.'listener', $userlistener);
+                            self::redisSet($socket->room_id, $socket->room_id.'listener', $userlistener);
                         } else {
                             self::logs($socket, ['type' => 'relogin']);
                             return;
@@ -258,7 +269,7 @@ class MsgTest extends Command
                         if ($socket->isteacher) {
                             $arr['onoff']['roomtype'] = 2;
                         }
-                        self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                        self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                         self::logs($socket, [
                             'type' => 'roomtype',
                             'status' => 2
@@ -266,7 +277,7 @@ class MsgTest extends Command
                     }
                     if ($socket->hash_id.'screen' == $arr['onoff']['share']) {
                         $arr['onoff']['share'] = '';
-                        self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                        self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     }
                     self::userlist($socket, 'cut');
                     if (Redis::exists($socket->room_id.'users')) {
@@ -335,7 +346,7 @@ class MsgTest extends Command
                     }
                     $index++;
 
-                    self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+                    self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
                     self::$senderIo->to($socket->room_id)->emit(
                         'platbatch',
                         [
@@ -377,7 +388,7 @@ class MsgTest extends Command
                         $arr['max'] = $request['status'] == 1 ? $socket->hash_id.'screen' : '';
                     }
                     $index++;
-                    self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr, 'index'=>$index]);
+                    self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$arr, 'index'=>$index]);
                     self::$senderIo->to($socket->room_id)->emit(
                         'onoff',
                         [
@@ -407,7 +418,7 @@ class MsgTest extends Command
                     if ($request['type'] == 'MAX') {
                         $arr = self::redisGet($socket->room_id.'onoff');
                         $arr['onoff']['max'] = $request['text'] == 1 ? $request['hash_id'] : '';
-                        self::redisSet($socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                        self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     } else if ($request['type'] == 'PLATZAN') {
                         if (Redis::exists($socket->room_id.'users')) {
                             $usersarr = self::redisGet($socket->room_id.'users');
@@ -420,7 +431,7 @@ class MsgTest extends Command
                                 return $item;
                             });
                             $users = $filtered->all();
-                            self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+                            self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
                         }
                     } else if ($request['type'] == 'ZAN') {
                         if (Redis::exists($socket->room_id.'users')) {
@@ -430,12 +441,12 @@ class MsgTest extends Command
                             if (array_key_exists($request['hash_id'], $users)) {
                                 $users[$request['hash_id']]['zan']++;
                             }
-                            self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+                            self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
                         }
                     } else if ($request['type'] == 'SHARE') {
                         $arr = self::redisGet($socket->room_id . 'onoff');
                         $arr['onoff']['share'] = $request['text'] == 1 ? $request['hash_id'] . 'screen' : '';
-                        self::redisSet($socket->room_id . 'onoff', ['onoff' => $arr['onoff'], 'index' => $arr['index']]);
+                        self::redisSet($socket->room_id, $socket->room_id . 'onoff', ['onoff' => $arr['onoff'], 'index' => $arr['index']]);
                         $users = self::redisGet($socket->room_id . 'users');
                         $request['issharing'] = 0;
                         if ($request['text'] == 1) {
@@ -646,7 +657,7 @@ class MsgTest extends Command
             
             if (array_key_exists($hash_id, $users)) {
                 self::logs($socket, ['type' => 'userdel']);
-                self::redisSet($room_id.$hash_id, $users[$hash_id]);
+                self::redisSet($socket->room_id, $room_id.$hash_id, $users[$hash_id]);
                 unset($users[$hash_id]);
             }
             // 用户数组为空 清除redis
@@ -657,7 +668,7 @@ class MsgTest extends Command
             }
         }
         $index++;
-        self::redisSet($room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::redisSet($socket->room_id, $room_id.'users', ['users'=>$users, 'index'=>$index]);
     }
     
     // 权限处理
@@ -679,10 +690,10 @@ class MsgTest extends Command
             $users[$hash_id][$type] = $status;
         }
         $index++;
-        self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
         // 持久化保留用户状态
         if (array_key_exists($hash_id, $users)) {
-            self::redisSet($socket->room_id.$hash_id, $users[$hash_id]);
+            self::redisSet($socket->room_id, $socket->room_id.$hash_id, $users[$hash_id]);
         }
         self::logs($socket, [
             'type' => $type,
@@ -729,7 +740,7 @@ class MsgTest extends Command
         }
         
         $index++;
-        self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
         if ($users[$hash_id]['plat'] == 1) {
             self::logs($socket, [
                 'type' => 'plat',
@@ -772,7 +783,7 @@ class MsgTest extends Command
         }
         
         $index++;
-        self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
         if ($users[$hash_id]['plat'] == 0) {
             self::logs($socket, [
                 'type' => 'plat',
@@ -803,7 +814,7 @@ class MsgTest extends Command
             }
         }
         $index++;
-        self::redisSet($socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+        self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
         if ($users[$hash_id]['plat'] == 0) {
             self::logs($socket, [
                 'type' => 'plat',
@@ -838,10 +849,22 @@ class MsgTest extends Command
         $res->errors($socket, $msg);
     }
 
-    public static function redisSet($key, $arr = [], $time = 9000)
+    public static function redisSet($room_id, $key, $arr = [], $redistime = 9000)
     {
-        //var_dump($key);
-        Redis::setex($key, $time, serialize($arr));
+        try {
+            if ($key != $room_id.'room_endtime' && Redis::exists($room_id.'room_endtime')) {
+                $endtime = self::redisGet($room_id.'room_endtime');
+                $starttime = strtotime(date("Y-m-d H:i:s"));
+                $redistime = $endtime - $starttime;
+            }
+            $redistime = $redistime > 0 ? $redistime : 9000;
+        } catch(\Exception $e) {
+            self::errors($socket, '[saveredis] '.$e->getMessage().' line:'.$e->getLine());
+            Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+            Log::info('websocket:', $e->getTrace());
+            $redistime = 9000;
+        }
+        Redis::setex($key, $redistime, serialize($arr));
     }
 
     public static function redisGet($key)
