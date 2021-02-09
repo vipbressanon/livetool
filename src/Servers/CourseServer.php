@@ -96,6 +96,21 @@ class CourseServer
                 ->first();
         return $res ? $res->starttime : '';
     }
+
+    public function endtime($room_id) {
+        $room = Room::find($room_id);
+        if (!$room) {
+            return '';
+        }
+        $course = config('livetool.course');
+        $res = DB::table($course['table'])
+                ->select(
+                    $course['field']['expectend'].' as expectend'
+                )
+                ->where($course['field']['id'], $room->course_id)
+                ->first();
+        return $res ? $res->expectend : '';
+    }
     
     public function iswhite($course_id, $users_id)
     {
