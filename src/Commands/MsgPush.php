@@ -15,6 +15,7 @@ use Vipbressanon\LiveTool\Servers\RoomServer;
 use Vipbressanon\LiveTool\Servers\UsersServer;
 use Vipbressanon\LiveTool\Servers\BalanceServer;
 use Vipbressanon\LiveTool\Servers\LogsServer;
+use Vipbressanon\LiveTool\Servers\SpeedServer;
 use Log;
 use Illuminate\Support\Facades\Redis;
 
