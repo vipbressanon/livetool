@@ -101,22 +101,42 @@ class MsgTest extends Command
                         $redistime = $redistime > 0 ? $redistime : 9000;
                         self::redisSet($socket->room_id, $socket->room_id.'room_endtime', $room_endtime, $redistime);
                     }
-                    if (!$socket->islistener) {
-                        // 在线人员处理
-                        self::userlist($socket, 'add');
-                        // 如果自动上台，做上台处理，否则做手动上台处理
-                        if ($socket->isplat) {
-                            self::addplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
+
+                    //加锁，防止并发情况下redis里users数据不同步
+                    do {
+                        $timeout = 2;
+                        $key = 'room_lock_' . $socket->room_id;
+                        $value = 'user_' . $socket->hash_id;    //分配一个随机的值,防止误删其他请求创建的锁
+                        $is_lock = Redis::set($key, $value, 'ex', $timeout, 'nx');
+                        if ($is_lock) {
+                            //相关逻辑处理
+                            if (!$socket->islistener) {
+                                // 在线人员处理
+                                self::userlist($socket, 'add');
+                                // 如果自动上台，做上台处理，否则做手动上台处理
+                                if ($socket->isplat) {
+                                    self::addplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                                } else {
+                                    self::handplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                                }
+                            } else {
+                                // 在线人员处理  index+1
+                                self::userlist($socket, 'listener');
+                                $userlistener = Redis::exists($socket->room_id.'listener')?self::redisGet($socket->room_id.'listener'):[];
+                                $userlistener[$socket->hash_id] = $socket->id;
+                                self::redisSet($socket->room_id, $socket->room_id.'listener', $userlistener);
+                            }
+                            $users = self::redisGet($socket->room_id.'users');
+
+                            if (Redis::get($key) == $value) {   //防止提前过期，误删其它请求创建的锁
+                                Redis::del($key);
+                                continue;
+                            }
                         } else {
-                            self::handplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                            usleep(500);    //睡眠，降低抢锁频率，缓解redis压力
                         }
-                    } else {
-                        // 在线人员处理  index+1
-                        self::userlist($socket, 'listener');
-                        $userlistener = Redis::exists($socket->room_id.'listener')?self::redisGet($socket->room_id.'listener'):[];
-                        $userlistener[$socket->hash_id] = $socket->id;
-                        self::redisSet($socket->room_id, $socket->room_id.'listener', $userlistener);
-                    }
+                    } while (!$is_lock);
+
                     // 更新维护 usersocket数组  用于限制单设备登录
                     $usersocket = Redis::exists($socket->room_id.'usersocket')?self::redisGet($socket->room_id.'usersocket'):[];
                     $usersocket[$socket->hash_id] = $socket->id;
@@ -130,7 +150,6 @@ class MsgTest extends Command
                         self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$onoff, 'index'=>0]);
                         self::logs($socket, ['type' => 'roominit']);
                     }
-                    $users = self::redisGet($socket->room_id.'users');
                     
                     self::$senderIo->to($socket->room_id)->emit(
                         'addusers',
