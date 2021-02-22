@@ -326,9 +326,19 @@ class MsgTest extends Command
                         $res = self::addplat($socket, $request['hash_id'], 0, $request['up_top']);
                     } elseif ($request['type'] == 'plat' && $request['status'] == 0) {
                         $res = self::cutplat($socket, $request['hash_id']);
+                    } elseif ($request['type'] == 'issharing' && $request['status'] == 1) {
+                        // 学生点击同意屏幕分享 判断$arr['onoff']['share']是否为空 为空则老师点击了关闭屏幕分享
+                        $arr = self::redisGet($socket->room_id . 'onoff');
+                        if($arr['onoff']['share']){
+                            $res = self::permission($socket, $request['hash_id'], $request['type'], $request['status']);
+                        }else{
+                            return;
+                        }
+
                     } else {
                         $res = self::permission($socket, $request['hash_id'], $request['type'], $request['status']);
                     }
+
                     $nickname = isset($request['nickname']) ? $request['nickname'] : '';
                     self::$senderIo->to($socket->room_id)->emit(
                         'permission',
