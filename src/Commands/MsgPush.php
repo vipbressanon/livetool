@@ -32,9 +32,10 @@ class MsgPush extends Command
     // 是否老师（1,0），上下台（1,0），白板授权（1,0），开麦闭麦（1,0），摄像头（1,0），来源（0-6）
     // 来源:0是pc端，1是h5手机端，2是h5平板端 3是android 4是android平板 5是ios 6是ios的平板
     private static $teainit = ['isteacher'=>1, 'plat'=>1, 'board'=>1, 'voice'=>1, 'camera'=>1, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
-    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
-    // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；
-    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100];
+    // issharing:
+    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => '', 'issharing' => 0];
+    // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；share, 老师获取学生分享屏幕hash_id
+    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100, 'share' => ''];
     public function __construct()
     {
         parent::__construct();
@@ -100,22 +101,42 @@ class MsgPush extends Command
                         $redistime = $redistime > 0 ? $redistime : 9000;
                         self::redisSet($socket->room_id, $socket->room_id.'room_endtime', $room_endtime, $redistime);
                     }
-                    if (!$socket->islistener) {
-                        // 在线人员处理
-                        self::userlist($socket, 'add');
-                        // 如果自动上台，做上台处理，否则做手动上台处理
-                        if ($socket->isplat) {
-                            self::addplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
+
+                    //加锁，防止并发情况下redis里users数据不同步
+                    do {
+                        $timeout = 2;
+                        $key = 'room_lock_' . $socket->room_id;
+                        $value = 'user_' . $socket->hash_id;    //分配一个随机的值,防止误删其他请求创建的锁
+                        $is_lock = Redis::set($key, $value, 'ex', $timeout, 'nx');
+                        if ($is_lock) {
+                            //相关逻辑处理
+                            if (!$socket->islistener) {
+                                // 在线人员处理
+                                self::userlist($socket, 'add');
+                                // 如果自动上台，做上台处理，否则做手动上台处理
+                                if ($socket->isplat) {
+                                    self::addplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                                } else {
+                                    self::handplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                                }
+                            } else {
+                                // 在线人员处理  index+1
+                                self::userlist($socket, 'listener');
+                                $userlistener = Redis::exists($socket->room_id.'listener')?self::redisGet($socket->room_id.'listener'):[];
+                                $userlistener[$socket->hash_id] = $socket->id;
+                                self::redisSet($socket->room_id, $socket->room_id.'listener', $userlistener);
+                            }
+                            $users = self::redisGet($socket->room_id.'users');
+
+                            if (Redis::get($key) == $value) {   //防止提前过期，误删其它请求创建的锁
+                                Redis::del($key);
+                                continue;
+                            }
                         } else {
-                            self::handplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
+                            usleep(500);    //睡眠，降低抢锁频率，缓解redis压力
                         }
-                    } else {
-                        // 在线人员处理  index+1
-                        self::userlist($socket, 'listener');
-                        $userlistener = Redis::exists($socket->room_id.'listener')?self::redisGet($socket->room_id.'listener'):[];
-                        $userlistener[$socket->hash_id] = $socket->id;
-                        self::redisSet($socket->room_id, $socket->room_id.'listener', $userlistener);
-                    }
+                    } while (!$is_lock);
+
                     // 更新维护 usersocket数组  用于限制单设备登录
                     $usersocket = Redis::exists($socket->room_id.'usersocket')?self::redisGet($socket->room_id.'usersocket'):[];
                     $usersocket[$socket->hash_id] = $socket->id;
@@ -129,8 +150,7 @@ class MsgPush extends Command
                         self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$onoff, 'index'=>0]);
                         self::logs($socket, ['type' => 'roominit']);
                     }
-                    $users = self::redisGet($socket->room_id.'users');
-                    
+
                     self::$senderIo->to($socket->room_id)->emit(
                         'addusers',
                         [
@@ -274,6 +294,10 @@ class MsgPush extends Command
                             'status' => 2
                         ]);
                     }
+                    if ($socket->hash_id.'screen' == $arr['onoff']['share']) {
+                        $arr['onoff']['share'] = '';
+                        self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                    }
                     self::userlist($socket, 'cut');
                     if (Redis::exists($socket->room_id.'users')) {
                         $users = self::redisGet($socket->room_id.'users');
@@ -302,9 +326,19 @@ class MsgPush extends Command
                         $res = self::addplat($socket, $request['hash_id'], 0, $request['up_top']);
                     } elseif ($request['type'] == 'plat' && $request['status'] == 0) {
                         $res = self::cutplat($socket, $request['hash_id']);
+                    } elseif ($request['type'] == 'issharing' && $request['status'] == 1) {
+                        // 学生点击同意屏幕分享 判断$arr['onoff']['share']是否为空 为空则老师点击了关闭屏幕分享
+                        $arr = self::redisGet($socket->room_id . 'onoff');
+                        if($arr['onoff']['share']){
+                            $res = self::permission($socket, $request['hash_id'], $request['type'], $request['status']);
+                        }else{
+                            return;
+                        }
+
                     } else {
                         $res = self::permission($socket, $request['hash_id'], $request['type'], $request['status']);
                     }
+
                     $nickname = isset($request['nickname']) ? $request['nickname'] : '';
                     self::$senderIo->to($socket->room_id)->emit(
                         'permission',
@@ -438,8 +472,32 @@ class MsgPush extends Command
                             }
                             self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
                         }
+                    } else if ($request['type'] == 'SHARE') {
+                        $arr = self::redisGet($socket->room_id . 'onoff');
+                        $arr['onoff']['share'] = $request['text'] == 1 ? $request['hash_id'] . 'screen' : '';
+                        self::redisSet($socket->room_id, $socket->room_id . 'onoff', ['onoff' => $arr['onoff'], 'index' => $arr['index']]);
+                        $users = self::redisGet($socket->room_id . 'users');
+                        $request['issharing'] = 0;
+                        if ($request['text'] == 1) {
+                            $request['issharing'] = $users['users'][$request['hash_id']]['issharing'];
+                        }
+
+                        /*$request['share'] = $arr['onoff']['share'];
+
+                        $users = self::redisGet($socket->room_id . 'users');
+                        $request['users'] = $users['users'];*/
                     }
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
+                    // 如果学生已经同意过就不再显示确认同意页面 直接分享视频
+                    if ($request['type'] == 'SHARE' && $arr['onoff']['share'] && $users['users'][$request['hash_id']]['issharing'] == 1) {
+                        self::$senderIo->to($socket->room_id)->emit(
+                            'permission',
+                            [
+                                'type' => 'issharing',
+                                'users' => [$request['hash_id'] => $users['users'][$request['hash_id']]],
+                            ]
+                        );
+                    }
                     self::logs($socket, [
                         'type' => $request['type'],
                         'hash_id' => isset($request['hash_id']) ? $request['hash_id'] : '',
