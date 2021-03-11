@@ -35,7 +35,7 @@ class MsgTest extends Command
     // issharing:
     private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => '', 'issharing' => 0];
     // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；share, 老师获取学生分享屏幕hash_id
-    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100, 'share' => '','modular_id' => ''];
+    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100, 'share' => ''];
     public function __construct()
     {
         parent::__construct();
@@ -488,9 +488,11 @@ class MsgTest extends Command
                         $request['users'] = $users['users'];*/
                     } else if ($request['type'] == 'practice') {
                         // 编程的练习模式
-                        $arr = self::redisGet($socket->room_id . 'onoff');
-                        $arr['onoff']['modular_id'] = $request['status'] == 1 ? $request['modular_id'] : '';
-                        self::redisSet($socket->room_id, $socket->room_id . 'onoff', ['onoff' => $arr['onoff'], 'index' => $arr['index']]);
+                        $arrRoomPractice['hash_id'] = isset($request['hash_id']) ? $request['hash_id'] : '';
+                        $arrRoomPractice['course_hash_id'] = isset($request['course_hash_id']) ? $request['course_hash_id'] : '';
+                        $arrRoomPractice['chapter_hash_id'] = isset($request['chapter_hash_id']) ? $request['chapter_hash_id'] : '';
+                        $arrRoomPractice['class_hash_id'] = isset($request['class_hash_id']) ? $request['class_hash_id'] : '';
+                        self::redisSet($socket->room_id, $socket->room_id . 'practice', $arrRoomPractice);
                     }
 
                     self::$senderIo->to($socket->room_id)->emit('im', $request);

@@ -175,6 +175,9 @@ class LogsServer
             case 'speed2':
                 $msg = '将检测的网速结果返回';
                 break;
+            case 'practice':
+                $msg = '操作了练习模式';
+                break;
             default:
                 $msg = implode(',', $arr);
                 break;
