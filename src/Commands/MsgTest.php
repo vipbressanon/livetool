@@ -300,7 +300,7 @@ class MsgTest extends Command
                         self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     }
                     // 如果是老师 而且是 编程模式
-                    if ($socket->isteacher && $arr['onoff']['scratch']['program_mode'] = 1) {
+                    if ($socket->isteacher && $arr['onoff']['scratch']['program_mode'] == 1) {
                         $arr['onoff']['scratch']['program_mode'] = 0;
                         $arr['onoff']['roomtype'] = 2;
                         $arr['onoff']['max'] = '';
