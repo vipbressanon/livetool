@@ -769,15 +769,21 @@ class MsgTest extends Command
             $index = $arr['index'];
         }
         if (!$isteacher) {
-            foreach ($users as $v) {
+            foreach ($users as $k => $v) {
                 if ($v['isteacher'] == 0 && $v['plat'] == 1) {
                     $stucount ++;
+
+                    Log::info('addplat_user:', $k . ';stucount:' . $stucount . ';cur_hash_id:' . $hash_id);
                 }
             }
+
             // 缓存中是否存有该人员数据
             if (Redis::exists($socket->room_id.$hash_id)) {
                 $temp = self::redisGet($socket->room_id.$hash_id);
                 if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
+
+                    Log::info('addplat_temp_user', 'temp:' . $temp);
+                    Log::info('addplat_up_top', 'up_top:' . intval($up_top) . ';stucount:' . $stucount);
                     $users[$hash_id]['plat'] = 0;
                     $users[$hash_id]['camera'] = 0;
                     $users[$hash_id]['board'] = 0;
@@ -817,15 +823,19 @@ class MsgTest extends Command
             $index = $arr['index'];
         }
         if (!$isteacher) {
-            foreach ($users as $v) {
+            foreach ($users as $k => $v) {
                 if ($v['isteacher'] == 0 && $v['plat'] == 1) {
                     $stucount ++;
+                    Log::info('handplat_user:', $k . ';stucount:' . $stucount . ';cur_hash_id:' . $hash_id);
                 }
             }
             // 缓存中是否存有该人员数据
             if (Redis::exists($socket->room_id.$hash_id)) {
                 $temp = self::redisGet($socket->room_id.$hash_id);
                 if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
+
+                    Log::info('handplat_temp_user', 'temp:' . $temp);
+                    Log::info('handplat_up_top', 'up_top:' . intval($up_top) . ';stucount:' . $stucount);
                     $users[$hash_id]['plat'] = 0;
                     $users[$hash_id]['camera'] = 0;
                     $users[$hash_id]['board'] = 0;
