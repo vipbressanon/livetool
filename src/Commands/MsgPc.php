@@ -1014,33 +1014,45 @@ class MsgPc extends Command
     // 权限处理
     public static function permission($socket, $hash_id, $type, $status)
     {
-        // 变量初始值
-        $users = [];
-        $index = 0;
-        // 从Redis读取在线人员信息
-        if (Redis::exists($socket->room_id.'users')) {
-            $arr = self::redisGet($socket->room_id.'users');
-            $users = $arr['users'];
-            $index = $arr['index'];
+        //初始化变量
+        list(
+            $users_plat,
+            $users_notplat,
+            $users_notinroom,
+            $index_plat,
+            $index_notplat,
+            $index_notinroom
+            ) = self::users_arr_init($socket->room_id);
+
+        if (isset($users_plat[$hash_id][$type])) {
+            $users_plat[$hash_id][$type] = $status;
+            $index_plat++;
+            self::redisSet($socket->room_id, $socket->room_id.'users_plat', ['users'=>$users_plat, 'index'=>$index_plat]);
+            $cur_user = $users_plat[$hash_id];
         }
-        if (!array_key_exists($hash_id, $users)) {
-            $users[$hash_id] = self::$stuinit;
+
+        if (isset($users_notplat[$hash_id][$type])) {
+            $users_notplat[$hash_id][$type] = $status;
+            $index_notplat++;
+            self::redisSet($socket->room_id, $socket->room_id.'users_notplat', ['users'=>$users_notplat, 'index'=>$index_notplat]);
+            $cur_user = $users_notplat[$hash_id];
         }
-        if (isset($users[$hash_id][$type])) {
-            $users[$hash_id][$type] = $status;
+
+        if (isset($users_notinroom[$hash_id][$type])) {
+            $users_notinroom[$hash_id][$type] = $status;
+            $index_notinroom++;
+            self::redisSet($socket->room_id, $socket->room_id.'users_notinroom', ['users'=>$users_notinroom, 'index'=>$index_notinroom]);
+            $cur_user = $users_notinroom[$hash_id];
         }
-        $index++;
-        self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
+
         // 持久化保留用户状态
-        if (array_key_exists($hash_id, $users)) {
-            self::redisSet($socket->room_id, $socket->room_id.$hash_id, $users[$hash_id]);
-        }
+        self::redisSet($socket->room_id, $socket->room_id.$hash_id, $cur_user);
         self::logs($socket, [
             'type' => $type,
             'hash_id' => $hash_id,
             'status' => $status
         ]);
-        return [$hash_id => $users[$hash_id]];
+        return [$hash_id => $cur_user];
     }
 
     // 下台处理
