@@ -3,6 +3,7 @@
 namespace Vipbressanon\LiveTool\Commands;
 
 use Illuminate\Console\Command;
+use phpDocumentor\Reflection\Types\Self_;
 use Workerman\Worker;
 use Workerman\Lib\Timer;
 use Workerman\Connection\TcpConnection;
@@ -24,23 +25,23 @@ class MsgPc extends Command
     protected $signature = 'wkpc 
     {action=start : start | restart | reload(平滑重启) | stop | status | connetions}
     {--d : deamon or debug}';
-    
+
     protected $description = 'web消息推送服务';
-    
+
     //PHPSocketIO服务
     private static $senderIo = null;
     // 是否老师（1,0），上下台（1,0），白板授权（1,0），开麦闭麦（1,0），摄像头（1,0），来源（0-6）
     // 来源:0是pc端，1是h5手机端，2是h5平板端 3是android 4是android平板 5是ios 6是ios的平板
     private static $teainit = ['isteacher'=>1, 'plat'=>1, 'board'=>1, 'voice'=>1, 'camera'=>1, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => ''];
-    // issharing:
-    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => '', 'issharing' => 0];
-    // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；share, 老师获取学生分享屏幕hash_id
-    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100, 'share' => ''];
+    // issharing:    ;stuvoice:0-关，1-开，2-有问题；stucamera:0-关，1-开，2-有问题；pdetail:设备的详细信息
+    private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0,'stuvoice'=>1,'stucamera'=>1, 'platform'=>0,'pdetail'=>'','nickname' => '', 'zan' => 0, 'imgurl' => '', 'issharing' => 0];
+    // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；share, 老师获取学生分享屏幕hash_id;'isplat'=>'','allshare'=>0
+    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100, 'share' => '','isplat'=>'','allshare'=>0];
     public function __construct()
     {
         parent::__construct();
     }
-    
+
     /**
      * 根据脚本参数开启PHPSocketIO服务
      * PHPSocketIO服务的端口是`2120`
@@ -54,18 +55,18 @@ class MsgPc extends Command
         // $argv[0] = 'wk';
         $argv[1] = $action;
         $argv[2] = $this->option('d') ? '-d' : '';
-        
+
         // global $argv;
         // //启动php脚本所需的命令行参数
         // $argv[0] = 'MsgPush';
         // $argv[1] = $this->argument('action'); // start | restart | reload(平滑重启) | stop | status | connetions
         // $argv[2] = $this->option('d') ? '-d' : ''; // 守护进程模式或调试模式启动
-        
+
         // 设置所有连接的默认应用层发送缓冲区大小
         TcpConnection::$defaultMaxSendBufferSize = 2 * 1024 * 1024;
         // PHPSocketIO服务
         self::$senderIo = new SocketIO(4120);
-        
+
         // 客户端发起连接事件时，设置连接socket的各种事件回调
         self::$senderIo->on('connection', function ($socket) {
             // 登录
@@ -79,6 +80,7 @@ class MsgPc extends Command
                     if (isset($socket->hash_id)) return;
                     // 用户数据
                     $socket->join($request['room_id']);
+                    $socket->user_id = $request['user_id']; //新增参数用户id
                     $socket->room_id = $request['room_id'];
                     $socket->hash_id = $request['hash_id'];
                     $socket->isteacher = $request['isteacher'];
@@ -111,8 +113,8 @@ class MsgPc extends Command
                         if ($is_lock) {
                             //相关逻辑处理
                             if (!$socket->islistener) {
-                                // 在线人员处理
-                                self::userlist($socket, 'add');
+                                //白名单首个进入，将白名单学生list存入离线数组；将该人员存入缓存
+                                self::set_user_cache($socket);
                                 // 如果自动上台，做上台处理，否则做手动上台处理
                                 if ($socket->isplat) {
                                     self::addplat($socket, $socket->hash_id, $socket->isteacher, $request['up_top']);
@@ -121,12 +123,14 @@ class MsgPc extends Command
                                 }
                             } else {
                                 // 在线人员处理  index+1
-                                self::userlist($socket, 'listener');
+                                //self::userlist($socket, 'listener');
                                 $userlistener = Redis::exists($socket->room_id.'listener')?self::redisGet($socket->room_id.'listener'):[];
                                 $userlistener[$socket->hash_id] = $socket->id;
                                 self::redisSet($socket->room_id, $socket->room_id.'listener', $userlistener);
                             }
-                            $users = self::redisGet($socket->room_id.'users');
+                            $users_plat = self::redisGet($socket->room_id . 'users_plat');
+                            $users_notplat = self::redisGet($socket->room_id . 'users_notplat');
+                            $users_notinroom = self::redisGet($socket->room_id . 'users_notinroom');
 
                             if (Redis::get($key) == $value) {   //防止提前过期，误删其它请求创建的锁
                                 Redis::del($key);
@@ -150,15 +154,20 @@ class MsgPc extends Command
                         self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$onoff, 'index'=>0]);
                         self::logs($socket, ['type' => 'roominit']);
                     }
-                    
+
                     self::$senderIo->to($socket->room_id)->emit(
                         'addusers',
                         [
-                            'users' => $users['users'],
-                            'index' => $users['index'],
+                            'users_plat' => $users_plat['users'],
+                            'index_plat' => $users_plat['index'],
+                            'users_notplat' => $users_notplat['users'],
+                            'index_notplat' => $users_notplat['index'],
+                            'users_notinroom' => $users_notinroom['users'],
+                            'index_notinroom' => $users_notinroom['index'],
                             'onoff' => $onoff,
                             'socketid' => $socket->id,
-                            'hashid' => $socket->hash_id
+                            'hashid' => $socket->hash_id,
+                            // 'list' => $list,
                         ]
                     );
                     $socket->emit('servertime', ['time'=>time()]);
@@ -187,7 +196,7 @@ class MsgPc extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             });
-            
+
             // 讲师创建房间后邀请所有人进入
             $socket->on('create', function () use ($socket) {
                 try {
@@ -211,7 +220,7 @@ class MsgPc extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             });
-            
+
             // 开始上课
             // 传参：up_top(上台人数上限), teacher_hash_id(讲师哈希)
             $socket->on('enter', function () use ($socket) {
@@ -219,7 +228,7 @@ class MsgPc extends Command
                     // 已通过腾讯云接口获取数据，该方法弃用
                     // $us = new UsersServer();
                     // $us->start($socket->room_id, $socket->hash_id, $socket->platform, $socket->islistener);
-                    
+
                     // if ($socket->isteacher) {
                     //     $interval = config('livetool.intervaltime');
                     //     $balance = new BalanceServer();
@@ -233,7 +242,7 @@ class MsgPc extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             });
-            
+
             // 下课
             $socket->on('over', function () use ($socket) {
                 try {
@@ -308,7 +317,7 @@ class MsgPc extends Command
                                 'index' => $users['index'],
                                 'onoff' => $arr['onoff']
                             ]
-                            
+
                         );
                     }
                     self::logs($socket, ['type' => 'disconnect']);
@@ -318,7 +327,7 @@ class MsgPc extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             });
-            
+
             // 传参：hash_id(被更改权限人哈希), type(权限类型), status(权限更改后状态)
             $socket->on('permission', function ($request) use ($socket)  {
                 try {
@@ -354,7 +363,7 @@ class MsgPc extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             });
-            
+
             // 批量修改上台人员状态
             $socket->on('platbatch', function ($request) use ($socket)  {
                 try {
@@ -395,7 +404,7 @@ class MsgPc extends Command
                     Log::info('websocket:', $e->getTrace());
                 }
             });
-            
+
             // 房间开关设置
             $socket->on('onoff', function ($request) use ($socket)  {
                 try {
@@ -436,8 +445,8 @@ class MsgPc extends Command
                     Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
                     Log::info('websocket:', $e->getTrace());
                 }
-            }); 
-            
+            });
+
             // 消息转发
             $socket->on('im', function ($request) use ($socket)  {
                 try {
@@ -590,7 +599,7 @@ class MsgPc extends Command
         //     //继续发送
         //     var_dump('继续发送');
         // };
-        
+
         // 当self::$senderIo启动后监听一个http端口，通过这个端口可以给任意uid或者所有uid推送数据
         self::$senderIo->on('workerStart', function () {
             // 监听一个http端口
@@ -655,7 +664,301 @@ class MsgPc extends Command
 
         Worker::runAll();
     }
-    
+
+    /**
+     * Notice: 白名单首个进入，将白名单学生list存入离线数组；将该人员存入缓存
+     * Author: chenxl
+     * DateTime 2021/3/17 16:35
+     * @param $socket
+     * @return array|mixed
+     */
+    public static function set_user_cache($socket)
+    {
+        Log::info('set_user_cache------start');
+
+        $user_id = $socket->user_id;
+        $room_id = $socket->room_id;
+        $hash_id = $socket->hash_id;
+        $isteacher = $socket->isteacher;
+        $platform = $socket->platform;
+        $zan = $socket->zan;
+        $nickname = $socket->nickname;
+        // 截取图片公共域名 只保存真实图片路径 减小返回数据大小
+        $imgarr = explode(".com/", $socket->imgurl);
+        $imgurl = count($imgarr) > 1 ? $imgarr[1]: 'face.png';
+
+        //查询课程信息
+        $course = app(CourseServer::class)->getCourseByRoomId($room_id);
+        //白名单课程
+        if ($course->invite_type == 2) {
+            //首个人员进入，将白名单学生list存入redis离线数组中 以user_id为键，暂时无法拿到腾讯云hash_id
+            if (!Redis::exists($socket->room_id . 'users_notinroom')) {
+                //获取白名单学生list
+                Log::info('首个进入白名单课程');
+                $whitelist = app(CourseServer::class)->getWhiteList($course->id);
+                $list = [];
+                foreach ($whitelist as $item) {
+                    $list[$item['id']] = self::$stuinit;
+                    $list[$item['id']]['nickname'] = $item['nickname'];
+                    // 截取图片公共域名 只保存真实图片路径 减小返回数据大小
+                    $img_arr = explode(".com/", $item['imgurl']);
+                    $img_url = count($img_arr) > 1 ? $img_arr[1]: 'face.png';
+                    $list[$item['id']]['imgurl'] = $img_url;
+                }
+                //白名单学生list存入离线数组中
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notinroom', ['users' => $list, 'index' => 0]);
+            }
+
+            //白名单人员首次进入，将离线数组的键 user_id 改为 hash_id
+            $arr_notinroom = self::redisGet($socket->room_id . 'users_notinroom');
+            $users_notinroom = $arr_notinroom['users'];
+            $index_notinroom = $arr_notinroom['index'];
+            if (array_key_exists($user_id, $users_notinroom)) {
+                $users_notinroom[$hash_id] = $users_notinroom[$user_id];
+                unset($users_notinroom[$user_id]);
+                $index_notinroom++;
+                self::redisSet($room_id, $room_id . 'users_notinroom', ['users' => $users_notinroom, 'index' => $index_notinroom]);
+            }
+        }
+
+        //将该人员信息存入缓存
+        if (Redis::exists($room_id . $hash_id)) {
+            self::logs($socket, ['type' => 'useradd']); //获取用户保留参数
+            $cur_user = self::redisGet($room_id . $hash_id);
+        } else {
+            self::logs($socket, ['type' => 'userinit']);    //初始化用户参数
+            $cur_user = $isteacher ? self::$teainit : self::$stuinit;
+            $cur_user['nickname'] = $nickname;
+            $cur_user['zan'] = $zan;
+            $cur_user['platform'] = $platform;
+            $cur_user['imgurl'] = $imgurl;
+        }
+        self::redisSet($room_id, $room_id . $hash_id, $cur_user);
+
+        if (!Redis::exists($room_id . 'users_plat')) {
+            self::redisSet($room_id, $room_id . 'users_plat', ['users' => [], 'index' => 0]);
+        }
+        if (!Redis::exists($room_id . 'users_notplat')) {
+            self::redisSet($room_id, $room_id . 'users_notplat', ['users' => [], 'index' => 0]);
+        }
+        if (!Redis::exists($room_id . 'users_notinroom')) {
+            self::redisSet($room_id, $room_id . 'users_notinroom', ['users' => [], 'index' => 0]);
+        }
+
+        Log::info('set_user_cache------end');
+        return $cur_user;
+    }
+
+    /**
+     * Notice: 初始化三个数组变量
+     * Author: chenxl
+     * DateTime 2021/3/17 16:45
+     * @param $room_id
+     * @return array
+     */
+    public static function users_arr_init($room_id)
+    {
+        // 变量初始值
+        $users_plat = []; //台上数组
+        $users_notplat = [];    //台下数组
+        $users_notinroom = [];  //离线数组
+        $index_plat = 0;
+        $index_notplat = 0;
+        $index_notinroom = 0;
+        // 从Redis读取台上数组人员信息
+        if (Redis::exists($room_id . 'users_plat')) {
+            $arr_plat = self::redisGet($room_id . 'users_plat');
+            $users_plat = $arr_plat['users'];
+            $index_plat = $arr_plat['index'];
+        }
+        //从Redis读取台下数组人员信息
+        if (Redis::exists($room_id . 'users_notplat')) {
+            $arr_notplat = self::redisGet($room_id . 'users_notplat');
+            $users_notplat = $arr_notplat['users'];
+            $index_notplat = $arr_notplat['index'];
+        }
+        //从Redis读取离线数组人员信息
+        if (Redis::exists($room_id . 'users_notinroom')) {
+            $arr_notinroom = self::redisGet($room_id . 'users_notinroom');
+            $users_notinroom = $arr_notinroom['users'];
+            $index_notinroom = $arr_notinroom['index'];
+        }
+
+        return [$users_plat, $users_notplat, $users_notinroom, $index_plat, $index_notplat, $index_notinroom];
+    }
+
+    /**
+     * Notice: 自动上台处理
+     * Author: chenxl
+     * DateTime 2021/3/17 16:36
+     * @param $socket
+     * @param $hash_id
+     * @param $isteacher
+     * @param $up_top
+     * @return array[]
+     */
+    public static function addplat($socket, $hash_id, $isteacher, $up_top)
+    {
+        Log::info('addplat------start');
+        // 变量初始值
+        $stucount = 0;
+        list(
+            $users_plat,
+            $users_notplat,
+            $users_notinroom,
+            $index_plat,
+            $index_notplat,
+            $index_notinroom
+            ) = self::users_arr_init($socket->room_id);
+
+        //从缓存中读取该人员信息
+        $cur_user = self::redisGet($socket->room_id . $hash_id);
+        if (!$isteacher) {
+            //台上学生数量
+            foreach ($users_plat as $v) {
+                if ($v['isteacher'] == 0 && $v['plat'] == 1) {
+                    $stucount++;
+                }
+            }
+
+            //未超出台上人数
+            if ($stucount < intval($up_top)) {
+                $cur_user['plat'] = 1;
+                $cur_user['camera'] = 1;
+                $cur_user['time'] = time(); //用于花名册排序
+                $users_plat[$hash_id] = $cur_user;
+                $index_plat++;
+                //将该学生放入台上数组
+                self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $users_plat, 'index' => $index_plat]);
+                //如果台下数组中有该人员需删除（异常退出，没有走disconnect）
+                if (array_key_exists($hash_id, $users_notplat)) {
+                    unset($users_notplat[$hash_id]);
+                    $index_notplat++;
+                    self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users'=>$users_notplat, 'index'=>$index_notplat]);
+                }
+            } else { //超出台上人数
+                $cur_user['plat'] = 0;
+                $cur_user['camera'] = 0;
+                $cur_user['board'] = 0;
+                $cur_user['voice'] = 0;
+                $cur_user['time'] = time();  //用于花名册排序
+                $users_notplat[$hash_id] = $cur_user;
+                $index_notplat++;
+                //将该学生放入台下数组
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users' => $users_notplat, 'index' => $index_notplat]);
+                //如果台上数组中有该人员需删除（异常退出，没有走disconnect）
+                if (array_key_exists($hash_id, $users_plat)) {
+                    unset($users_plat[$hash_id]);
+                    $index_plat++;
+                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users'=>$users_plat, 'index'=>$index_plat]);
+                }
+            }
+            //将离线数组中该学生信息删除
+            if (array_key_exists($hash_id, $users_notinroom)) {
+                $index_notinroom++;
+                unset($users_notinroom[$hash_id]);
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notinroom', ['users' => $users_notinroom, 'index' => $index_notinroom]);
+            }
+        } else {    //将老师存入台上数组
+            $cur_user['time'] = time();  //用于花名册排序
+            $users_plat[$hash_id] = $cur_user;
+            $index_plat++;
+            self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $users_plat, 'index' => $index_plat]);
+        }
+        //将该人员信息存入缓存
+        self::redisSet($socket->room_id, $socket->room_id . $hash_id, $cur_user);
+
+        if ($cur_user['plat'] == 1) {
+            self::logs($socket, [
+                'type' => 'plat',
+                'hash_id' => $hash_id,
+                'status' => 1
+            ]);
+        }
+        Log::info('addplat------end');
+        return [$hash_id => $cur_user];
+    }
+
+    /**
+     * Notice: 手动上台处理
+     * Author: chenxl
+     * DateTime 2021/3/17 16:36
+     * @param $socket
+     * @param $hash_id
+     * @param $isteacher
+     * @param $up_top
+     * @return array[]
+     */
+    public static function handplat($socket, $hash_id, $isteacher, $up_top)
+    {
+        // 变量初始值
+        $stucount = 0;
+        list(
+            $users_plat,
+            $users_notplat,
+            $users_notinroom,
+            $index_plat,
+            $index_notplat,
+            $index_notinroom
+            ) = self::users_arr_init($socket->room_id);
+
+        //从缓存中读取该人员信息
+        $cur_user = self::redisGet($socket->room_id . $hash_id);
+        if (!$isteacher) {
+            //台上学生数量
+            foreach ($users_plat as $v) {
+                if ($v['isteacher'] == 0 && $v['plat'] == 1) {
+                    $stucount++;
+                }
+            }
+
+            if ($cur_user['plat'] = 1 && $stucount < intval($up_top)) { //放台上数组
+                $cur_user['time'] = time(); //用于花名册排序
+                $users_plat[$hash_id] = $cur_user;
+                $index_plat++;
+                //将该学生放入台上数组
+                self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $users_plat, 'index' => $index_plat]);
+            } else {    //放台下数组
+                $cur_user['plat'] = 0;
+                $cur_user['camera'] = 0;
+                $cur_user['board'] = 0;
+                $cur_user['voice'] = 0;
+                $cur_user['time'] = time();  //用于花名册排序
+                $users_notplat[$hash_id] = $cur_user;
+                $index_notplat++;
+                //将该学生放入台下数组
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users' => $users_notplat, 'index' => $index_notplat]);
+                //如果台上数组中有该人员需删除（异常退出，没有走disconnect）
+                if (array_key_exists($hash_id, $users_plat)) {
+                    unset($users_plat[$hash_id]);
+                    $index_plat++;
+                    self::redisSet($socket->room_id, $room_id . 'users_plat', ['users'=>$users_plat, 'index'=>$index_plat]);
+                }
+            }
+            //将离线数组中该学生信息删除
+            if (array_key_exists($hash_id, $users_notinroom)) {
+                $index_notinroom++;
+                unset($users_notinroom[$hash_id]);
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notinroom', ['users' => $users_notinroom, 'index' => $index_notinroom]);
+            }
+        } else {    //将老师存入台上数组
+            $cur_user['time'] = time();  //用于花名册排序
+            $users_plat[$hash_id] = $cur_user;
+            $index_plat++;
+            self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $users_plat, 'index' => $index_plat]);
+        }
+        //将该学生信息存入缓存
+        self::redisSet($socket->room_id, $socket->room_id . $hash_id, $cur_user);
+        if ($cur_user['plat'] == 0) {
+            self::logs($socket, [
+                'type' => 'plat',
+                'hash_id' => $hash_id,
+                'status' => 0
+            ]);
+        }
+        return [$hash_id => $cur_user];
+    }
+
     // 在线人员
     public static function userlist($socket, $type)
     {
@@ -678,7 +981,7 @@ class MsgPc extends Command
             $index = $arr['index'];
         }
         if ($type == 'add') {           // 人员增加
-            
+
             if (Redis::exists($room_id.$hash_id)) {     // 缓存中是否存有该人员数据
                 self::logs($socket, ['type' => 'useradd']);
                 $users[$hash_id] = self::redisGet($room_id.$hash_id);
@@ -691,7 +994,7 @@ class MsgPc extends Command
             $users[$hash_id]['platform'] = $platform;
             $users[$hash_id]['imgurl'] = $imgurl;
         } elseif ($type == 'cut') {     // 人员减少
-            
+
             if (array_key_exists($hash_id, $users)) {
                 self::logs($socket, ['type' => 'userdel']);
                 self::redisSet($socket->room_id, $room_id.$hash_id, $users[$hash_id]);
@@ -707,7 +1010,7 @@ class MsgPc extends Command
         $index++;
         self::redisSet($socket->room_id, $room_id.'users', ['users'=>$users, 'index'=>$index]);
     }
-    
+
     // 权限处理
     public static function permission($socket, $hash_id, $type, $status)
     {
@@ -740,97 +1043,6 @@ class MsgPc extends Command
         return [$hash_id => $users[$hash_id]];
     }
 
-    // 自动上台处理
-    public static function addplat($socket, $hash_id, $isteacher, $up_top)
-    {
-        // 变量初始值
-        $users = [];
-        $index = 0;
-        $stucount = 0;
-        // 从Redis读取在线人员信息
-        if (Redis::exists($socket->room_id.'users')) {
-            $arr = self::redisGet($socket->room_id.'users');
-            $users = $arr['users'];
-            $index = $arr['index'];
-        }
-        if (!$isteacher) {
-            foreach ($users as $v) {
-                if ($v['isteacher'] == 0 && $v['plat'] == 1) {
-                    $stucount ++;
-                }
-            }
-            // 缓存中是否存有该人员数据
-            if (Redis::exists($socket->room_id.$hash_id)) {
-                $temp = self::redisGet($socket->room_id.$hash_id);
-                if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
-                    $users[$hash_id]['plat'] = 0;
-                    $users[$hash_id]['camera'] = 0;
-                    $users[$hash_id]['board'] = 0;
-                    $users[$hash_id]['voice'] = 0;
-                }
-            }
-            // 未超出上台人数上限
-            if ($users[$hash_id]['plat'] == 0 && $stucount < intval($up_top)) {
-                $users[$hash_id]['plat'] = 1;
-                $users[$hash_id]['camera'] = 1;
-            }
-        }
-        
-        $index++;
-        self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
-        if ($users[$hash_id]['plat'] == 1) {
-            self::logs($socket, [
-                'type' => 'plat',
-                'hash_id' => $hash_id,
-                'status' => 1
-            ]);
-        }
-        return [$hash_id => $users[$hash_id]];
-    }
-
-    // 手动上台处理，主要检查保留权限人员再进来时是否超过上台人数上限
-    public static function handplat($socket, $hash_id, $isteacher, $up_top)
-    {
-        // 变量初始值
-        $users = [];
-        $index = 0;
-        $stucount = 0;
-        // 从Redis读取在线人员信息
-        if (Redis::exists($socket->room_id.'users')) {
-            $arr = self::redisGet($socket->room_id.'users');
-            $users = $arr['users'];
-            $index = $arr['index'];
-        }
-        if (!$isteacher) {
-            foreach ($users as $v) {
-                if ($v['isteacher'] == 0 && $v['plat'] == 1) {
-                    $stucount ++;
-                }
-            }
-            // 缓存中是否存有该人员数据
-            if (Redis::exists($socket->room_id.$hash_id)) {
-                $temp = self::redisGet($socket->room_id.$hash_id);
-                if ($temp['plat'] == 1 && $stucount > intval($up_top)) {
-                    $users[$hash_id]['plat'] = 0;
-                    $users[$hash_id]['camera'] = 0;
-                    $users[$hash_id]['board'] = 0;
-                    $users[$hash_id]['voice'] = 0;
-                }
-            }
-        }
-        
-        $index++;
-        self::redisSet($socket->room_id, $socket->room_id.'users', ['users'=>$users, 'index'=>$index]);
-        if ($users[$hash_id]['plat'] == 0) {
-            self::logs($socket, [
-                'type' => 'plat',
-                'hash_id' => $hash_id,
-                'status' => 0
-            ]);
-        }
-        return [$hash_id => $users[$hash_id]];
-    }
-    
     // 下台处理
     public static function cutplat($socket, $hash_id)
     {
@@ -861,7 +1073,7 @@ class MsgPc extends Command
         }
         return [$hash_id => $users[$hash_id]];
     }
-    
+
     private function output($code = 200, $msg = '操作成功', $data = [])
     {
         $json = [
