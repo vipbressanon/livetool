@@ -3,8 +3,11 @@ namespace Vipbressanon\LiveTool\Servers;
 
 use DB;
 use Log;
+use Vipbressanon\LiveTool\Models\Course;
 use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomSig;
+use Vipbressanon\LiveTool\Models\CourseWhiteList;
+use Vipbressanon\LiveTool\Models\User;
 
 class CourseServer
 {
@@ -64,7 +67,7 @@ class CourseServer
             return null;
         }
     }
-    
+
     public function errors($input)
     {
         $now = date('Y-m-d H:i:s');
@@ -80,7 +83,7 @@ class CourseServer
             $errors['field']['updated_at'] => $now
         ]);
     }
-    
+
     public function starttime($room_id)
     {
         $room = Room::find($room_id);
@@ -111,7 +114,7 @@ class CourseServer
                 ->first();
         return $res ? $res->expectend : '';
     }
-    
+
     public function iswhite($course_id, $users_id)
     {
         $white = config('livetool.white');
@@ -134,7 +137,7 @@ class CourseServer
             $white['field']['created_at'] => $now,
             $white['field']['updated_at'] => $now
         ]);
-    }    
+    }
 
     public function balance($team_id)
     {
@@ -158,7 +161,7 @@ class CourseServer
             return  $from->display;
 
         }else{
-            
+
             return  0;
         }
     }
@@ -204,5 +207,41 @@ class CourseServer
         } else {
             return false;
         }
+    }
+
+    /**
+     * Notice: 根据roomid查询课程信息
+     * Author: chenxl
+     * DateTime DateTime
+     * @param $room_id
+     * @return mixed
+     */
+    public function getCourseByRoomId($room_id)
+    {
+        $room = Room::find($room_id);
+        $course = Course::find($room->course_id);
+        return $course;
+    }
+
+    /**
+     * Notice: 获取课程白名单人员信息
+     * Author: chenxl
+     * DateTime DateTime
+     * @param $courseid
+     * @return array
+     */
+    public function getWhiteList($courseid)
+    {
+        $list = User::query()
+            ->select(['id', 'hash_id', 'nickname', 'imgurl'])
+            ->whereHas('whitelist', function ($builder) use ($courseid) {
+                $builder->where([
+                    'course_id' => $courseid,
+                    'type' => CourseWhiteList::STUDENT,
+                ]);
+            })
+            ->get()
+            ->toArray();
+        return $list;
     }
 }

@@ -9,4 +9,9 @@ class Room extends Model
 
     protected $table = 'room';
 
+    public function course()
+    {
+        return $this->hasOne('Vipbressanon\LiveTool\Models\Course', 'course_id', 'id');
+    }
+
 }
