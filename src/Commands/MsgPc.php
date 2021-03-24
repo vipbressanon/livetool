@@ -954,7 +954,7 @@ class MsgPc extends Command
                 if (array_key_exists($hash_id, $users_plat)) {
                     unset($users_plat[$hash_id]);
                     $index_plat++;
-                    self::redisSet($socket->room_id, $room_id . 'users_plat', ['users'=>$users_plat, 'index'=>$index_plat]);
+                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users'=>$users_plat, 'index'=>$index_plat]);
                 }
             }
             //将离线数组中该学生信息删除
