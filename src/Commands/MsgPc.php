@@ -917,6 +917,7 @@ class MsgPc extends Command
      */
     public static function handplat($socket, $hash_id, $isteacher, $up_top)
     {
+        Log::info('handplat------start');
         // 变量初始值
         $stucount = 0;
         list(
@@ -938,7 +939,7 @@ class MsgPc extends Command
                 }
             }
 
-            if ($cur_user['plat'] = 1 && $stucount < intval($up_top)) { //放台上数组
+            if ($cur_user['plat'] == 1 && $stucount < intval($up_top)) { //放台上数组
                 $cur_user['time'] = time(); //用于花名册排序
                 $users_plat[$hash_id] = $cur_user;
                 $index_plat++;
@@ -983,6 +984,7 @@ class MsgPc extends Command
                 'status' => 0
             ]);
         }
+        Log::info('handplat------end');
         return [$hash_id => $cur_user];
     }
 
@@ -1182,9 +1184,10 @@ class MsgPc extends Command
             $arr_notplat = self::redisGet($socket->room_id . 'users_notplat');
             $users_notplat = $arr_notplat['users'];
             $index_notplat = $arr_notplat['index'];
+            $cur_user['time'] = time();
             $users_notplat[$hash_id] = $cur_user;   //添加到台下数组
             $index_notplat++;
-            self::redisSet($socket->room_id, $socket->room_id.'users_notplat', ['users'=>$users_notplat, 'index'=>$index_notplat]);
+            self::redisSet($socket->room_id, $socket->room_id.'users_notplat', ['users'=>self::users_sort($users_notplat, 'notplat'), 'index'=>$index_notplat]);
         }
 
         if ($cur_user['plat'] == 0) {
