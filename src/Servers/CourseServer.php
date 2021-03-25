@@ -244,4 +244,32 @@ class CourseServer
             ->toArray();
         return $list;
     }
+
+    /**
+     * 修改课程是否自动上线台状态
+     * @param $input
+     * @return bool
+     */
+    public function updateCourseIsplat($input)
+    {
+        $now = date('Y-m-d H:i:s');
+        $course_id = $input['course_id'];
+        $course = config('livetool.course');
+
+        $res = DB::table($course['table'])
+            ->where($course['field']['id'], $course_id)
+            ->first();
+        if ($res->isplat == $input['isplat']) {
+            return false;
+        }
+
+        $res = DB::table($course['table'])
+            ->where($course['field']['id'], $course_id)
+            ->update([
+                $course['field']['isplat'] => $input['isplat'],
+                $course['field']['updated_at'] => $now
+            ]);
+
+        return true;
+    }
 }

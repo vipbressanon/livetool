@@ -482,4 +482,16 @@ class LiveController extends Controller
         }
         return $data;
     }
+
+    // 修改课程是否上台
+    public function updateCourseIsplat(Request $request)
+    {
+        $cs = new CourseServer();
+        $res = $cs->updateCourseIsplat($request->all());
+        $errormsg = '';
+        if (!$res) {
+            $errormsg = '修改上台状态失败！';
+        }
+        return response()->json(['error' => $errormsg]);
+    }
 }
