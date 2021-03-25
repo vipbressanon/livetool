@@ -996,7 +996,7 @@ class MsgPc extends Command
      * @param string $sort
      * @return mixed
      */
-    public static function users_sort($users, $type='plat', $sort='asc')
+    public static function users_sort($users,$type='plat', $sort='asc')
     {
         $sort_arr = [
             'asc' => SORT_ASC,
@@ -1004,7 +1004,7 @@ class MsgPc extends Command
         ];
         if (!array_key_exists($sort, $sort_arr)) return $users;
         if ($type == 'plat') {  //将老师排在首位
-            array_multisort(array_column($users,'time'),$sort_arr[$sort], array_column($users,'isteacher'), SORT_DESC, $users);
+            array_multisort(array_column($users,'isteacher'), SORT_DESC, array_column($users,'time'),$sort_arr[$sort], $users);
         } else {
             array_multisort(array_column($users,'time'),$sort_arr[$sort], $users);
         }
