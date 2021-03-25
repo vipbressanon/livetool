@@ -996,7 +996,7 @@ class MsgPc extends Command
      * @param string $sort
      * @return mixed
      */
-    public static function users_sort($users,$type='plat', $sort='asc')
+    public static function users_sort($users, $type='plat', $sort='asc')
     {
         $sort_arr = [
             'asc' => SORT_ASC,
@@ -1171,10 +1171,6 @@ class MsgPc extends Command
             $index_plat = $arr['index'];
             if (array_key_exists($hash_id, $users_plat)) {
                 $cur_user = $users_plat[$hash_id];
-                $cur_user['plat'] = 0;
-                $cur_user['board'] = 0;
-                $cur_user['voice'] = 0;
-                $cur_user['camera'] = 0;
                 unset($users_plat[$hash_id]);//在台上数组中删除
                 $index_plat++;
                 self::redisSet($socket->room_id, $socket->room_id.'users_plat', ['users'=>$users_plat, 'index'=>$index_plat]);
@@ -1184,6 +1180,10 @@ class MsgPc extends Command
             $arr_notplat = self::redisGet($socket->room_id . 'users_notplat');
             $users_notplat = $arr_notplat['users'];
             $index_notplat = $arr_notplat['index'];
+            $cur_user['plat'] = 0;
+            $cur_user['board'] = 0;
+            $cur_user['voice'] = 0;
+            $cur_user['camera'] = 0;
             $cur_user['time'] = time();
             $users_notplat[$hash_id] = $cur_user;   //添加到台下数组
             $index_notplat++;
