@@ -132,6 +132,7 @@ class MsgPc extends Command
                             $users_notplat = self::redisGet($socket->room_id . 'users_notplat');
                             $users_notinroom = self::redisGet($socket->room_id . 'users_notinroom');
 
+
                             if (Redis::get($key) == $value) {   //防止提前过期，误删其它请求创建的锁
                                 Redis::del($key);
                                 continue;
@@ -167,6 +168,7 @@ class MsgPc extends Command
                             'onoff' => $onoff,
                             'socketid' => $socket->id,
                             'hashid' => $socket->hash_id,
+                            'userid' => $socket->user_id,
                             // 'list' => $list,
                         ]
                     );
@@ -725,9 +727,10 @@ class MsgPc extends Command
                     $img_arr = explode(".com/", $item['imgurl']);
                     $img_url = count($img_arr) > 1 ? $img_arr[1]: 'face.png';
                     $list[$item['id']]['imgurl'] = $img_url;
+                    $list[$item['id']]['time'] = time();
                 }
                 //白名单学生list存入离线数组中
-                self::redisSet($socket->room_id, $socket->room_id . 'users_notinroom', ['users' => $list, 'index' => 0]);
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notinroom', ['users' => $list,  'index' => 0]);
             }
 
             //白名单人员首次进入，将离线数组的键 user_id 改为 hash_id
@@ -846,11 +849,12 @@ class MsgPc extends Command
             if ($stucount < intval($up_top)) {
                 $cur_user['plat'] = 1;
                 $cur_user['camera'] = 1;
+                $cur_user['voice'] = 1;
                 $cur_user['time'] = time(); //用于花名册排序
                 $users_plat[$hash_id] = $cur_user;
                 $index_plat++;
                 //将该学生放入台上数组
-                self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $users_plat, 'index' => $index_plat]);
+                self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => self::users_sort($users_plat, 'plat'), 'index' => $index_plat]);
                 //如果台下数组中有该人员需删除（异常退出，没有走disconnect）
                 if (array_key_exists($hash_id, $users_notplat)) {
                     unset($users_notplat[$hash_id]);
@@ -866,12 +870,12 @@ class MsgPc extends Command
                 $users_notplat[$hash_id] = $cur_user;
                 $index_notplat++;
                 //将该学生放入台下数组
-                self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users' => $users_notplat, 'index' => $index_notplat]);
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users' => self::users_sort($users_notplat, 'notplat'), 'index' => $index_notplat]);
                 //如果台上数组中有该人员需删除（异常退出，没有走disconnect）
                 if (array_key_exists($hash_id, $users_plat)) {
                     unset($users_plat[$hash_id]);
                     $index_plat++;
-                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users'=>$users_plat, 'index'=>$index_plat]);
+                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users'=> $users_plat, 'index'=>$index_plat]);
                 }
             }
             //将离线数组中该学生信息删除
@@ -884,7 +888,7 @@ class MsgPc extends Command
             $cur_user['time'] = time();  //用于花名册排序
             $users_plat[$hash_id] = $cur_user;
             $index_plat++;
-            self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $users_plat, 'index' => $index_plat]);
+            self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => self::users_sort($users_plat, 'plat'), 'index' => $index_plat]);
         }
 
         //将该人员信息存入缓存
@@ -939,7 +943,7 @@ class MsgPc extends Command
                 $users_plat[$hash_id] = $cur_user;
                 $index_plat++;
                 //将该学生放入台上数组
-                self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $users_plat, 'index' => $index_plat]);
+                self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => self::users_sort($users_plat, 'plat'), 'index' => $index_plat]);
             } else {    //放台下数组
                 $cur_user['plat'] = 0;
                 $cur_user['camera'] = 0;
@@ -949,7 +953,7 @@ class MsgPc extends Command
                 $users_notplat[$hash_id] = $cur_user;
                 $index_notplat++;
                 //将该学生放入台下数组
-                self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users' => $users_notplat, 'index' => $index_notplat]);
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users' => self::users_sort($users_notplat, 'notplat'), 'index' => $index_notplat]);
                 //如果台上数组中有该人员需删除（异常退出，没有走disconnect）
                 if (array_key_exists($hash_id, $users_plat)) {
                     unset($users_plat[$hash_id]);
@@ -967,7 +971,7 @@ class MsgPc extends Command
             $cur_user['time'] = time();  //用于花名册排序
             $users_plat[$hash_id] = $cur_user;
             $index_plat++;
-            self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $users_plat, 'index' => $index_plat]);
+            self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => self::users_sort($users_plat, 'plat'), 'index' => $index_plat]);
         }
 
         //将该人员信息存入缓存
@@ -980,6 +984,29 @@ class MsgPc extends Command
             ]);
         }
         return [$hash_id => $cur_user];
+    }
+
+    /**
+     * Notice:用户排序，用于花名册排序
+     * Author: chenxl
+     * DateTime 2021/3/23 16:51
+     * @param $users
+     * @param string $sort
+     * @return mixed
+     */
+    public static function users_sort($users,$type='plat', $sort='asc')
+    {
+        $sort_arr = [
+            'asc' => SORT_ASC,
+            'desc' => SORT_DESC,
+        ];
+        if (!array_key_exists($sort, $sort_arr)) return $users;
+        if ($type == 'plat') {  //将老师排在首位
+            array_multisort(array_column($users,'time'),$sort_arr[$sort], array_column($users,'isteacher'), SORT_DESC, $users);
+        } else {
+            array_multisort(array_column($users,'time'),$sort_arr[$sort], $users);
+        }
+        return $users;
     }
 
     /**
