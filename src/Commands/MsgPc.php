@@ -1264,13 +1264,13 @@ class MsgPc extends Command
                     $cur_on_users[$k] = $v;
                     $online[$k] = $v;
                     $index_plat++;
-                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $online, 'index' => $index_plat]);
+                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => self::users_sort($online), 'index' => $index_plat]);
 
                     //从台下数组删除
                     if (array_key_exists($k, $users_notplat['users'])) {
                         unset($users_notplat['users'][$k]);
                         $index_notplat++;
-                        self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users'=>$users_notplat['users'], 'index'=>$index_notplat]);
+                        self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users'=>self::users_sort($users_notplat['users'],'notplat'), 'index'=>$index_notplat]);
                     }
 
                     $on_num ++;
@@ -1290,7 +1290,7 @@ class MsgPc extends Command
                 $cur_off_users[$k] = $v;
                 $users_notplat['users'][$k] = $v;
                 $index_notplat++;
-                self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users' => $users_notplat['users'], 'index' => $index_notplat]);
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users' => self::users_sort($users_notplat['users'],'notplat'), 'index' => $index_notplat]);
 
                 //从台上数组删除
                 if (array_key_exists($k, $users_plat['users'])) {
@@ -1298,7 +1298,7 @@ class MsgPc extends Command
                     Log::info("users:".json_encode($users_plat['users'][$k]));
                     unset($online[$k]);
                     $index_plat++;
-                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users'=>$online, 'index'=>$index_plat]);
+                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users'=>self::users_sort($online), 'index'=>$index_plat]);
                 }
             }
         }
