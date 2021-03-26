@@ -1226,6 +1226,7 @@ class MsgPc extends Command
             $index_notplat++;
             self::redisSet($socket->room_id, $socket->room_id.'users_notplat', ['users'=>self::users_sort($users_notplat, 'notplat'), 'index'=>$index_notplat]);
         }
+        self::redisSet($socket->room_id, $socket->room_id . $hash_id, $cur_user);
 
         if ($cur_user['plat'] == 0) {
             self::logs($socket, [
