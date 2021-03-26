@@ -180,6 +180,36 @@ class MsgPc extends Command
                 }
             });
 
+            //监听批量下台指令
+            $socket->on('batchoffplat', function ($request) use ($socket) {
+                try {
+                    Log::info('@@@@@@@@@@@@@@@@@@@@@@@@@11');
+                    $batch_data = self::batchplat($socket, $socket->isplat, $request['up_top']);
+
+                    $users_plat = self::redisGet($socket->room_id . 'users_plat');
+                    Log::info(json_encode($users_plat['users']));
+                    $users_notplat = self::redisGet($socket->room_id . 'users_notplat');
+                    Log::info(json_encode($users_notplat['users']));
+                    $users_notinroom = self::redisGet($socket->room_id . 'users_notinroom');
+
+                    self::$senderIo->to($socket->room_id)->emit('batchoffplat', [
+                        'users_plat' => $users_plat['users'],
+                        'index_plat' => $users_plat['index'],
+                        'users_notplat' => $users_notplat['users'],
+                        'index_notplat' => $users_notplat['index'],
+                        'users_notinroom' => $users_notinroom['users'],
+                        'index_notinroom' => $users_notinroom['index'],
+                        'socketid' => $socket->id,
+                        'hashid' => $socket->hash_id,
+                        'cur_off_users' => $batch_data['cur_off_users'],
+                        'cur_on_users' => $batch_data['cur_on_users'],
+                    ]);
+                } catch(\Exception $e) {
+                    self::errors($socket, '[userslist] '.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:'.$e->getMessage().' line:'.$e->getLine());
+                    Log::info('websocket:', $e->getTrace());
+                }
+            });
             // 主动获取房间内用户列表
             $socket->on('userslist', function () use ($socket) {
                 try {
@@ -1202,6 +1232,74 @@ class MsgPc extends Command
             ]);
         }
         return [$hash_id => $cur_user];
+    }
+
+    public function batchplat($socket, $isplat, $up_top){
+
+        $users_plat = self::redisGet($socket->room_id . 'users_plat');
+        $users_notplat = self::redisGet($socket->room_id . 'users_notplat');
+        $users_notinroom = self::redisGet($socket->room_id . 'users_notinroom');
+        $onoff = self::redisGet($socket->room_id.'onoff');
+        $index_plat = $users_plat['index'];
+        $index_notplat = $users_plat['index'];
+
+        $cur_on_users = [];
+        $online = $users_plat['users'];
+        if ($isplat == 1){
+
+            Log::info("online:".json_encode($online));
+            $on_num = 0;
+            foreach ($users_notplat['users'] as $k=>&$v) {
+                if ($on_num < $up_top) {
+
+                    $v['plat'] = 1;
+                    $v['voice'] = 1;
+                    $v['camera'] = 1;
+                    $v['time'] = time();
+                    //存到台上数组
+                    $cur_on_users[$k] = $v;
+                    $online[$k] = $v;
+                    $index_plat++;
+                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users' => $online, 'index' => $index_plat]);
+
+                    //从台下数组删除
+                    if (array_key_exists($k, $users_notplat['users'])) {
+                        unset($users_notplat['users'][$k]);
+                        $index_notplat++;
+                        self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users'=>$users_notplat['users'], 'index'=>$index_notplat]);
+                    }
+
+                    $on_num ++;
+                }
+            }
+        }
+        //下台操作
+        $cur_off_users =[];
+        foreach ($users_plat['users'] as $k=>&$v) {
+            //下台
+            if ($v['isteacher'] == 0 && $v['plat'] == 1) {
+                $v['plat'] = 0;
+                $v['voice'] = 0;
+                $v['camera'] = 0;
+                $v['time'] = time(); //用于花名册排序
+                //存到台下数组
+                $cur_off_users[$k] = $v;
+                $users_notplat['users'][$k] = $v;
+                $index_notplat++;
+                self::redisSet($socket->room_id, $socket->room_id . 'users_notplat', ['users' => $users_notplat['users'], 'index' => $index_notplat]);
+
+                //从台上数组删除
+                if (array_key_exists($k, $users_plat['users'])) {
+                    Log::info("K:".$k);
+                    Log::info("users:".json_encode($users_plat['users'][$k]));
+                    unset($online[$k]);
+                    $index_plat++;
+                    self::redisSet($socket->room_id, $socket->room_id . 'users_plat', ['users'=>$online, 'index'=>$index_plat]);
+                }
+            }
+        }
+
+        return ['cur_off_users' => $cur_off_users, 'cur_on_users' => $cur_on_users];
     }
 
     private function output($code = 200, $msg = '操作成功', $data = [])
