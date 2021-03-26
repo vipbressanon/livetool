@@ -440,6 +440,10 @@ class MsgPc extends Command
                     if ($request['type'] == 'roomtype') {
                         $arr['max'] = $request['status'] == 1 ? $socket->hash_id.'screen' : '';
                     }
+                    // 直播间自动上下台状态
+                    if ($request['type'] == 'isplat') {
+                        $socket->isplat = $request['status'];
+                    }
                     $index++;
                     self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$arr, 'index'=>$index]);
                     self::$senderIo->to($socket->room_id)->emit(
