@@ -173,7 +173,7 @@ class CourseServer
         //根据room_id 取course_id
         $room = Room::find($room_id);
         if (!$room) {
-            Log::info("room不存在",[$room_id, $hash_id, $platform, $islistener]);
+            Log::info("room不存在",[$room_id, $users_hash_id]);
             return false;
         }
         //hash 转id

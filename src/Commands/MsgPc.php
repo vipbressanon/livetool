@@ -87,9 +87,11 @@ class MsgPc extends Command
                     $socket->zan = isset($request['zan'])?$request['zan']:0;
                     $socket->nickname = isset($request['nickname'])?$request['nickname']:'';
                     $socket->platform = isset($request['platform']) ? $request['platform'] : 0;
+                    $socket->pdetail = isset($request['pdetail']) ? $request['pdetail'] : '';
                     $socket->imgurl = isset($request['imgurl']) ? $request['imgurl'] : '';
                     $socket->islistener = (isset($request['islistener']) && $request['islistener']) ? $request['islistener'] : false;
                     $socket->isplat = isset($request['isplat'])?$request['isplat']:1;
+
                     // socket日志
                     self::logs($socket, ['type' => 'connection']);
                     // 判断是否有课程的结束时间，没有去取
@@ -738,6 +740,7 @@ class MsgPc extends Command
         $hash_id = $socket->hash_id;
         $isteacher = $socket->isteacher;
         $platform = $socket->platform;
+        $pdetail = $socket->pdetail;//设备详细信息
         $zan = $socket->zan;
         $nickname = $socket->nickname;
         // 截取图片公共域名 只保存真实图片路径 减小返回数据大小
