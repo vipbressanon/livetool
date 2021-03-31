@@ -149,9 +149,11 @@ class MsgPc extends Command
                     $usersocket[$socket->hash_id] = $socket->id;
                     self::redisSet($socket->room_id, $socket->room_id.'usersocket', $usersocket);
                     // 房间开关初始化
+                    $onoff_index = 0;
                     if (Redis::exists($socket->room_id.'onoff')) {
                         $arr = self::redisGet($socket->room_id.'onoff');
                         $onoff = $arr['onoff'];
+                        $onoff_index = $arr['index'];
                     } else {
                         $onoff = self::$onoffinit;
                         self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$onoff, 'index'=>0]);
@@ -168,6 +170,7 @@ class MsgPc extends Command
                             'users_notinroom' => $users_notinroom['users'],
                             'index_notinroom' => $users_notinroom['index'],
                             'onoff' => $onoff,
+                            'onoff_index' => $onoff_index,
                             'socketid' => $socket->id,
                             'hashid' => $socket->hash_id,
                             'userid' => $socket->user_id,
