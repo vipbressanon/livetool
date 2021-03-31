@@ -519,6 +519,8 @@ class MsgPc extends Command
                         $arrRoomPractice['chapter_hash_id'] = isset($request['chapter_hash_id']) ? $request['chapter_hash_id'] : '';
                         $arrRoomPractice['class_hash_id'] = isset($request['class_hash_id']) ? $request['class_hash_id'] : '';
                         self::redisSet($socket->room_id, $socket->room_id . 'practice', $arrRoomPractice);
+                    } else if ($request['type'] == 'TEXT') {
+                        $request['time'] = time();
                     }
 
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
