@@ -1,6 +1,7 @@
 <?php
 namespace Vipbressanon\LiveTool\Servers;
 
+use App\Models\Course\CourseRecord;
 use DB;
 use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomSig;
@@ -19,12 +20,17 @@ class RecordServer
         $room = Room::find($room_id);
         $oldstatus = $room->roomrecord;
         $room->roomrecord = $status;
-        if (($oldstatus == 0 || $oldstatus == 3) && $room->roomrecord == 1) {
+        if (($oldstatus == 0 || $oldstatus == 3 || $oldstatus == 1) && $room->roomrecord == 1) {
             $api = new ApiServer();
             $re = $api->recordstart($room_id);
+
+            //zln
+            $room->recording = 1;
         } else{
             $api = new ApiServer();
             $re = $api->recordend($room_id);
+            //zln
+            $room->recording = 0;
         }
         Log::info("RecordServer hander re",['re'=>$re]);
         if($re->meta->code == 200){
@@ -69,6 +75,14 @@ class RecordServer
             $filesize_m = sprintf("%.2f", ceil($str_m*100)/100);
             // 保存文件
             $record = $this->insertData($account, $room_id, $course_id, $input, $filesize, $filesize_m, $finish_reason, $now);
+            Log::info("结束拉！！！！！！！！！！！");
+            //zln 录制结束更改了正在录制的状态
+            Log::info("结束拉".json_encode($record));
+            if ($record){
+                Log::info("结束拉2222");
+                $room->recording = 0;
+                $room->save();
+            }
             // 结算
             if (($account->amount_space_z - $account->amount_space) >= $filesize_m) {
                 $status = 1; // 状态成功
@@ -83,6 +97,23 @@ class RecordServer
         }
         Log::info("录制回调--完成");
         return true;
+    }
+
+    //查询当前课程录制状态
+    public function postRecordStatus($course_id, $room_id){
+
+        //查询当前状态
+        $room = Room::find($room_id);
+        $recordlog=CourseRecord::where('course_id',$course_id)
+                 ->where('room_id',$room_id)
+                 ->orderBy('id', 'desc')
+                 ->first();
+
+        $flag = false;
+        if ($room->recording == 0 && $recordlog->finish_reason == 'AUTO')
+            $flag = true;
+
+        return $flag;
     }
 
     // 存数据

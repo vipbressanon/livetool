@@ -182,6 +182,7 @@ class ApiServer
             ['Authorization: '.$accesstoken->token_type.' '.$accesstoken->access_token],
             'POST'
         );
+        Log::info("录制开始拉：333333");
         if ($res->meta->code == 200) {
             $data = true;
         } else {

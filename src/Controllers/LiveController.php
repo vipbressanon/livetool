@@ -325,7 +325,7 @@ class LiveController extends Controller
      // 录制开始
     public function postRecord(Request $request)
     {
-        Log::info("录制事件 request",array('re' => $request->all()));
+        Log::info("录制事件111 request",array('re' => $request->all()));
         $room_id = $request->input('room_id');
         $status = $request->input('status');
         $rs = new RecordServer();
@@ -481,5 +481,14 @@ class LiveController extends Controller
             $data = [213, '账号已被禁用，不能进入'];
         }
         return $data;
+    }
+
+    public function postRecordStatus(Request $request){
+
+
+        $input = $request->all();
+        $rs = new RecordServer();
+        $flag = $rs->postRecordStatus($input['course_id'], $input['room_id']);
+        return response()->json(['error'=>'', 'flag' => $flag]);
     }
 }
