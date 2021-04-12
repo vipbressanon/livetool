@@ -1,11 +1,12 @@
 <?php
 namespace Vipbressanon\LiveTool\Servers;
 
-use App\Models\Course\CourseRecord;
+// use App\Models\Course\CourseRecord;
 use DB;
 use Vipbressanon\LiveTool\Models\Room;
 use Vipbressanon\LiveTool\Models\RoomSig;
 use Vipbressanon\LiveTool\Servers\ApiServer;
+use Vipbressanon\LiveTool\Models\CourseRecord;
 use Log;
 
 class RecordServer
@@ -101,14 +102,13 @@ class RecordServer
 
     //查询当前课程录制状态
     public function postRecordStatus($course_id, $room_id){
-
-        //查询当前状态
         $room = Room::find($room_id);
+        if (!$room) return false;
         $recordlog=CourseRecord::where('course_id',$course_id)
                  ->where('room_id',$room_id)
                  ->orderBy('id', 'desc')
                  ->first();
-
+        if (!$recordlog) return false;        
         $flag = false;
         if ($room->recording == 0 && $recordlog->finish_reason == 'AUTO')
             $flag = true;
