@@ -423,4 +423,27 @@ class UsersServer
         }
         return null;
     }
+
+    public function autoMonitorLogin($course_id, $team_id, $tel) {
+        $users = config('livetool.users');
+        $res = DB::table($users['table'])
+                ->select($users['field']['id'])
+                ->where($users['field']['tel'], $tel)
+                ->first();
+        if ($res) {
+            $users_from = config('livetool.users_from');
+            // 判断在users_from里面是否是团队管理员
+            $users_from_res = DB::table($users_from['table'])
+                ->select(
+                    $users_from['table'].'.'.$users_from['field']['users_id']
+                )
+                ->where($users_from['table'].'.'.$users_from['field']['team_id'], $team_id)
+                ->where($users_from['table'].'.'.$users_from['field']['type'], 1)
+                ->where($users_from['table'].'.'.$users_from['field']['display'], 2)
+                ->whereNull($users_from['table'].'.'.$users_from['field']['deleted_at'])
+                ->first();
+            return $users_from_res ? $users_from_res->users_id : null;
+        }
+        return null;
+    }
 }

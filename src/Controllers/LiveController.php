@@ -36,7 +36,13 @@ class LiveController extends Controller
         if ($course) {
             $tel = $request->input('tel', '');
             if ($tel != '') {
-                $this->autologin($course['id'], $course['team_id'], $tel);
+                if ($from == 'monitor') {
+                    // 兼课的自动登录
+                    $this->autoMonitorLogin($course['id'], $course['team_id'], $tel);
+                } else {
+                    // 编程白名单课程的自动登录
+                    $this->autologin($course['id'], $course['team_id'], $tel);
+                }
                 $users = Auth::guard($auth)->user();
                 $team = Auth::guard($auth_team)->user();
             }
@@ -433,6 +439,22 @@ class LiveController extends Controller
         $team = config('livetool.auth_team');
         $us = new UsersServer();
         $users_id = $us->autologin($course_id, $tel);
+        if ($users_id) {
+            Auth::guard($auth)->loginUsingId($users_id);
+            Auth::guard($team)->loginUsingId($team_id);
+        } else {
+            Auth::guard($auth)->logout();
+            Auth::guard($team)->logout();
+        }
+    }
+
+    // 兼课的自动登录
+    private function autoMonitorLogin($course_id, $team_id, $tel)
+    {
+        $auth = config('livetool.auth');
+        $team = config('livetool.auth_team');
+        $us = new UsersServer();
+        $users_id = $us->autoMonitorLogin($course_id,$team_id, $tel);
         if ($users_id) {
             Auth::guard($auth)->loginUsingId($users_id);
             Auth::guard($team)->loginUsingId($team_id);
