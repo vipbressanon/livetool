@@ -35,7 +35,8 @@ class MsgPush extends Command
     // issharing:
     private static $stuinit = ['isteacher'=>0, 'plat'=>0, 'board'=>0, 'voice'=>0, 'camera'=>0, 'platform'=>0, 'nickname' => '', 'zan' => 0, 'imgurl' => '', 'issharing' => 0];
     // 房间内开关参数，type，1屏幕分享模式，2白板模式；ischat，0是禁止聊天，1是允许聊天；ishand，0是禁止举手，1是允许举手；share, 老师获取学生分享屏幕hash_id
-    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100, 'share' => ''];
+    // 编程初始化 practice_mode: 0是讲课, 1是练习; program_mode: 0是白板, 1是编程
+    private static $onoffinit = ['roomtype'=>2, 'ischat'=>1, 'ishand'=>1, 'max'=>'', 'boardscale' => 100, 'share' => '', 'scratch' => ['practice_mode'=> 0, 'program_mode' => 0, 'scratch_id' => '', 'course_hash_id' => '', 'chapter_hash_id' => '', 'class_hash_id' => '']];
     public function __construct()
     {
         parent::__construct();
@@ -298,6 +299,13 @@ class MsgPush extends Command
                         $arr['onoff']['share'] = '';
                         self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
                     }
+                    // 如果是老师 而且是 编程模式
+                    if ($socket->isteacher && $arr['onoff']['scratch']['program_mode'] == 1) {
+                        $arr['onoff']['scratch']['program_mode'] = 0;
+                        $arr['onoff']['roomtype'] = 2;
+                        $arr['onoff']['max'] = '';
+                        self::redisSet($socket->room_id, $socket->room_id.'onoff', ['onoff'=>$arr['onoff'], 'index'=>$arr['index']]);
+                    }
                     self::userlist($socket, 'cut');
                     if (Redis::exists($socket->room_id.'users')) {
                         $users = self::redisGet($socket->room_id.'users');
@@ -486,7 +494,22 @@ class MsgPush extends Command
 
                         $users = self::redisGet($socket->room_id . 'users');
                         $request['users'] = $users['users'];*/
+                    }  else if ($request['type'] == 'scratch_practice') {
+                        // 练习 讲课 模式
+                        $arr = self::redisGet($socket->room_id . 'onoff');
+                        $arr['onoff']['scratch']['practice_mode'] = isset($request['status']) ? $request['status'] : 0;
+                        $arr['onoff']['scratch']['scratch_id'] = isset($request['scratch_id']) ? $request['scratch_id'] : '';
+                        $arr['onoff']['scratch']['course_hash_id'] = isset($request['course_hash_id']) ? $request['course_hash_id'] : '';
+                        $arr['onoff']['scratch']['chapter_hash_id'] = isset($request['chapter_hash_id']) ? $request['chapter_hash_id'] : '';
+                        $arr['onoff']['scratch']['class_hash_id'] = isset($request['class_hash_id']) ? $request['class_hash_id'] : '';
+                        self::redisSet($socket->room_id, $socket->room_id . 'onoff', ['onoff' => $arr['onoff'], 'index' => $arr['index']]);
+                    } else if ($request['type'] == 'scratch_program') {
+                        // 编程 白板 模式
+                        $arr = self::redisGet($socket->room_id . 'onoff');
+                        $arr['onoff']['scratch']['program_mode'] = isset($request['status']) ? $request['status'] : 0;
+                        self::redisSet($socket->room_id, $socket->room_id . 'onoff', ['onoff' => $arr['onoff'], 'index' => $arr['index']]);
                     }
+                    
                     self::$senderIo->to($socket->room_id)->emit('im', $request);
                     // 如果学生已经同意过就不再显示确认同意页面 直接分享视频
                     if ($request['type'] == 'SHARE' && $arr['onoff']['share'] && $users['users'][$request['hash_id']]['issharing'] == 1) {
