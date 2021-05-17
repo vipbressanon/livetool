@@ -437,6 +437,7 @@ class UsersServer
                 ->select(
                     $users_from['table'].'.'.$users_from['field']['users_id']
                 )
+                ->where($users_from['table'].'.'.$users_from['field']['users_id'], $res->id)
                 ->where($users_from['table'].'.'.$users_from['field']['team_id'], $team_id)
                 ->where($users_from['table'].'.'.$users_from['field']['type'], 1)
                 ->where($users_from['table'].'.'.$users_from['field']['display'], 2)
